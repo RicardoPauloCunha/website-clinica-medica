@@ -6,12 +6,12 @@ import { hasValueString } from '../../util/stringFormat';
 
 import { FormGroup, Input, Label, InputProps, FormFeedback } from 'reactstrap';
 
-interface InputCurrencyProps extends InputProps {
+interface CurrencyInputProps extends InputProps {
     name: string;
     label: string;
 }
 
-const InputCurrency = ({ name, label, ...rest }: InputCurrencyProps) => {
+const CurrencyInput = ({ name, label, ...rest }: CurrencyInputProps) => {
     const inputRef = useRef(null);
     const { fieldName, defaultValue, registerField, error, clearError } = useField(name);
 
@@ -53,4 +53,4 @@ const InputCurrency = ({ name, label, ...rest }: InputCurrencyProps) => {
     );
 }
 
-export default InputCurrency;
+export default CurrencyInput;

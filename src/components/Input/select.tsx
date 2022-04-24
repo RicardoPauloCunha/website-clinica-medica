@@ -5,16 +5,17 @@ import { hasValueString } from '../../util/stringFormat';
 
 import { FormGroup, Input, Label, InputProps, FormFeedback } from 'reactstrap';
 
-interface InputSelectProps extends InputProps {
+interface SelectInputProps extends InputProps {
     name: string;
     label: string;
+    placeholder: string;
     options: {
         label: string;
         value: string;
     }[];
 }
 
-const InputSelect = ({ name, label, options, ...rest }: InputSelectProps) => {
+const SelectInput = ({ name, label, placeholder, options, ...rest }: SelectInputProps) => {
     const inputRef = useRef(null);
     const { fieldName, defaultValue, registerField, error, clearError } = useField(name);
 
@@ -43,7 +44,7 @@ const InputSelect = ({ name, label, options, ...rest }: InputSelectProps) => {
             <Input
                 id={fieldName}
                 innerRef={inputRef}
-                defaultValue={defaultValue}
+                defaultValue={hasValueString(defaultValue) ? defaultValue : ""}
                 type="select"
                 invalid={hasValueString(error)}
                 onFocus={clearError}
@@ -53,12 +54,12 @@ const InputSelect = ({ name, label, options, ...rest }: InputSelectProps) => {
                     value=""
                     disabled
                 >
-                    {rest.placeholder}
+                    {placeholder}
                 </option>
 
                 {options.map(opt => (
                     <option
-                        key={opt.label}
+                        key={opt.value}
                         value={opt.value}
                     >
                         {opt.label}
@@ -73,4 +74,4 @@ const InputSelect = ({ name, label, options, ...rest }: InputSelectProps) => {
     );
 }
 
-export default InputSelect;
+export default SelectInput;

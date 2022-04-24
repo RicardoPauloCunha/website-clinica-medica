@@ -10,7 +10,7 @@ import getValidationErrors from '../../util/getValidationErrors';
 
 import { Button } from 'reactstrap';
 import { Form } from '../../styles/components';
-import InputField from '../../components/Input';
+import FieldInput from '../../components/Input';
 import Warning from '../../components/Warning';
 
 type LocationData = {
@@ -78,14 +78,14 @@ const Login = () => {
                     password: "1029384756"
                 }}
             >
-                <InputField
+                <FieldInput
                     name='email'
                     label='Email'
                     placeholder='Put your email'
                     type="email"
                 />
 
-                <InputField
+                <FieldInput
                     name='password'
                     label='Password'
                     placeholder='Put your password'

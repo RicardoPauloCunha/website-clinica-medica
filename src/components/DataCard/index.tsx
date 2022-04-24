@@ -1,6 +1,6 @@
 import React from "react"
 
-import { CardBody, CardTitle } from "reactstrap"
+import { CardSubtitle, CardTitle } from "reactstrap"
 import { DataCardEl } from "./styles"
 
 type DataCardProps = {
@@ -10,14 +10,20 @@ type DataCardProps = {
 
 const DataCard = ({ title, children }: DataCardProps): JSX.Element => {
     return (
-        <DataCardEl>
-            <CardBody>
-                <CardTitle tag="h5">
-                    {title}
-                </CardTitle>
+        <DataCardEl body>
+            <CardTitle
+                tag="h5"
+            >
+                {title}
+            </CardTitle>
 
-                {children}
-            </CardBody>
+            <CardSubtitle
+                className="mb-2"
+            >
+                Card subtitle
+            </CardSubtitle>
+
+            {children}
         </DataCardEl>
     )
 }

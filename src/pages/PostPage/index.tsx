@@ -8,7 +8,7 @@ import getValidationErrors from "../../util/getValidationErrors";
 
 import { Button, CardText, Spinner } from "reactstrap";
 import { Form } from "../../styles/components";
-import InputField from "../../components/Input";
+import FieldInput from "../../components/Input";
 import Warning from "../../components/Warning";
 import DataCard from "../../components/DataCard";
 
@@ -92,20 +92,20 @@ const PostPage = () => {
                     userId: 1
                 }}
             >
-                <InputField
+                <FieldInput
                     name='title'
                     label='Title'
                     placeholder='Put the title'
                 />
 
-                <InputField
+                <FieldInput
                     name='body'
                     label='Body'
                     placeholder='Put the body'
                     type="textarea"
                 />
 
-                <InputField
+                <FieldInput
                     name='userId'
                     label='User ID'
                     placeholder='Put the title User ID'

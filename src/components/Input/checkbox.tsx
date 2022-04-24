@@ -5,7 +5,7 @@ import { hasValueString } from '../../util/stringFormat';
 
 import { FormGroup, Input, Label, InputProps, FormFeedback } from 'reactstrap';
 
-interface InputCheckboxProps extends InputProps {
+interface CheckboxInputProps extends InputProps {
     name: string;
     label: string;
     options: {
@@ -14,7 +14,7 @@ interface InputCheckboxProps extends InputProps {
     }[];
 }
 
-const InputCheckbox = ({ name, label, options, ...rest }: InputCheckboxProps) => {
+const CheckboxInput = ({ name, label, options, ...rest }: CheckboxInputProps) => {
     const inputRefs = useRef([]);
     const { fieldName, defaultValue, registerField, error, clearError } = useField(name);
 
@@ -83,4 +83,4 @@ const InputCheckbox = ({ name, label, options, ...rest }: InputCheckboxProps) =>
     );
 }
 
-export default InputCheckbox;
+export default CheckboxInput;

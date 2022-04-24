@@ -5,12 +5,12 @@ import { hasValueString } from '../../util/stringFormat';
 
 import { FormGroup, Input, Label, InputProps, FormFeedback } from 'reactstrap';
 
-interface InputFieldProps extends InputProps {
+interface FieldInputProps extends InputProps {
     name: string;
     label: string;
 }
 
-const InputField = ({ name, label, ...rest }: InputFieldProps) => {
+const FieldInput = ({ name, label, ...rest }: FieldInputProps) => {
     const inputRef = useRef(null);
     const { fieldName, defaultValue, registerField, error, clearError } = useField(name);
 
@@ -52,4 +52,4 @@ const InputField = ({ name, label, ...rest }: InputFieldProps) => {
     );
 }
 
-export default InputField;
+export default FieldInput;

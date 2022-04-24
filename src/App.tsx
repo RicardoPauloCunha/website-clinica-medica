@@ -1,7 +1,7 @@
-import Menu from './components/Menu';
-import { AuthContextProvider } from './contexts/auth';
 import PagesRoutes from './routes';
 import GlobalStyles from './styles/global';
+import { AuthContextProvider } from './contexts/auth';
+import Menu from './components/Menu';
 
 const App = () => {
     return (

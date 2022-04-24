@@ -6,14 +6,14 @@ import { hasValueString } from '../../util/stringFormat';
 
 import { FormGroup, Input, Label, InputProps, FormFeedback } from 'reactstrap';
 
-interface InputMaskProps extends InputProps {
+interface MaskInputProps extends InputProps {
     name: string;
     label: string;
     mask: string;
     maskChar: string;
 }
 
-const InputMask = ({ name, label, mask, maskChar, ...rest }: InputMaskProps) => {
+const MaskInput = ({ name, label, mask, maskChar, ...rest }: MaskInputProps) => {
     const inputRef = useRef(null);
     const { fieldName, defaultValue, registerField, error, clearError } = useField(name);
     const [value, setValue] = useState(defaultValue === undefined ? "" : defaultValue);
@@ -60,4 +60,4 @@ const InputMask = ({ name, label, mask, maskChar, ...rest }: InputMaskProps) => 
     );
 }
 
-export default InputMask;
+export default MaskInput;

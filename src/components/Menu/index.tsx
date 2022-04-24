@@ -31,7 +31,7 @@ const Menu = () => {
     return (
         <div>
             <Navbar
-                color="dark"
+                color="primary"
                 dark
                 expand="md"
                 fixed="top"
@@ -40,7 +40,7 @@ const Menu = () => {
                     to="/"
                     tag={Link}
                 >
-                    Template Website
+                    Clínica Médica
                 </NavbarBrand>
 
                 <NavbarToggler
@@ -98,6 +98,7 @@ const Menu = () => {
                             </>
                             : <Button
                                 onClick={() => navigate("/login")}
+                                color="light"
                             >
                                 Login
                             </Button>

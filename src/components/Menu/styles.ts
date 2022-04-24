@@ -8,6 +8,7 @@ export const NavbarProfile = styled.div`
 
     >span {
         margin-right: 1rem;
+        color: var(--color-white-0) !important;
     }
 
     @media (min-width: 768px) {

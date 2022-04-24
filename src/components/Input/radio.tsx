@@ -5,7 +5,7 @@ import { hasValueString } from '../../util/stringFormat';
 
 import { FormGroup, Input, Label, InputProps, FormFeedback } from 'reactstrap';
 
-interface InputRadioProps extends InputProps {
+interface RadioInputProps extends InputProps {
     name: string;
     label: string;
     options: {
@@ -14,7 +14,7 @@ interface InputRadioProps extends InputProps {
     }[];
 }
 
-const InputRadio = ({ name, label, options, ...rest }: InputRadioProps) => {
+const RadioInput = ({ name, label, options, ...rest }: RadioInputProps) => {
     const inputRefs = useRef([]);
     const { fieldName, defaultValue, registerField, error, clearError } = useField(name);
 
@@ -80,4 +80,4 @@ const InputRadio = ({ name, label, options, ...rest }: InputRadioProps) => {
     );
 }
 
-export default InputRadio;
+export default RadioInput;

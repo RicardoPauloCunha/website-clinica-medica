@@ -1,5 +1,6 @@
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
+import './styles/custom-btsp.scss';
 import App from './App';
 
 const root = ReactDOM.createRoot(
