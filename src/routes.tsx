@@ -8,7 +8,6 @@ import Layout from './components/Layout';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
-import PostPage from './pages/PostPage';
 import PrivatePage from './pages/PrivatePage';
 import PublicPage from './pages/PublicPage';
 
@@ -38,7 +37,6 @@ const PagesRoutes = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/public" element={<PublicPage />} />
                 <Route path="/private" element={<RequireAuth><PrivatePage /></RequireAuth>} />
-                <Route path="/post" element={<RequireAuth><PostPage /></RequireAuth>} />
                 <Route path="*" element={<NotFound />} />
             </Route>
         </Routes>

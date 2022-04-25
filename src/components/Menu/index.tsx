@@ -72,15 +72,6 @@ const Menu = () => {
                                 Private
                             </NavLink>
                         </NavItem>
-
-                        <NavItem>
-                            <NavLink
-                                to="/post"
-                                tag={Link}
-                            >
-                                Post
-                            </NavLink>
-                        </NavItem>
                     </Nav>
 
                     <NavbarProfile>
