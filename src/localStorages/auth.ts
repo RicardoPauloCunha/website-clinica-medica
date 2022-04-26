@@ -1,11 +1,14 @@
-import { TokenData, tokenDecode } from '../util/tokenDecode';
 import { decryptData, encryptData } from '../util/cryptography';
+
+export type TokenData = {
+    idEmployee: number;
+    name: string;
+    employeeType: number;
+}
 
 const LOGGED_USER_KEY = "@Template:logged-user";
 
-export const handlerSignIn = (token: string) => {
-    let dataUser = tokenDecode(token);
-
+export const handlerSignIn = (dataUser: TokenData) => {
     localStorage.setItem(LOGGED_USER_KEY, encryptData(dataUser));
 
     return dataUser;

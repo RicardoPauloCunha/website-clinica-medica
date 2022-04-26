@@ -1,3 +1,4 @@
+import { SuccessResponse } from "../defaultEntities";
 import Material from "../entities/material";
 import { getEnumMaterialStatus } from "../enums/materialStatus";
 
@@ -111,10 +112,10 @@ export const listMaterialByCategoryHttp = async (materialCategoryId: number): Pr
         return _listMaterial.filter(x => x.categoriaMaterial?.idCategoriaMaterial === materialCategoryId);
 }
 
-export const postMaterialHttp = async (requestData: Material): Promise<void> => {
-    requestData;
+export const postMaterialHttp = async (requestData: Material): Promise<SuccessResponse> => {
+    return { message: "" };
 }
 
-export const putMaterialHttp = async (requestData: Material): Promise<void> => {
-    requestData;
+export const putMaterialHttp = async (requestData: Material): Promise<SuccessResponse> => {
+    return { message: "" };
 }

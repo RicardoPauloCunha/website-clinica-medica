@@ -1,3 +1,4 @@
+import { SuccessResponse } from "../defaultEntities";
 import { EntradaSaidaMaterial } from "../entities/entradaSaidaMaterial";
 import { getEnumMaterialInputOutputType } from "../enums/materialInputOutputType";
 
@@ -92,6 +93,6 @@ export const getMaterialInputOutputByMaterialIdHttp = async (materialId: number)
     return _listMaterialInputOutput.filter(x => x.material?.idMaterial === materialId);
 }
 
-export const postMaterialInputOutputHttp = async (requestData: EntradaSaidaMaterial): Promise<void> => {
-    requestData;
+export const postMaterialInputOutputHttp = async (requestData: EntradaSaidaMaterial): Promise<SuccessResponse> => {
+    return { message: "" };
 }

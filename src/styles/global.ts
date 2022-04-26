@@ -54,5 +54,13 @@ export default createGlobalStyle`
         & + button {
             margin-left: 1rem;
         }
+
+        .spinner-border {
+            color: var(--color-white-0);
+        }
+    }
+
+    .alert {
+        margin: 2rem 0 0 0;
     }
 `;

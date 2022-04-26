@@ -1,3 +1,4 @@
+import { SuccessResponse } from "../defaultEntities";
 import Ressarcimento from "../entities/ressarcimento";
 import { getEnumPaymentMethodType } from "../enums/paymentMethodType";
 
@@ -15,6 +16,6 @@ export const getRefundBySchedulingIdHttp = async (schedulingId: number): Promise
     return _listRefund.find(x => x.pagamento?.agendamento?.idAgendamento === schedulingId);
 }
 
-export const postRefundHttp = async (requestData: Ressarcimento): Promise<void> => {
-    requestData;
+export const postRefundHttp = async (requestData: Ressarcimento): Promise<SuccessResponse> => {
+    return { message: "" };
 }

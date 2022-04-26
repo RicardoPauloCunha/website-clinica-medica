@@ -1,3 +1,4 @@
+import { SuccessResponse } from '../defaultEntities';
 import Funcionario from '../entities/funcionario';
 import { getEnumEmployeeType } from '../enums/employeeType';
 
@@ -6,7 +7,7 @@ export const _listEmployee: Funcionario[] = [
         idFuncionario: 1,
         nome: "Administrador",
         email: "admin@cm.com",
-        senha: "admin123",
+        senha: "147852369",
         setor: "Gestão",
         tipoFuncionario: getEnumEmployeeType("admin")
     },
@@ -14,7 +15,7 @@ export const _listEmployee: Funcionario[] = [
         idFuncionario: 2,
         nome: "Recepcionista",
         email: "recep@cm.com",
-        senha: "recep123",
+        senha: "147852369",
         setor: "Recepção",
         tipoFuncionario: getEnumEmployeeType("receptionist")
     },
@@ -22,7 +23,7 @@ export const _listEmployee: Funcionario[] = [
         idFuncionario: 3,
         nome: "Médico",
         email: "medic@cm.com",
-        senha: "medic123",
+        senha: "147852369",
         setor: "Atendimento",
         tipoFuncionario: getEnumEmployeeType("doctor")
     },
@@ -30,7 +31,7 @@ export const _listEmployee: Funcionario[] = [
         idFuncionario: 4,
         nome: "Estoquista",
         email: "estoq@cm.com",
-        senha: "estoq123",
+        senha: "147852369",
         setor: "Almoxarifado",
         tipoFuncionario: getEnumEmployeeType("stockist")
     }
@@ -56,10 +57,10 @@ export const postLoginEmployeeHttp = async (requestData: LoginRequest): Promise<
     return _listEmployee.find(x => x.email === requestData.email && x.senha === requestData.senha);
 }
 
-export const postEmployeeHttp = async (requestData: Funcionario): Promise<void> => {
-    requestData;
+export const postEmployeeHttp = async (requestData: Funcionario): Promise<SuccessResponse> => {
+    return { message: "" };
 }
 
-export const putEmployeeHttp = async (requestData: Funcionario): Promise<void> => {
-    requestData;
+export const putEmployeeHttp = async (requestData: Funcionario): Promise<SuccessResponse> => {
+    return { message: "" };
 }

@@ -1,3 +1,4 @@
+import { SuccessResponse } from "../defaultEntities";
 import Servico from "../entities/servico";
 
 export const _listService: Servico[] = [
@@ -25,6 +26,6 @@ export const listServiceHttp = async (): Promise<Servico[]> => {
     return _listService;
 }
 
-export const postServiceHttp = async (requestData: Servico): Promise<void> => {
-    requestData;
+export const postServiceHttp = async (requestData: Servico): Promise<SuccessResponse> => {
+    return { message: "" };
 }

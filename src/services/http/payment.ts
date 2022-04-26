@@ -1,3 +1,4 @@
+import { SuccessResponse } from "../defaultEntities";
 import Pagamento from "../entities/pagamento";
 import { getEnumPaymentMethodType } from "../enums/paymentMethodType";
 import { getEnumPaymentStatus } from "../enums/paymentStatus";
@@ -25,6 +26,6 @@ export const getPaymentBySchedulingIdHttp = async (schedulingId: number): Promis
     return _listPayment.find(x => x.agendamento?.idAgendamento === schedulingId);
 }
 
-export const postPaymentHttp = async (requestData: Pagamento): Promise<void> => {
-    requestData;
+export const postPaymentHttp = async (requestData: Pagamento): Promise<SuccessResponse> => {
+    return { message: "" };
 }

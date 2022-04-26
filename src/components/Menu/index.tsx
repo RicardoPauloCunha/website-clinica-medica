@@ -6,17 +6,28 @@ import { getLoggedUser, handlerLogout } from '../../localStorages/auth';
 
 import { Button, Collapse, NavLink, Nav, Navbar, NavbarBrand, NavbarText, NavbarToggler, NavItem } from 'reactstrap';
 import { NavbarProfile } from './styles';
+import { getValueEmployeeType } from '../../services/enums/employeeType';
 
 const Menu = () => {
     const navigate = useNavigate();
     const { loggedUser, defineLoggedUser } = useAuth();
 
+    const ADMIN_TYPE = getValueEmployeeType("admin");
+
     const [isOpen, setIsOpen] = useState(false);
+    const [employeeType, setEmployeeType] = useState("");
 
     useEffect(() => {
         defineLoggedUser(getLoggedUser());
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    useEffect(() => {
+        if (loggedUser !== null)
+            setEmployeeType(getValueEmployeeType(undefined, loggedUser.employeeType));
+        else
+            setEmployeeType("");
+    }, [loggedUser]);
 
     const toggleIsOpen = () => {
         setIsOpen(!isOpen);
@@ -56,21 +67,14 @@ const Menu = () => {
                         navbar
                     >
                         <NavItem>
-                            <NavLink
-                                to="/public"
-                                tag={Link}
-                            >
-                                Public
-                            </NavLink>
-                        </NavItem>
-
-                        <NavItem>
-                            <NavLink
-                                to="/private"
-                                tag={Link}
-                            >
-                                Private
-                            </NavLink>
+                            {employeeType === ADMIN_TYPE && <>
+                                <NavLink
+                                    to="/cadastrar-servico"
+                                    tag={Link}
+                                >
+                                    Serviços
+                                </NavLink>
+                            </>}
                         </NavItem>
                     </Nav>
 
@@ -89,7 +93,6 @@ const Menu = () => {
                             </>
                             : <Button
                                 onClick={() => navigate("/login")}
-                                color="light"
                             >
                                 Login
                             </Button>

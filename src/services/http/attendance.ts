@@ -1,3 +1,4 @@
+import { SuccessResponse } from "../defaultEntities";
 import Atendimento from "../entities/atendimento";
 
 export const _listAttendance: Atendimento[] = [
@@ -19,6 +20,6 @@ export const getSchedulingByCpfHttp = async (cpf: string): Promise<Atendimento[]
     return _listAttendance.filter(x => x.Agendamento?.paciente?.cpf === cpf);
 }
 
-export const postAttendanceHttp = async (requestData: Atendimento): Promise<void> => {
-    requestData;
+export const postAttendanceHttp = async (requestData: Atendimento): Promise<SuccessResponse> => {
+    return { message: "" };
 }

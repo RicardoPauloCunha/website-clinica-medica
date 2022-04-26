@@ -1,3 +1,4 @@
+import { SuccessResponse } from "../defaultEntities";
 import Agendamento from "../entities/agendamento";
 import { getEnumScheduleStatus } from "../enums/scheduleStatus";
 
@@ -66,10 +67,10 @@ export const listDoctorSchedulingByParamsHttp = async (paramsData: listDoctorSch
     return list;
 }
 
-export const postSchedulingHttp = async (requestData: Agendamento): Promise<void> => {
-    requestData;
+export const postSchedulingHttp = async (requestData: Agendamento): Promise<SuccessResponse> => {
+    return { message: "" };
 }
 
-export const putSchedulingHttp = async (requestData: Agendamento): Promise<void> => {
-    requestData;
+export const putSchedulingHttp = async (requestData: Agendamento): Promise<SuccessResponse> => {
+    return { message: "" };
 }

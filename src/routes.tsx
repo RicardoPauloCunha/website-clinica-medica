@@ -8,23 +8,28 @@ import Layout from './components/Layout';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
-import PrivatePage from './pages/PrivatePage';
-import PublicPage from './pages/PublicPage';
+import RegisterService from './pages/RegisterService';
+import EmployeeType, { getEnumEmployeeType } from './services/enums/employeeType';
 
-const RequireAuth = ({ children }: { children: JSX.Element }) => {
+type RequireAuthProps = {
+    employeeType: EmployeeType;
+    children: React.ReactNode;
+}
+
+const RequireAuth = ({ employeeType, children }: RequireAuthProps): JSX.Element => {
     let location = useLocation();
 
     let { userIsChecked, loggedUser } = useAuth();
 
-    if (loggedUser !== null || (!userIsChecked && userIsAuth()))
-        return children;
+    if ((loggedUser !== null && loggedUser.employeeType === getEnumEmployeeType(employeeType)) || (!userIsChecked && userIsAuth()))
+        return <>{children}</>;
 
     return <Navigate
         to="/login"
         replace
         state={{
             from: location,
-            message: "You are not authorized to access this page."
+            message: "Você não tem autorização para acessar essa página."
         }}
     />;
 }
@@ -35,8 +40,9 @@ const PagesRoutes = () => {
             <Route element={<Layout />}>
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/public" element={<PublicPage />} />
-                <Route path="/private" element={<RequireAuth><PrivatePage /></RequireAuth>} />
+
+                <Route path="/cadastrar-servico" element={<RequireAuth employeeType="admin" children={<RegisterService />} />} />
+
                 <Route path="*" element={<NotFound />} />
             </Route>
         </Routes>
