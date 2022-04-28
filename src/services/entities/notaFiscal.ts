@@ -5,7 +5,7 @@ type NotaFiscal = {
     valor: number;
     dataEmissao: string;
     impostos: number;
-    tipoNota: number;
+    tipoNotaFiscal: number;
     pagamento?: Pagamento;
 }
 

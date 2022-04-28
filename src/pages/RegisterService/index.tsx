@@ -1,13 +1,13 @@
 import { FormHandles, SubmitHandler } from "@unform/core";
 import { useEffect, useRef, useState } from "react";
-import { Button, Spinner } from "reactstrap";
+import { Button, ModalBody, ModalFooter, ModalHeader, Spinner } from "reactstrap";
 import FieldInput from "../../components/Input";
 import CurrencyInput from "../../components/Input/currency";
 import SelectInput from "../../components/Input/select";
 import Warning from "../../components/Warning";
 import Especialidade from "../../services/entities/especialidade";
 import { listSpecialtyHttp } from "../../services/http/specialty";
-import { Form } from "../../styles/components";
+import { DataModal, Form } from "../../styles/components";
 import { WarningTuple } from "../../util/getHttpErrors";
 import * as Yup from 'yup';
 import { postServiceHttp, _listService } from "../../services/http/service";
@@ -24,15 +24,17 @@ type AddFormData = {
     specialtyName: string
 }
 
+type ModalString = "add" | "";
+
 const RegisterService = () => {
     const registerFormRef = useRef<FormHandles>(null);
     const addFormRef = useRef<FormHandles>(null);
 
-    const [isLoading, setIsLoading] = useState<"form" | "">("");
+    const [isLoading, setIsLoading] = useState<"register" | "">("");
     const [warning, setWarning] = useState<WarningTuple>(["", ""]);
-    const [warnFor, setWarnFor] = useState<"form" | "add" | "">("");
+    const [modal, setModal] = useState<ModalString>("");
 
-    const selectedService = _listService[0];
+    const _itemService = _listService[0];
 
     const [specialties, setSpecialties] = useState<Especialidade[]>([]);
 
@@ -40,6 +42,10 @@ const RegisterService = () => {
         getSpecialties();
         // eslint-disable-next-line
     }, []);
+
+    const toggleModal = (modalName?: ModalString) => {
+        setModal(modalName !== undefined ? modalName : "");
+    }
 
     const getSpecialties = () => {
         listSpecialtyHttp().then(response => {
@@ -49,18 +55,16 @@ const RegisterService = () => {
 
     const submitRegisterForm: SubmitHandler<RegisterFormData> = async (data, { reset }) => {
         try {
-            setIsLoading("form");
-            setWarnFor("form");
+            setIsLoading("register");
+            setWarning(["", ""]);
             registerFormRef.current?.setErrors({});
 
             const shema = Yup.object().shape({
-                name: Yup.string()
-                    .trim()
+                name: Yup.string().trim()
                     .required("Coloque o nome do serviço."),
                 price: Yup.number()
                     .moreThan(0, "Coloque o preço do serviço."),
-                description: Yup.string()
-                    .trim()
+                description: Yup.string().trim()
                     .required("Coloque a descrição do serviço."),
                 specialtyId: Yup.string()
                     .required("Selecione a especialidade do serviço.")
@@ -72,7 +76,6 @@ const RegisterService = () => {
 
             data.specialtyId = Number(data.specialtyId);
             let specialty = specialties.find(x => x.idEspecialidade === data.specialtyId);
-
             if (specialty === undefined) {
                 setWarning(["warning", "Especialidade não encontrada."]);
                 return;
@@ -108,12 +111,10 @@ const RegisterService = () => {
 
     const submitAddForm: SubmitHandler<AddFormData> = async (data, { reset }) => {
         try {
-            setWarnFor("add");
             addFormRef.current?.setErrors({});
 
             const shema = Yup.object().shape({
-                specialtyName: Yup.string()
-                    .trim()
+                specialtyName: Yup.string().trim()
                     .required("Coloque o nome da especialidade."),
             });
 
@@ -133,12 +134,12 @@ const RegisterService = () => {
             }, 100);
 
             reset();
-            setWarning(["success", "Especialidade adicionada e criada com sucesso."]);
+            setWarning(["success", "Especialidade adicionada e selecionada com sucesso."]);
+            toggleModal();
         }
         catch (err) {
             if (err instanceof Yup.ValidationError)
                 addFormRef.current?.setErrors(getValidationErrors(err));
-            setWarning(["warning", "Campos inválidos."]);
         }
     }
 
@@ -151,9 +152,9 @@ const RegisterService = () => {
                 onSubmit={submitRegisterForm}
                 className="form-data"
                 initialData={{
-                    name: selectedService.nome,
-                    price: selectedService.valor.toFixed(2),
-                    description: selectedService.descricao
+                    name: _itemService.nome,
+                    price: _itemService.valor.toFixed(2),
+                    description: _itemService.descricao
                 }}
             >
                 <FieldInput
@@ -176,7 +177,7 @@ const RegisterService = () => {
 
                 <SelectInput
                     name='specialtyId'
-                    label='Selecionar especialidade'
+                    label='Especialidade'
                     placeholder='Selecione a especialidade'
                     options={specialties.map(x => ({
                         value: x.idEspecialidade.toString(),
@@ -187,41 +188,64 @@ const RegisterService = () => {
                 <Button
                     type='submit'
                 >
-                    {isLoading === "form"
+                    {isLoading === "register"
                         ? <Spinner size="sm" />
                         : "Cadastrar"
                     }
                 </Button>
 
-                {warnFor === "form" && <Warning
-                    value={warning}
-                />}
+                <Warning value={warning} />
             </Form>
 
             <h2>Adicionar especialidade</h2>
             <p>Você pode adicionar uma nova especialidade caso não tenha encontrado a opção desejada.</p>
-
-            <Form
-                ref={addFormRef}
-                onSubmit={submitAddForm}
-                className="form-data"
+            <Button
+                onClick={() => toggleModal("add")}
+                outline
             >
-                <FieldInput
-                    name='specialtyName'
-                    label='Nome'
-                    placeholder='Coloque o nome da especialidade'
-                />
+                Adicionar especialidade
+            </Button>
 
-                <Button
-                    type='submit'
+            <DataModal
+                isOpen={modal === "add"}
+                toggle={toggleModal}
+                centered
+            >
+                <ModalHeader
+                    toggle={() => toggleModal()}
                 >
-                    Adicionar
-                </Button>
+                    Adicionar especialidade
+                </ModalHeader>
 
-                {warnFor === "add" && <Warning
-                    value={warning}
-                />}
-            </Form>
+                <ModalBody>
+                    <Form
+                        ref={addFormRef}
+                        onSubmit={submitAddForm}
+                        className="form-modal"
+                    >
+                        <FieldInput
+                            name='specialtyName'
+                            label='Nome da especialidade'
+                            placeholder='Coloque o nome da especialidade'
+                        />
+                    </Form>
+                </ModalBody>
+
+                <ModalFooter>
+                    <Button
+                        type='submit'
+                        onClick={() => addFormRef.current?.submitForm()}
+                    >
+                        Adicionar
+                    </Button>
+
+                    <Button
+                        onClick={() => toggleModal()}
+                    >
+                        Cancelar
+                    </Button>
+                </ModalFooter>
+            </DataModal>
         </>
     )
 }

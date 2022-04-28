@@ -1,5 +1,6 @@
 import { SuccessResponse } from '../defaultEntities';
 import Funcionario from '../entities/funcionario';
+import { getEnumEmployeeStatus } from '../enums/employeeStatus';
 import { getEnumEmployeeType } from '../enums/employeeType';
 
 export const _listEmployee: Funcionario[] = [
@@ -9,6 +10,7 @@ export const _listEmployee: Funcionario[] = [
         email: "admin@cm.com",
         senha: "147852369",
         setor: "Gestão",
+        statusFuncionario: getEnumEmployeeStatus("enabled"),
         tipoFuncionario: getEnumEmployeeType("admin")
     },
     {
@@ -17,6 +19,7 @@ export const _listEmployee: Funcionario[] = [
         email: "recep@cm.com",
         senha: "147852369",
         setor: "Recepção",
+        statusFuncionario: getEnumEmployeeStatus("enabled"),
         tipoFuncionario: getEnumEmployeeType("receptionist")
     },
     {
@@ -25,6 +28,7 @@ export const _listEmployee: Funcionario[] = [
         email: "medic@cm.com",
         senha: "147852369",
         setor: "Atendimento",
+        statusFuncionario: getEnumEmployeeStatus("enabled"),
         tipoFuncionario: getEnumEmployeeType("doctor")
     },
     {
@@ -33,6 +37,7 @@ export const _listEmployee: Funcionario[] = [
         email: "estoq@cm.com",
         senha: "147852369",
         setor: "Almoxarifado",
+        statusFuncionario: getEnumEmployeeStatus("enabled"),
         tipoFuncionario: getEnumEmployeeType("stockist")
     }
 ];

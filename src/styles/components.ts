@@ -25,6 +25,10 @@ export const Form = styled(Unform)`
     &.form-modal {
         margin: 0;
         background-color: var(--color-white-0);
+
+        .alert {
+            margin: 2rem 0 1rem 0;
+        }
     }
 `;
 
@@ -70,9 +74,17 @@ export const ButtonGroupRow = styled.div`
 `;
 
 export const DataModal = styled(Modal)`
+    .modal-content {
+        padding: 1rem;
+    }
+
     .modal-header {
         border: none;
         padding-bottom: 0;
+    }
+
+    .modal-title {
+        margin: 0;
     }
 
     .modal-footer {

@@ -13,9 +13,10 @@ interface SelectInputProps extends InputProps {
         label: string;
         value: string;
     }[];
+    handlerChange?: (optionValue: string) => void;
 }
 
-const SelectInput = ({ name, label, placeholder, options, ...rest }: SelectInputProps) => {
+const SelectInput = ({ name, label, placeholder, options, handlerChange, ...rest }: SelectInputProps) => {
     const inputRef = useRef(null);
     const { fieldName, defaultValue, registerField, error, clearError } = useField(name);
 
@@ -35,6 +36,11 @@ const SelectInput = ({ name, label, placeholder, options, ...rest }: SelectInput
         });
     }, [fieldName, registerField]);
 
+    const changeOption = (optionValue: string) => {
+        if (handlerChange !== undefined)
+            handlerChange(optionValue);
+    }
+
     return (
         <FormGroup>
             <Label htmlFor={fieldName}>
@@ -48,6 +54,7 @@ const SelectInput = ({ name, label, placeholder, options, ...rest }: SelectInput
                 type="select"
                 invalid={hasValueString(error)}
                 onFocus={clearError}
+                onChange={e => changeOption(e.target.value)}
                 {...rest}
             >
                 <option

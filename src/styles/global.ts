@@ -38,7 +38,7 @@ export default createGlobalStyle`
 
     h2, h3 {
         color: var(--color-gray-300);
-        margin: 1.5rem 0;
+        margin: 2.5rem 0 1rem;
     }
 
     h4, h5, h6 {
@@ -47,7 +47,6 @@ export default createGlobalStyle`
     }
 
     button {
-        color: var(--color-white-0) !important;
         font-weight: 500 !important;
         padding: 0.5rem 2rem 0.5rem 2rem !important;
         
@@ -55,8 +54,8 @@ export default createGlobalStyle`
             margin-left: 1rem;
         }
 
-        .spinner-border {
-            color: var(--color-white-0);
+        &.btn-block {
+            width: 100%;
         }
     }
 

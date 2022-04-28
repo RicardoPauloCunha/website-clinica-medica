@@ -31,10 +31,11 @@ const Login = () => {
 
     const { defineLoggedUser } = useAuth();
 
+    const _itemEmployee = _listEmployee[3];
+
     const location = useLocation()?.state as LocationData;
     const from = location?.from?.pathname || "/";
     const message = location?.message || "";
-    const selectedEmployee = _listEmployee[0];
 
     const [isLoading, setIsLoading] = useState<"form" | "">("");
     const [warning, setWarning] = useState<WarningTuple>(location?.message ? ["warning", message] : ["", ""]);
@@ -61,12 +62,10 @@ const Login = () => {
             loginFormRef.current?.setErrors({});
 
             const shema = Yup.object().shape({
-                email: Yup.string()
-                    .trim()
+                email: Yup.string().trim()
                     .email("E-mail inválido.")
                     .required("Coloque o email da sua conta."),
-                password: Yup.string()
-                    .trim()
+                password: Yup.string().trim()
                     .required("Coloque a senha da sua conta.")
             });
 
@@ -119,20 +118,20 @@ const Login = () => {
                 onSubmit={submitLoginForm}
                 className="form-data"
                 initialData={{
-                    email: selectedEmployee.email,
-                    password: selectedEmployee.senha
+                    email: _itemEmployee.email,
+                    password: _itemEmployee.senha
                 }}
             >
                 <FieldInput
                     name='email'
-                    label='Email'
+                    label='E-mail'
                     placeholder='Coloque seu email'
                     type="email"
                 />
 
                 <FieldInput
                     name='password'
-                    label='Password'
+                    label='Senha'
                     placeholder='Coloque sua senha'
                     type="password"
                 />
@@ -146,9 +145,7 @@ const Login = () => {
                     }
                 </Button>
 
-                <Warning
-                    value={warning}
-                />
+                <Warning value={warning} />
             </Form>
         </>
     );

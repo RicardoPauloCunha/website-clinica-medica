@@ -13,6 +13,7 @@ const Menu = () => {
     const { loggedUser, defineLoggedUser } = useAuth();
 
     const ADMIN_TYPE = getValueEmployeeType("admin");
+    const STOCKIST_TYPE = getValueEmployeeType("stockist");
 
     const [isOpen, setIsOpen] = useState(false);
     const [employeeType, setEmployeeType] = useState("");
@@ -66,16 +67,54 @@ const Menu = () => {
                         className="me-auto"
                         navbar
                     >
-                        <NavItem>
-                            {employeeType === ADMIN_TYPE && <>
+                        {employeeType === ADMIN_TYPE && <>
+                            <NavItem>
                                 <NavLink
-                                    to="/cadastrar-servico"
+                                    to="/servico/cadastrar"
                                     tag={Link}
                                 >
-                                    Serviços
+                                    Cadastrar serviço
                                 </NavLink>
-                            </>}
-                        </NavItem>
+                            </NavItem>
+
+                            <NavItem>
+                                <NavLink
+                                    to="/funcionario/cadastrar"
+                                    tag={Link}
+                                >
+                                    Cadastrar funcionário
+                                </NavLink>
+                            </NavItem>
+
+                            <NavItem>
+                                <NavLink
+                                    to="/funcionario"
+                                    tag={Link}
+                                >
+                                    Funcionários
+                                </NavLink>
+                            </NavItem>
+                        </>}
+
+                        {employeeType === STOCKIST_TYPE && <>
+                            <NavItem>
+                                <NavLink
+                                    to="/material/cadastrar"
+                                    tag={Link}
+                                >
+                                    Cadastrar material
+                                </NavLink>
+                            </NavItem>
+
+                            <NavItem>
+                                <NavLink
+                                    to="/material"
+                                    tag={Link}
+                                >
+                                    Materiais
+                                </NavLink>
+                            </NavItem>
+                        </>}
                     </Nav>
 
                     <NavbarProfile>

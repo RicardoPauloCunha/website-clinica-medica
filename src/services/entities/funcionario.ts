@@ -5,6 +5,7 @@ type Funcionario = {
     senha: string;
     setor: string;
     tipoFuncionario: number;
+    statusFuncionario: number;
 }
 
 export default Funcionario;

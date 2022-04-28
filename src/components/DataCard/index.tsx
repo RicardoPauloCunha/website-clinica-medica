@@ -5,10 +5,11 @@ import { DataCardEl } from "./styles"
 
 type DataCardProps = {
     title: string;
+    subtitle?: string;
     children?: React.ReactNode;
 }
 
-const DataCard = ({ title, children }: DataCardProps): JSX.Element => {
+const DataCard = ({ title, subtitle, children }: DataCardProps): JSX.Element => {
     return (
         <DataCardEl body>
             <CardTitle
@@ -17,11 +18,11 @@ const DataCard = ({ title, children }: DataCardProps): JSX.Element => {
                 {title}
             </CardTitle>
 
-            <CardSubtitle
+            {subtitle && <CardSubtitle
                 className="mb-2"
             >
-                Card subtitle
-            </CardSubtitle>
+                {subtitle}
+            </CardSubtitle>}
 
             {children}
         </DataCardEl>

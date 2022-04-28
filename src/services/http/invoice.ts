@@ -8,21 +8,21 @@ export const _listInvoice: NotaFiscal[] = [
         valor: 110.00,
         dataEmissao: "24/04/2022",
         impostos: 0.00,
-        tipoNota: getEnumInvoiceType("payment") 
+        tipoNotaFiscal: getEnumInvoiceType("payment") 
     },
     {
         numeroNota: 2,
         valor: 120.00,
         dataEmissao: "24/04/2022",
         impostos: 0.00,
-        tipoNota: getEnumInvoiceType("payment") 
+        tipoNotaFiscal: getEnumInvoiceType("payment") 
     },
     {
         numeroNota: 3,
         valor: 120.00,
         dataEmissao: "24/04/2022",
         impostos: 0.00,
-        tipoNota: getEnumInvoiceType("refund") 
+        tipoNotaFiscal: getEnumInvoiceType("refund") 
     }
 ];
 

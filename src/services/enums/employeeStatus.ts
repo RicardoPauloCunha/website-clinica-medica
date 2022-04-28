@@ -1,10 +1,10 @@
-type MaterialStatus = "enabled" | "disabled";
+type EmployeeStatus = "enabled" | "disabled";
 
-export const getValueMaterialStatus = (typeString?: MaterialStatus, typeNumber?: number) => {
+export const getValueEmployeeStatus = (typeString?: EmployeeStatus, typeNumber?: number) => {
     let type: number;
 
     if (typeString !== undefined)
-        type = (getEnumMaterialStatus(typeString));
+        type = (getEnumEmployeeStatus(typeString));
     else if (typeNumber !== undefined)
         type = typeNumber;
     else
@@ -20,7 +20,7 @@ export const getValueMaterialStatus = (typeString?: MaterialStatus, typeNumber?:
     }
 }
 
-export const getEnumMaterialStatus = (type: MaterialStatus) => {
+export const getEnumEmployeeStatus = (type: EmployeeStatus) => {
     switch (type) {
         case "enabled":
             return 1;
@@ -31,13 +31,13 @@ export const getEnumMaterialStatus = (type: MaterialStatus) => {
     }
 }
 
-export const listMaterialStatus = () => {
+export const listEmployeeStatus = () => {
     let list: string[] = [];
 
     for (let i = 1; i <= 2; i++)
-        list.push(getValueMaterialStatus(undefined, i));
+        list.push(getValueEmployeeStatus(undefined, i));
 
     return list;
 }
 
-export default MaterialStatus;
+export default EmployeeStatus;

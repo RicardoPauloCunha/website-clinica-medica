@@ -51,3 +51,34 @@ export const hasValueNumber = (value?: any) => {
     else
         return true;
 }
+
+type AddressData = {
+    cep: string;
+    street: string;
+    number: string;
+    district: string;
+    city: string;
+    state: string;
+}
+
+export const concatenateAddressData = (value: AddressData) => {
+    return `${value.street}, ${value.number}, ${value.district} - ${value.city}/${value.state.toUpperCase()} - ${value.cep}`;
+}
+
+export const splitAddressData = (value: string) => {
+    let firstData = value.split(" - ");
+
+    let secondData = firstData[0].split(", ");
+    let thirdData = firstData[1].split("/");
+
+    let data: AddressData = {
+        cep: firstData[2],
+        street: secondData[0],
+        number: secondData[1],
+        district: secondData[2],
+        city: thirdData[0],
+        state: thirdData[1],
+    }
+
+    return data;
+}
