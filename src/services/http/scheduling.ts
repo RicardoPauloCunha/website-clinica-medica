@@ -5,28 +5,24 @@ import { getEnumScheduleStatus } from "../enums/scheduleStatus";
 export const _listScheduling: Agendamento[] = [
     {
         idAgendamento: 1,
-        idRecepcionista: 2,
         data: "24/04/2022",
         dataAgendada: "25/04/2022",
         status: getEnumScheduleStatus("scheduled")
     },
     {
         idAgendamento: 2,
-        idRecepcionista: 2,
         data: "24/04/2022",
         dataAgendada: "25/04/2022",
         status: getEnumScheduleStatus("scheduled")
     },
     {
         idAgendamento: 3,
-        idRecepcionista: 2,
         data: "24/04/2022",
         dataAgendada: "26/04/2022",
         status: getEnumScheduleStatus("scheduled")
     },
     {
         idAgendamento: 4,
-        idRecepcionista: 2,
         data: "24/04/2022",
         dataAgendada: "26/04/2022",
         status: getEnumScheduleStatus("scheduled")

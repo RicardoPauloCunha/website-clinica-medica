@@ -1,15 +1,15 @@
 import CategoriaMaterial from "./categoriaMaterial";
 import Fabricante from "./fabricante";
 
-type Material = {
+interface Material {
     idMaterial: number;
-    nome: string;
-    descricao: string;
+    nomeMaterial: string;
     unidadeDeMedida: string;
     quantidade: number;
-    status: number;
-    categoriaMaterial?: CategoriaMaterial;
-    fabricante?: Fabricante;
+    descricao: string;
+    categoriaMaterial: CategoriaMaterial;
+    fabricante: Fabricante;
+    statusMaterial: number;
 }
 
 export default Material;

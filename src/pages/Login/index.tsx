@@ -10,10 +10,10 @@ import { getEmployeeByIdHttp, postLoginEmployeeHttp, _listEmployee } from '../..
 import { WarningTuple } from '../../util/getHttpErrors';
 import getValidationErrors from '../../util/getValidationErrors';
 
-import { Button, Spinner } from 'reactstrap';
 import { Form } from '../../styles/components';
 import FieldInput from '../../components/Input';
 import Warning from '../../components/Warning';
+import LoadingButton from '../../components/LoadingButton';
 
 type LocationData = {
     from: Location;
@@ -41,24 +41,24 @@ const Login = () => {
     const [warning, setWarning] = useState<WarningTuple>(location?.message ? ["warning", message] : ["", ""]);
 
     useEffect(() => {
-        getInitialValues();
+        getEmployee();
         // eslint-disable-next-line
     }, []);
 
-    const getInitialValues = async () => {
+    const getEmployee = async () => {
         let user = getLoggedUser();
 
         if (user !== null) {
             await getEmployeeByIdHttp(user.idEmployee).then(response => {
-                if (response !== undefined)
-                    handlerLogin(response);
-            })
+                handlerLogin(response);
+            });
         }
     }
 
     const submitLoginForm: SubmitHandler<LoginFormData> = async (data, { reset }) => {
         try {
             setIsLoading("form");
+            setWarning(["", ""]);
             loginFormRef.current?.setErrors({});
 
             const shema = Yup.object().shape({
@@ -73,22 +73,14 @@ const Login = () => {
                 abortEarly: false
             });
 
-            setTimeout(async () => {
-                await postLoginEmployeeHttp({
-                    email: data.email,
-                    senha: data.password
-                }).then(response => {
-                    if (response === undefined) {
-                        setWarning(["danger", "Email ou senha inválida."]);
-                        return;
-                    }
-
-                    handlerLogin(response);
-                    reset();
-                }).catch(() => {
-                    setWarning(["danger", "Email ou senha inválida."]);
-                }).finally(() => { setIsLoading(""); });
-            }, 1000);
+            await postLoginEmployeeHttp({
+                email: data.email,
+                senha: data.password
+            }).then(response => {
+                handlerLogin(response);
+            }).catch(() => {
+                setWarning(["danger", "Email ou senha inválida."]);
+            }).finally(() => { setIsLoading(""); });
         }
         catch (err) {
             if (err instanceof Yup.ValidationError)
@@ -101,7 +93,7 @@ const Login = () => {
     const handlerLogin = (user: Funcionario) => {
         let dataToken = handlerSignIn({
             idEmployee: user.idFuncionario,
-            name: user.nome,
+            name: user.nomeFuncionario,
             employeeType: user.tipoFuncionario
         });
 
@@ -136,14 +128,11 @@ const Login = () => {
                     type="password"
                 />
 
-                <Button
-                    type='submit'
-                >
-                    {isLoading === "form"
-                        ? <Spinner size="sm" />
-                        : "Entrar"
-                    }
-                </Button>
+                <LoadingButton
+                    text="Entrar"
+                    isLoading={isLoading === "form"}
+                    type="submit"
+                />
 
                 <Warning value={warning} />
             </Form>

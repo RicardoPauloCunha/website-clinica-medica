@@ -1,9 +1,8 @@
 import Especialidade from "./especialidade";
 import Funcionario from "./funcionario";
 
-type Medico = {
+interface Medico extends Funcionario {
     crm: string;
-    funcionario?: Funcionario;
     especialidade?: Especialidade;
 }
 

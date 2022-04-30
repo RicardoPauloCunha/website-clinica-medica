@@ -1,6 +1,6 @@
-type Funcionario = {
+interface Funcionario {
     idFuncionario: number;
-    nome: string;
+    nomeFuncionario: string;
     email: string;
     senha: string;
     setor: string;

@@ -1,8 +1,8 @@
 import Pagamento from "./pagamento";
 
-type NotaFiscal = {
-    numeroNota: number;
-    valor: number;
+interface NotaFiscal {
+    idNotaFiscal: number;
+    valorNota: number;
     dataEmissao: string;
     impostos: number;
     tipoNotaFiscal: number;

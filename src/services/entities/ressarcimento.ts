@@ -1,6 +1,6 @@
 import Pagamento from "./pagamento";
 
-type Ressarcimento = {
+interface Ressarcimento {
     idRessarcimento: number;
     data: string;
     valor: number;

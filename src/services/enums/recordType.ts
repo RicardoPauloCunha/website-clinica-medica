@@ -1,10 +1,10 @@
-type MaterialInputOutputType = "input" | "output";
+type RecordType = "input" | "output";
 
-export const getValueMaterialInputOutputType = (typeString?: MaterialInputOutputType, typeNumber?: number) => {
+export const getValueRecordType = (typeString?: RecordType, typeNumber?: number) => {
     let type: number;
 
     if (typeString !== undefined)
-        type = (getEnumMaterialInputOutputType(typeString));
+        type = (getEnumRecordType(typeString));
     else if (typeNumber !== undefined)
         type = typeNumber;
     else
@@ -20,7 +20,7 @@ export const getValueMaterialInputOutputType = (typeString?: MaterialInputOutput
     }
 }
 
-export const getEnumMaterialInputOutputType = (type: MaterialInputOutputType) => {
+export const getEnumRecordType = (type: RecordType) => {
     switch (type) {
         case "input":
             return 1;
@@ -31,13 +31,13 @@ export const getEnumMaterialInputOutputType = (type: MaterialInputOutputType) =>
     }
 }
 
-export const listMaterialInputOutputType = () => {
+export const listRecordType = () => {
     let list: string[] = [];
 
     for (let i = 1; i <= 2; i++)
-        list.push(getValueMaterialInputOutputType(undefined, i));
+        list.push(getValueRecordType(undefined, i));
 
     return list;
 }
 
-export default MaterialInputOutputType;
+export default RecordType;

@@ -69,55 +69,50 @@ const RegisterEmployee = () => {
             return;
 
         setIsLoading("getEmployee");
-        setTimeout(() => {
-            getEmployeeByIdHttp(id).then(response => {
-                if (response === undefined)
-                    return;
+        getEmployeeByIdHttp(id).then(response => {
+            if (response === undefined)
+                return;
 
-                let employeeTypeIndex = response.idFuncionario - 1;
+            let employeeTypeIndex = (response.idFuncionario as number) - 1;
 
-                registerFormRef.current?.setData({
-                    name: response.nome,
-                    email: response.email,
-                    password: response.senha,
-                    confirmPassword: response.senha,
-                    sector: response.setor,
-                    employeeTypeIndex: employeeTypeIndex
-                });
-
-                handlerChangeEmployeeType(employeeTypeIndex.toString());
-
-                if (getValueEmployeeType(undefined, response.idFuncionario) !== DOCTOR_TYPE) {
-                    setEditedDoctor({
-                        crm: "",
-                        funcionario: response
-                    });
-                    setIsLoading("");
-                    return;
-                }
-
-                getDoctor(response.idFuncionario);
+            registerFormRef.current?.setData({
+                name: response.nomeFuncionario,
+                email: response.email,
+                password: response.senha,
+                confirmPassword: response.senha,
+                sector: response.setor,
+                employeeTypeIndex: employeeTypeIndex
             });
-        }, 1000);
+
+            handlerChangeEmployeeType(employeeTypeIndex.toString());
+
+            if (getValueEmployeeType(undefined, response.idFuncionario) !== DOCTOR_TYPE) {
+                setEditedDoctor({
+                    crm: "",
+                    ...response
+                });
+                setIsLoading("");
+                return;
+            }
+
+            getDoctor(response.idFuncionario as number);
+        });
     }
 
     const getDoctor = (employeeId: number) => {
         setIsLoading("getDoctor");
+        getDoctorByEmployeeIdHttp(employeeId).then(response => {
+            if (response === undefined)
+                return;
 
-        setTimeout(() => {
-            getDoctorByEmployeeIdHttp(employeeId).then(response => {
-                if (response === undefined)
-                    return;
-
-                complementFormRef.current?.setData({
-                    crm: response.crm,
-                    specialtyId: response.especialidade?.idEspecialidade.toString()
-                });
-
-                setEditedDoctor(response)
-                setIsLoading("");
+            complementFormRef.current?.setData({
+                crm: response.crm,
+                specialtyId: response.especialidade?.idEspecialidade?.toString()
             });
-        }, 1000);
+
+            setEditedDoctor(response)
+            setIsLoading("");
+        });
     }
 
     const submitRegisterForm: SubmitHandler<RegisterFormData> = async (data, { reset }) => {
@@ -159,77 +154,66 @@ const RegisterEmployee = () => {
             }
 
             if (editedDoctor === undefined) {
-                let employee = {
+                let employee: Funcionario = {
                     idFuncionario: 0,
-                    nome: data.name,
+                    nomeFuncionario: data.name,
                     email: data.email,
                     senha: data.password,
                     setor: data.sector,
                     statusFuncionario: getEnumEmployeeStatus("enabled"),
-                    tipoFuncionario: data.employeeTypeIndex
+                    tipoFuncionario: data.employeeTypeIndex + 1
                 };
 
                 if (_typesEmployee[data.employeeTypeIndex] !== DOCTOR_TYPE) {
-                    setTimeout(async () => {
-                        await postEmployeeHttp(employee).then(() => {
-                            setWarning(["success", "Funcionário criado com sucesso."]);
-                            reset();
-                        }).catch(() => {
-                            setWarning(["danger", "Não foi possível criar o funcionário."]);
-                        }).finally(() => { setIsLoading(""); });
-                    }, 1000);
+                    await postEmployeeHttp(employee).then(() => {
+                        setWarning(["success", "Funcionário criado com sucesso."]);
+                        reset();
+                    }).catch(() => {
+                        setWarning(["danger", "Não foi possível criar o funcionário."]);
+                    }).finally(() => { setIsLoading(""); });
 
                     return;
                 }
 
                 let crm = complementFormRef.current?.getFieldValue("crm") as string;
 
-                setTimeout(async () => {
-                    await postDoctorHttp({
-                        crm: crm,
-                        especialidade: specialty,
-                        funcionario: employee
-                    }).then(() => {
-                        setWarning(["success", "Médico criado com sucesso."]);
-                        reset();
-                        complementFormRef.current?.reset();
-                    }).catch(() => {
-                        setWarning(["danger", "Não foi possível criar o médico."]);
-                    }).finally(() => { setIsLoading(""); });
-                }, 1000);
+                await postDoctorHttp({
+                    crm: crm,
+                    especialidade: specialty,
+                    ...employee
+                }).then(() => {
+                    setWarning(["success", "Médico criado com sucesso."]);
+                    reset();
+                    complementFormRef.current?.reset();
+                }).catch(() => {
+                    setWarning(["danger", "Não foi possível criar o médico."]);
+                }).finally(() => { setIsLoading(""); });
 
                 return;
             }
 
-            if (editedDoctor?.funcionario === undefined)
-                return;
-
-            editedDoctor.funcionario.nome = data.name;
-            editedDoctor.funcionario.email = data.email;
-            editedDoctor.funcionario.senha = data.password;
-            editedDoctor.funcionario.setor = data.sector;
+            editedDoctor.nomeFuncionario = data.name;
+            editedDoctor.email = data.email;
+            editedDoctor.senha = data.password;
+            editedDoctor.setor = data.sector;
 
             if (_typesEmployee[data.employeeTypeIndex] !== DOCTOR_TYPE) {
-                setTimeout(async () => {
-                    await putEmployeeHttp(editedDoctor.funcionario as Funcionario).then(() => {
-                        setWarning(["success", "Funcionário editado com sucesso."]);
-                    }).catch(() => {
-                        setWarning(["danger", "Não foi possível editar o funcionário."]);
-                    }).finally(() => { setIsLoading(""); });
-                }, 1000);
+                await putEmployeeHttp(editedDoctor).then(() => {
+                    setWarning(["success", "Funcionário editado com sucesso."]);
+                }).catch(() => {
+                    setWarning(["danger", "Não foi possível editar o funcionário."]);
+                }).finally(() => { setIsLoading(""); });
 
                 return;
             }
 
             editedDoctor.especialidade = specialty;
 
-            setTimeout(async () => {
-                await putDoctorHttp(editedDoctor).then(() => {
-                    setWarning(["success", "Médico editado com sucesso."]);
-                }).catch(() => {
-                    setWarning(["danger", "Não foi possível editar o médico."]);
-                }).finally(() => { setIsLoading(""); });
-            }, 1000);
+            await putDoctorHttp(editedDoctor).then(() => {
+                setWarning(["success", "Médico editado com sucesso."]);
+            }).catch(() => {
+                setWarning(["danger", "Não foi possível editar o médico."]);
+            }).finally(() => { setIsLoading(""); });
         }
         catch (err) {
             if (err instanceof Yup.ValidationError)
@@ -297,7 +281,7 @@ const RegisterEmployee = () => {
                 onSubmit={submitRegisterForm}
                 className="form-data"
                 initialData={{
-                    name: _itemEmployee.nome,
+                    name: _itemEmployee.nomeFuncionario,
                     email: _itemEmployee.email,
                     password: _itemEmployee.senha,
                     confirmPassword: _itemEmployee.senha,
@@ -399,8 +383,8 @@ const RegisterEmployee = () => {
                         label='Especialidade'
                         placeholder='Selecione a especialidade'
                         options={specialties.map(x => ({
-                            value: x.idEspecialidade.toString(),
-                            label: x.nome
+                            value: x.idEspecialidade?.toString() as string,
+                            label: x.nomeEspecialidade
                         }))}
                     />
 

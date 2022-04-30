@@ -1,10 +1,10 @@
 import Especialidade from "./especialidade";
 
-type Servico = {
+interface Servico {
     idServico: number;
-    nome: string;
+    nomeServico: string;
     valor: number;
-    descricao: string;
+    descricaoServico: string;
     especialidade?: Especialidade;
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useField } from '@unform/core';
 
 import { convertCurrency, currencyToNumber } from '../../util/convertCurrency';
@@ -14,6 +14,7 @@ interface CurrencyInputProps extends InputProps {
 const CurrencyInput = ({ name, label, ...rest }: CurrencyInputProps) => {
     const inputRef = useRef(null);
     const { fieldName, defaultValue, registerField, error, clearError } = useField(name);
+    const [value, setValue] = useState(defaultValue === undefined ? "R$ 0,00" : convertCurrency(`${defaultValue}`));
 
     useEffect(() => {
         registerField<number>({
@@ -23,10 +24,10 @@ const CurrencyInput = ({ name, label, ...rest }: CurrencyInputProps) => {
                 return currencyToNumber(ref.value);
             },
             setValue: (ref, value: number) => {
-                ref.value = convertCurrency(value.toString());
+                setValue(convertCurrency(value.toString()));
             },
             clearValue: (ref) => {
-                ref.value = "R$ 0,00";
+                setValue("R$ 0,00");
             },
         });
     }, [fieldName, registerField]);
@@ -40,7 +41,8 @@ const CurrencyInput = ({ name, label, ...rest }: CurrencyInputProps) => {
             <Input
                 id={fieldName}
                 innerRef={inputRef}
-                defaultValue={convertCurrency(`${defaultValue}`)}
+                value={value}
+                onChange={e => setValue(convertCurrency(e.target.value))}
                 invalid={hasValueString(error)}
                 onFocus={clearError}
                 {...rest}

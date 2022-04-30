@@ -1,8 +1,8 @@
-type Fabricante = {
+interface Fabricante {
     cnpj: string;
-    nome: string;
-    endereco: string;
-    contato: string;
+    nomeFabricante: string;
+    enderecoFabricante: string;
+    contatoFabricante: string;
 }
 
 export default Fabricante;

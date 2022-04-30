@@ -1,49 +1,53 @@
+import { get, post } from '../api';
 import { SuccessResponse } from '../defaultEntities';
 import Funcionario from '../entities/funcionario';
 import { getEnumEmployeeStatus } from '../enums/employeeStatus';
 import { getEnumEmployeeType } from '../enums/employeeType';
 
+const ROOT = "funcionarios/";
+
 export const _listEmployee: Funcionario[] = [
     {
         idFuncionario: 1,
-        nome: "Administrador",
+        nomeFuncionario: "Administrador",
         email: "admin@cm.com",
         senha: "147852369",
         setor: "Gestão",
-        statusFuncionario: getEnumEmployeeStatus("enabled"),
-        tipoFuncionario: getEnumEmployeeType("admin")
+        tipoFuncionario: getEnumEmployeeType("admin"),
+        statusFuncionario: getEnumEmployeeStatus("enabled")
     },
     {
         idFuncionario: 2,
-        nome: "Recepcionista",
+        nomeFuncionario: "Recepcionista",
         email: "recep@cm.com",
         senha: "147852369",
         setor: "Recepção",
-        statusFuncionario: getEnumEmployeeStatus("enabled"),
-        tipoFuncionario: getEnumEmployeeType("receptionist")
+        tipoFuncionario: getEnumEmployeeType("receptionist"),
+        statusFuncionario: getEnumEmployeeStatus("enabled")
     },
     {
         idFuncionario: 3,
-        nome: "Médico",
+        nomeFuncionario: "Médico",
         email: "medic@cm.com",
         senha: "147852369",
         setor: "Atendimento",
-        statusFuncionario: getEnumEmployeeStatus("enabled"),
-        tipoFuncionario: getEnumEmployeeType("doctor")
+        tipoFuncionario: getEnumEmployeeType("doctor"),
+        statusFuncionario: getEnumEmployeeStatus("enabled")
     },
     {
         idFuncionario: 4,
-        nome: "Estoquista",
+        nomeFuncionario: "Estoquista",
         email: "estoq@cm.com",
         senha: "147852369",
         setor: "Almoxarifado",
-        statusFuncionario: getEnumEmployeeStatus("enabled"),
-        tipoFuncionario: getEnumEmployeeType("stockist")
+        tipoFuncionario: getEnumEmployeeType("stockist"),
+        statusFuncionario: getEnumEmployeeStatus("enabled")
     }
 ];
 
-export const getEmployeeByIdHttp = async (id: number): Promise<Funcionario | undefined> => {
-    return _listEmployee.find(x => x.idFuncionario === id);
+export const getEmployeeByIdHttp = async (employeeId: number): Promise<Funcionario> => {
+    let { data } = await get<Funcionario>(ROOT + employeeId);
+    return data;
 }
 
 export const listEmployeeByTypeHttp = async (type: number): Promise<Funcionario[]> => {
@@ -53,13 +57,14 @@ export const listEmployeeByTypeHttp = async (type: number): Promise<Funcionario[
         return _listEmployee.filter(x => x.tipoFuncionario === type);
 }
 
-type LoginRequest = {
+interface LoginRequest {
     email: string;
     senha: string;
 }
 
-export const postLoginEmployeeHttp = async (requestData: LoginRequest): Promise<Funcionario | undefined> => {
-    return _listEmployee.find(x => x.email === requestData.email && x.senha === requestData.senha);
+export const postLoginEmployeeHttp = async (requestData: LoginRequest): Promise<Funcionario> => {
+    let { data } = await post<LoginRequest, Funcionario>(ROOT + "login", requestData);
+    return data;
 }
 
 export const postEmployeeHttp = async (requestData: Funcionario): Promise<SuccessResponse> => {

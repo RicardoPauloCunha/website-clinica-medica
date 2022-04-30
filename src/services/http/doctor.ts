@@ -7,7 +7,7 @@ export const _listDoctor: Medico[] = [
     {
         crm: "000000/SP",
         especialidade: _listSpecialty[0],
-        funcionario: _listEmployee[2]
+        ..._listEmployee[2]
     }
 ];
 
@@ -16,7 +16,7 @@ export const getDoctorByIdHttp = async (crm: string): Promise<Medico | undefined
 }
 
 export const getDoctorByEmployeeIdHttp = async (EmployeeId: number): Promise<Medico | undefined> => {
-    return _listDoctor.find(x => x.funcionario?.idFuncionario === EmployeeId);
+    return _listDoctor.find(x => x.idFuncionario === EmployeeId);
 }
 
 export const listDoctorBySpecialtyHttp = async (specialtyId: number): Promise<Medico[] | undefined> => {

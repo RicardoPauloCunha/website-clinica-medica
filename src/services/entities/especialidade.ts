@@ -1,6 +1,6 @@
-type Especialidade = {
+interface Especialidade {
     idEspecialidade: number;
-    nome: string;
+    nomeEspecialidade: string;
 }
 
 export default Especialidade;

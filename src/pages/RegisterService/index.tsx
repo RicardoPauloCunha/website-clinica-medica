@@ -1,40 +1,44 @@
-import { FormHandles, SubmitHandler } from "@unform/core";
 import { useEffect, useRef, useState } from "react";
-import { Button, ModalBody, ModalFooter, ModalHeader, Spinner } from "reactstrap";
+import { FormHandles, SubmitHandler } from "@unform/core";
+import * as Yup from 'yup';
+
+import Especialidade from "../../services/entities/especialidade";
+import { postServiceHttp, _listService } from "../../services/http/service";
+import { listSpecialtyHttp, postSpecialtyHttp, _listSpecialty } from "../../services/http/specialty";
+import { WarningTuple } from "../../util/getHttpErrors";
+import getValidationErrors from "../../util/getValidationErrors";
+
+import { Button, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
+import { DataModal, Form } from "../../styles/components";
 import FieldInput from "../../components/Input";
 import CurrencyInput from "../../components/Input/currency";
 import SelectInput from "../../components/Input/select";
 import Warning from "../../components/Warning";
-import Especialidade from "../../services/entities/especialidade";
-import { listSpecialtyHttp } from "../../services/http/specialty";
-import { DataModal, Form } from "../../styles/components";
-import { WarningTuple } from "../../util/getHttpErrors";
-import * as Yup from 'yup';
-import { postServiceHttp, _listService } from "../../services/http/service";
-import getValidationErrors from "../../util/getValidationErrors";
+import LoadingButton from "../../components/LoadingButton";
 
-type RegisterFormData = {
+type ServiceFormData = {
     name: string;
     price: number;
     description: string;
     specialtyId: number;
 }
 
-type AddFormData = {
-    specialtyName: string
+type SpecialtyFormData = {
+    name: string
 }
 
-type ModalString = "add" | "";
+type ModalString = "specialty" | "";
 
 const RegisterService = () => {
-    const registerFormRef = useRef<FormHandles>(null);
-    const addFormRef = useRef<FormHandles>(null);
+    const serviceFormRef = useRef<FormHandles>(null);
+    const specialtyFormRef = useRef<FormHandles>(null);
 
-    const [isLoading, setIsLoading] = useState<"register" | "">("");
+    const [isLoading, setIsLoading] = useState<"service" | "specialty" | "">("");
     const [warning, setWarning] = useState<WarningTuple>(["", ""]);
     const [modal, setModal] = useState<ModalString>("");
 
     const _itemService = _listService[0];
+    const _itemSpecialty = _listSpecialty[0];
 
     const [specialties, setSpecialties] = useState<Especialidade[]>([]);
 
@@ -43,21 +47,22 @@ const RegisterService = () => {
         // eslint-disable-next-line
     }, []);
 
-    const toggleModal = (modalName?: ModalString) => {
-        setModal(modalName !== undefined ? modalName : "");
-    }
-
     const getSpecialties = () => {
         listSpecialtyHttp().then(response => {
             setSpecialties([...response]);
         });
     }
 
-    const submitRegisterForm: SubmitHandler<RegisterFormData> = async (data, { reset }) => {
+    const toggleModal = (modalName?: ModalString) => {
+        setModal(modalName !== undefined ? modalName : "");
+        setWarning(["", ""]);
+    }
+
+    const submitServiceForm: SubmitHandler<ServiceFormData> = async (data, { reset }) => {
         try {
-            setIsLoading("register");
+            setIsLoading("service");
             setWarning(["", ""]);
-            registerFormRef.current?.setErrors({});
+            serviceFormRef.current?.setErrors({});
 
             const shema = Yup.object().shape({
                 name: Yup.string().trim()
@@ -74,47 +79,34 @@ const RegisterService = () => {
                 abortEarly: false
             });
 
-            data.specialtyId = Number(data.specialtyId);
-            let specialty = specialties.find(x => x.idEspecialidade === data.specialtyId);
-            if (specialty === undefined) {
-                setWarning(["warning", "Especialidade não encontrada."]);
-                return;
-            }
-
-            specialty.idEspecialidade = specialty.idEspecialidade > 0 ? specialty.idEspecialidade : 0;
-
-            setTimeout(async () => {
-                await postServiceHttp({
-                    idServico: 0,
-                    nome: data.name,
-                    valor: data.price,
-                    descricao: data.description,
-                    especialidade: specialty
-                }).then(() => {
-                    setWarning(["success", "Serviço criado com sucesso."]);
-                    reset();
-
-                    if (specialty?.idEspecialidade === 0)
-                        getSpecialties();
-                }).catch(() => {
-                    setWarning(["danger", "Não foi possível criar o serviço."]);
-                }).finally(() => { setIsLoading(""); });
-            }, 1000);
+            await postServiceHttp({
+                nomeServico: data.name,
+                valor: data.price,
+                descricaoServico: data.description,
+                especialidade: { idEspecialidade: Number(data.specialtyId) }
+            }).then(() => {
+                setWarning(["success", "Serviço cadastrado com sucesso."]);
+                reset();
+            }).catch(() => {
+                setWarning(["danger", "Não foi possível cadastrar o serviço."]);
+            }).finally(() => { setIsLoading(""); });
         }
         catch (err) {
             if (err instanceof Yup.ValidationError)
-                registerFormRef.current?.setErrors(getValidationErrors(err));
-            setWarning(["warning", "Campos inválidos."]);
+                serviceFormRef.current?.setErrors(getValidationErrors(err));
+            setWarning(["warning", "Campos do serviço inválidos."]);
             setIsLoading("");
         }
     }
 
-    const submitAddForm: SubmitHandler<AddFormData> = async (data, { reset }) => {
+    const submitSpecialtyForm: SubmitHandler<SpecialtyFormData> = async (data, { reset }) => {
         try {
-            addFormRef.current?.setErrors({});
+            setIsLoading("specialty");
+            setWarning(["", ""]);
+            specialtyFormRef.current?.setErrors({});
 
             const shema = Yup.object().shape({
-                specialtyName: Yup.string().trim()
+                name: Yup.string().trim()
                     .required("Coloque o nome da especialidade."),
             });
 
@@ -122,24 +114,26 @@ const RegisterService = () => {
                 abortEarly: false
             });
 
-            let specialtyId = (specialties.length + 1) * -1;
+            postSpecialtyHttp({
+                nomeEspecialidade: data.name
+            }).then(response => {
+                toggleModal();
+                setWarning(["success", "Especialidade adicionada e selecionada com sucesso."]);
+                setSpecialties([...specialties, response]);
+                reset();
 
-            setSpecialties([...specialties, {
-                idEspecialidade: specialtyId,
-                nome: data.specialtyName
-            }]);
-
-            setTimeout(() => {
-                registerFormRef.current?.setFieldValue("specialtyId", specialtyId.toString());
-            }, 100);
-
-            reset();
-            setWarning(["success", "Especialidade adicionada e selecionada com sucesso."]);
-            toggleModal();
+                setTimeout(() => {
+                    serviceFormRef.current?.setFieldValue("specialtyId", response.idEspecialidade.toString());
+                }, 100);
+            }).catch(() => {
+                setWarning(["danger", "Não foi possível cadastrar o serviço."]);
+            }).finally(() => { setIsLoading(""); });
         }
         catch (err) {
             if (err instanceof Yup.ValidationError)
-                addFormRef.current?.setErrors(getValidationErrors(err));
+                specialtyFormRef.current?.setErrors(getValidationErrors(err));
+            setWarning(["warning", "Campos da especialidade inválidos."]);
+            setIsLoading("");
         }
     }
 
@@ -148,13 +142,13 @@ const RegisterService = () => {
             <h1>Cadastro de serviço</h1>
 
             <Form
-                ref={registerFormRef}
-                onSubmit={submitRegisterForm}
+                ref={serviceFormRef}
+                onSubmit={submitServiceForm}
                 className="form-data"
                 initialData={{
-                    name: _itemService.nome,
+                    name: _itemService.nomeServico,
                     price: _itemService.valor.toFixed(2),
-                    description: _itemService.descricao
+                    description: _itemService.descricaoServico
                 }}
             >
                 <FieldInput
@@ -181,33 +175,31 @@ const RegisterService = () => {
                     placeholder='Selecione a especialidade'
                     options={specialties.map(x => ({
                         value: x.idEspecialidade.toString(),
-                        label: x.nome
+                        label: x.nomeEspecialidade
                     }))}
                 />
 
-                <Button
+                <LoadingButton
+                    text="Cadastrar"
+                    isLoading={isLoading === "service"}
                     type='submit'
-                >
-                    {isLoading === "register"
-                        ? <Spinner size="sm" />
-                        : "Cadastrar"
-                    }
-                </Button>
+                />
 
-                <Warning value={warning} />
+                {modal === "" && <Warning value={warning} />}
             </Form>
 
             <h2>Adicionar especialidade</h2>
             <p>Você pode adicionar uma nova especialidade caso não tenha encontrado a opção desejada.</p>
+
             <Button
-                onClick={() => toggleModal("add")}
+                onClick={() => toggleModal("specialty")}
                 outline
             >
                 Adicionar especialidade
             </Button>
 
             <DataModal
-                isOpen={modal === "add"}
+                isOpen={modal === "specialty"}
                 toggle={toggleModal}
                 centered
             >
@@ -219,12 +211,15 @@ const RegisterService = () => {
 
                 <ModalBody>
                     <Form
-                        ref={addFormRef}
-                        onSubmit={submitAddForm}
+                        ref={specialtyFormRef}
+                        onSubmit={submitSpecialtyForm}
                         className="form-modal"
+                        initialData={{
+                            name: _itemSpecialty.nomeEspecialidade
+                        }}
                     >
                         <FieldInput
-                            name='specialtyName'
+                            name='name'
                             label='Nome da especialidade'
                             placeholder='Coloque o nome da especialidade'
                         />
@@ -232,12 +227,13 @@ const RegisterService = () => {
                 </ModalBody>
 
                 <ModalFooter>
-                    <Button
-                        type='submit'
-                        onClick={() => addFormRef.current?.submitForm()}
-                    >
-                        Adicionar
-                    </Button>
+                    {modal === "" && <Warning value={warning} />}
+                    <LoadingButton
+                        text="Adicionar"
+                        isLoading={isLoading === "specialty"}
+                        type='button'
+                        onClick={() => specialtyFormRef.current?.submitForm()}
+                    />
 
                     <Button
                         onClick={() => toggleModal()}

@@ -14,7 +14,7 @@ import RegisterEmployee from './pages/RegisterEmployee';
 import Employees from './pages/Employees';
 import RegisterMaterial from './pages/RegisterMaterial';
 import Materials from './pages/Materials';
-import MaterialRecords from './pages/MaterialRecords';
+import MaterialRecords from './pages/Records';
 
 type RequireAuthProps = {
     employeeType: EmployeeType;

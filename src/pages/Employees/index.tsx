@@ -42,16 +42,14 @@ const Employees = () => {
         setIsLoading("get");
         setWarning(["", ""]);
 
-        setTimeout(() => {
-            listEmployeeByTypeHttp(employeeType).then(response => {
-                setEmployees([...response]);
+        listEmployeeByTypeHttp(employeeType).then(response => {
+            setEmployees([...response]);
 
-                if (response.length === 0)
-                    setWarning(["warning", "Nenhum funcionário foi encontrado."]);
+            if (response.length === 0)
+                setWarning(["warning", "Nenhum funcionário foi encontrado."]);
 
-                setIsLoading("");
-            });
-        }, 1000);
+            setIsLoading("");
+        });
     }
 
     const sendChangeStatus = () => {
@@ -66,12 +64,10 @@ const Employees = () => {
         else
             employees[employeeIndex].statusFuncionario = getEnumEmployeeStatus("enabled");
 
-        setTimeout(() => {
-            putEmployeeHttp(employees[employeeIndex]).then(() => {
-                setIsLoading("");
-                toggleModal();
-            });
-        }, 1000);
+        putEmployeeHttp(employees[employeeIndex]).then(() => {
+            setIsLoading("");
+            toggleModal();
+        });
     }
 
     const handlerChangeEmployeeType = (optionValue: string) => {
@@ -123,7 +119,7 @@ const Employees = () => {
                 return (
                     <DataCard
                         key={x.idFuncionario}
-                        title={x.nome}
+                        title={x.nomeFuncionario}
                         subtitle={x.email}
                     >
                         <TextGroupGrid>
@@ -175,7 +171,7 @@ const Employees = () => {
                 </ModalHeader>
 
                 {employees[employeeIndex] && <ModalBody>
-                    Tem certeza que deseja {employeeIsEnabled ? "desabilitar" : "habilitar"} o funcionário <b>{employees[employeeIndex].nome}</b>?
+                    Tem certeza que deseja {employeeIsEnabled ? "desabilitar" : "habilitar"} o funcionário <b>{employees[employeeIndex].nomeFuncionario}</b>?
                 </ModalBody>}
 
                 <ModalFooter>

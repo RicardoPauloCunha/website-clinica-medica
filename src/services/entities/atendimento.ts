@@ -1,6 +1,6 @@
 import Agendamento from "./agendamento";
 
-type Atendimento = {
+interface Atendimento {
     idAtendimento: number;
     data: string;
     observacoes: string;

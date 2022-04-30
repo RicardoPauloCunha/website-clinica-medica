@@ -1,48 +1,61 @@
+import { get, post } from "../api";
 import Especialidade from "../entities/especialidade";
+
+const ROOT = "especialidades/";
 
 export const _listSpecialty: Especialidade[] = [
     {
         idEspecialidade: 1,
-        nome: "Clínica Médica"
+        nomeEspecialidade: "Clínica Médica"
     },
     {
         idEspecialidade: 2,
-        nome: "Cirurgia Geral"
+        nomeEspecialidade: "Cirurgia Geral"
     },
     {
         idEspecialidade: 3,
-        nome: "Pediatria"
+        nomeEspecialidade: "Pediatria"
     },
     {
         idEspecialidade: 4,
-        nome: "Ginecologia"
+        nomeEspecialidade: "Ginecologia"
     },
     {
         idEspecialidade: 5,
-        nome: "Traumatologia"
+        nomeEspecialidade: "Traumatologia"
     },
     {
         idEspecialidade: 6,
-        nome: "Oftalmologia"
+        nomeEspecialidade: "Oftalmologia"
     },
     {
         idEspecialidade: 7,
-        nome: "Cardiologia"
+        nomeEspecialidade: "Cardiologia"
     },
     {
         idEspecialidade: 8,
-        nome: "Dermatologia"
+        nomeEspecialidade: "Dermatologia"
     },
     {
         idEspecialidade: 9,
-        nome: "Psiquiatria"
+        nomeEspecialidade: "Psiquiatria"
     },
     {
         idEspecialidade: 10,
-        nome: "Infectologia"
+        nomeEspecialidade: "Infectologia"
     }
 ];
 
 export const listSpecialtyHttp = async (): Promise<Especialidade[]> => {
-    return _listSpecialty;
+    let { data } = await get<Especialidade[]>(ROOT);
+    return data;
+}
+
+interface postSpecialtyRequest {
+    nomeEspecialidade: string;
+}
+
+export const postSpecialtyHttp = async (requestData: postSpecialtyRequest): Promise<Especialidade> => {
+    let { data } = await post<postSpecialtyRequest, Especialidade>(ROOT, requestData);
+    return data;
 }

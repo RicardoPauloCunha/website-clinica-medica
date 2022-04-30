@@ -1,6 +1,6 @@
 import Agendamento from "./agendamento";
 
-type Pagamento = {
+interface Pagamento {
     idPagamento: number;
     data: string;
     valor: number;
@@ -8,7 +8,6 @@ type Pagamento = {
     formaDePagamento: number;
     status: number;
     agendamento?: Agendamento;
-
 }
 
 export default Pagamento;

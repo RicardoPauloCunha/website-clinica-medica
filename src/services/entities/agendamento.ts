@@ -1,15 +1,16 @@
+import Funcionario from "./funcionario";
 import Medico from "./medico";
 import Paciente from "./paciente";
 import Servico from "./servico";
 
-type Agendamento = {
+interface Agendamento {
     idAgendamento: number;
-    idRecepcionista: number;
     data: string;
     dataAgendada: string;
     status: number;
     servico?: Servico;
     medico?: Medico;
+    funcionario?: Funcionario;
     paciente?: Paciente;
 }
 

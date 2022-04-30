@@ -1,27 +1,30 @@
-import { FormHandles, SubmitHandler } from "@unform/core";
 import { useEffect, useRef, useState } from "react";
+import { FormHandles, SubmitHandler } from "@unform/core";
+import * as Yup from 'yup';
+import { useParams } from "react-router-dom";
+
+import { getEnumMaterialStatus } from "../../services/enums/materialStatus";
 import CategoriaMaterial from "../../services/entities/categoriaMaterial";
 import Fabricante from "../../services/entities/fabricante";
-import { listManufacturerHttp, _listManufacturer } from "../../services/http/manufacturer";
+import Material from "../../services/entities/material";
+import { listManufacturerHttp, postManufacturerHttp, _listManufacturer } from "../../services/http/manufacturer";
 import { getMaterialByIdHttp, postMaterialHttp, putMaterialHttp, _listMaterial } from "../../services/http/material";
-import { listMaterialCategoryHttp } from "../../services/http/materialCategory";
+import { listCategoryHttp, postCategoryHttp, _listCategory } from "../../services/http/category";
 import { WarningTuple } from "../../util/getHttpErrors";
-import * as Yup from 'yup';
 import getValidationErrors from "../../util/getValidationErrors";
+import { concatenateAddressData, splitAddressData } from "../../util/stringFormat";
+
+import { Alert, Button, ModalBody, ModalFooter, ModalHeader, Spinner } from "reactstrap";
 import { DataModal, Form, TextGroupGrid } from "../../styles/components";
 import FieldInput from "../../components/Input";
 import SelectInput from "../../components/Input/select";
-import { Alert, Button, ModalBody, ModalFooter, ModalHeader, Spinner } from "reactstrap";
-import Warning from "../../components/Warning";
 import MaskInput from "../../components/Input/mask";
-import { concatenateAddressData, splitAddressData } from "../../util/stringFormat";
+import Warning from "../../components/Warning";
 import DataCard from "../../components/DataCard";
 import DataText from "../../components/DataText";
-import { getEnumMaterialStatus } from "../../services/enums/materialStatus";
-import { useParams } from "react-router-dom";
-import Material from "../../services/entities/material";
+import LoadingButton from "../../components/LoadingButton";
 
-type RegisterFormData = {
+type MaterialFormData = {
     name: string;
     description: string;
     unitMeasurement: string;
@@ -29,11 +32,11 @@ type RegisterFormData = {
     manufacturerCnpj: string;
 }
 
-type AddCategoryFormData = {
-    categoryName: string;
+type CategoryFormData = {
+    name: string;
 }
 
-type AddManufacturerFormData = {
+type ManufacturerFormData = {
     cnpj: string;
     name: string;
     contact: string;
@@ -45,21 +48,22 @@ type AddManufacturerFormData = {
     state: string;
 }
 
-type ModalString = "add-category" | "add-manufacturer" | "";
+type ModalString = "category" | "manufacturer" | "";
 
 const RegisterMaterial = () => {
     const routeParams = useParams();
-    const registerFormRef = useRef<FormHandles>(null);
-    const addCategoryFormRef = useRef<FormHandles>(null);
-    const addManufacturerFormRef = useRef<FormHandles>(null);
+    const materialFormRef = useRef<FormHandles>(null);
+    const categoryFormRef = useRef<FormHandles>(null);
+    const manufacturerFormRef = useRef<FormHandles>(null);
 
-    const [isLoading, setIsLoading] = useState<"register" | "get" | "define" | "">("");
+    const [isLoading, setIsLoading] = useState<"material" | "category" | "manufacturer" | "get" | "">("");
     const [warning, setWarning] = useState<WarningTuple>(["", ""]);
     const [modal, setModal] = useState<ModalString>("");
 
     const _itemMaterial = _listMaterial[0];
+    const _itemCategory = _listCategory[0];
     const _itemManufacturer = _listManufacturer[0];
-    const _itemAddress = splitAddressData(_itemManufacturer.endereco);
+    const _itemAddress = splitAddressData(_itemManufacturer.enderecoFabricante);
 
     const [categories, setCategories] = useState<CategoriaMaterial[]>([]);
     const [manufacturers, setManufacturers] = useState<Fabricante[]>([]);
@@ -81,13 +85,28 @@ const RegisterMaterial = () => {
         // eslint-disable-next-line
     }, [manufacturers, editedMaterial]);
 
-    const toggleModal = (modalName?: ModalString) => {
-        setModal(modalName !== undefined ? modalName : "");
-        setWarning(["", ""]);
+    const getMaterial = () => {
+        let id = Number(routeParams.materialId);
+        if (isNaN(id))
+            return;
+
+        setIsLoading("get");
+        getMaterialByIdHttp(id).then(response => {
+            materialFormRef.current?.setData({
+                name: response.nomeMaterial,
+                description: response.descricao,
+                unitMeasurement: response.unidadeDeMedida,
+                categoryId: response.categoriaMaterial?.idCategoria.toString(),
+                manufacturerCnpj: response.fabricante?.cnpj
+            });
+
+            setEditedMaterial(response);
+            setIsLoading("");
+        });
     }
 
     const getCategories = async () => {
-        listMaterialCategoryHttp().then(response => {
+        listCategoryHttp().then(response => {
             setCategories([...response]);
         });
     }
@@ -98,37 +117,16 @@ const RegisterMaterial = () => {
         });
     }
 
-    const getMaterial = () => {
-        let id = Number(routeParams.materialId);
-
-        if (isNaN(id))
-            return;
-
-        setIsLoading("get");
-        setTimeout(async () => {
-            getMaterialByIdHttp(id).then(response => {
-                if (response === undefined)
-                    return;
-
-                registerFormRef.current?.setData({
-                    name: response.nome,
-                    description: response.descricao,
-                    unitMeasurement: response.unidadeDeMedida,
-                    categoryId: response.categoriaMaterial?.idCategoriaMaterial.toString(),
-                    manufacturerCnpj: response.fabricante?.cnpj
-                });
-
-                setEditedMaterial(response);
-                setIsLoading("");
-            });
-        }, 1000);
+    const toggleModal = (modalName?: ModalString) => {
+        setModal(modalName !== undefined ? modalName : "");
+        setWarning(["", ""]);
     }
 
-    const submitRegisterForm: SubmitHandler<RegisterFormData> = async (data, { reset }) => {
+    const submitMaterialForm: SubmitHandler<MaterialFormData> = async (data, { reset }) => {
         try {
-            setIsLoading("register");
+            setIsLoading("material");
             setWarning(["", ""]);
-            registerFormRef.current?.setErrors({});
+            materialFormRef.current?.setErrors({});
 
             const shema = Yup.object().shape({
                 name: Yup.string().trim()
@@ -147,110 +145,92 @@ const RegisterMaterial = () => {
                 abortEarly: false
             });
 
-            data.categoryId = Number(data.categoryId);
-            let category = categories.find(x => x.idCategoriaMaterial === data.categoryId);
-            if (category === undefined) {
-                setWarning(["warning", "Categoria não encontrada."]);
-                return;
+            let material = {
+                nomeMaterial: data.name,
+                unidadeDeMedida: data.unitMeasurement,
+                quantidade: 0,
+                descricao: data.description,
+                categoriaMaterial: {
+                    idCategoria: Number(data.categoryId)
+                },
+                fabricante: {
+                    cnpj: data.manufacturerCnpj
+                },
+                statusMaterial: getEnumMaterialStatus("enabled"),
             }
-
-            let manufacturer = manufacturers.find(x => x.cnpj === data.manufacturerCnpj);
-            if (manufacturer === undefined) {
-                setWarning(["warning", "Fabricante não encontrado."]);
-                return;
-            }
-
-            category.idCategoriaMaterial = category.idCategoriaMaterial > 0 ? category.idCategoriaMaterial : 0;
 
             if (editedMaterial === undefined) {
-                setTimeout(async () => {
-                    postMaterialHttp({
-                        idMaterial: 0,
-                        nome: data.name,
-                        descricao: data.description,
-                        unidadeDeMedida: data.unitMeasurement,
-                        quantidade: 0,
-                        status: getEnumMaterialStatus("enabled"),
-                        categoriaMaterial: category,
-                        fabricante: manufacturer
-                    }).then(() => {
-                        setWarning(["success", "Material criado com sucesso."]);
-                        reset();
-
-                        if (category?.idCategoriaMaterial === 0) {
-                            getCategories().then(() => {
-                                data.categoryId = Number(data.categoryId) * -1;
-                                registerFormRef.current?.setFieldValue("categoryId", data.categoryId.toString());
-                            });
-                        }
-
-                        getManufacturers();
-                    }).catch(() => {
-                        setWarning(["danger", "Não foi possível criar o material."]);
-                    }).finally(() => { setIsLoading(""); });
-                }, 1000);
+                postMaterialHttp(material).then(() => {
+                    setWarning(["success", "Material cadastrado com sucesso."]);
+                    reset();
+                    setManufacturerIndex(-1);
+                }).catch(() => {
+                    setWarning(["danger", "Não foi possível cadastrar o material."]);
+                }).finally(() => { setIsLoading(""); });
 
                 return;
             }
 
-            editedMaterial.nome = data.name;
-            editedMaterial.descricao = data.description;
-            editedMaterial.unidadeDeMedida = data.unitMeasurement;
-
-            setTimeout(async () => {
-                putMaterialHttp(editedMaterial).then(() => {
-                    setWarning(["success", "Material editado com sucesso."]);
-                }).catch(() => {
-                    setWarning(["danger", "Não foi possível editar o material."]);
-                }).finally(() => { setIsLoading(""); });
-            }, 1000);
+            putMaterialHttp({
+                idMaterial: editedMaterial.idMaterial,
+                ...material
+            }).then(() => {
+                setWarning(["success", "Material editado com sucesso."]);
+            }).catch(() => {
+                setWarning(["danger", "Não foi possível editar o material."]);
+            }).finally(() => { setIsLoading(""); });
         }
         catch (err) {
             if (err instanceof Yup.ValidationError)
-                registerFormRef.current?.setErrors(getValidationErrors(err));
-            setWarning(["warning", "Campos inválidos."]);
+                materialFormRef.current?.setErrors(getValidationErrors(err));
+            setWarning(["warning", "Campos do material inválidos."]);
             setIsLoading("");
         }
     }
 
-    const submitAddCategoryForm: SubmitHandler<AddCategoryFormData> = async (data, { reset }) => {
+    const submitCategoryForm: SubmitHandler<CategoryFormData> = async (data, { reset }) => {
         try {
-            addCategoryFormRef.current?.setErrors({});
+            setIsLoading("category");
+            setWarning(["", ""]);
+            categoryFormRef.current?.setErrors({});
 
             const shema = Yup.object().shape({
-                categoryName: Yup.string().trim()
-                    .required("Coloque o nome da categoria de material.")
+                name: Yup.string().trim()
+                    .required("Coloque o nome da categoria.")
             });
 
             await shema.validate(data, {
                 abortEarly: false
             });
 
-            let categoryId = (categories.length + 1) * -1;
+            postCategoryHttp({
+                nomeCategoria: data.name
+            }).then(response => {
+                toggleModal();
+                setWarning(["success", "Categoria adicionada e selecionada com sucesso."]);
+                setCategories([...categories, response]);
+                reset();
 
-            setCategories([...categories, {
-                idCategoriaMaterial: categoryId,
-                nome: data.categoryName
-            }]);
-
-            setTimeout(() => {
-                registerFormRef.current?.setFieldValue("categoryId", categoryId.toString());
-            }, 100);
-
-            reset();
-            toggleModal();
-            setWarning(["success", "Categoria adicionada e selecionada com sucesso."]);
+                setTimeout(() => {
+                    materialFormRef.current?.setFieldValue("categoryId", response.idCategoria.toString());
+                }, 100);
+            }).catch(() => {
+                setWarning(["danger", "Não foi possível cadastrar a categoria."]);
+            }).finally(() => { setIsLoading(""); });
         }
         catch (err) {
             if (err instanceof Yup.ValidationError)
-                addCategoryFormRef.current?.setErrors(getValidationErrors(err));
+                categoryFormRef.current?.setErrors(getValidationErrors(err));
+            setWarning(["warning", "Campos da categoria inválidos."]);
+            setIsLoading("");
         }
     }
 
-    const submitAddManufacturerForm: SubmitHandler<AddManufacturerFormData> = async (data, { reset }) => {
+    const submitManufacturerForm: SubmitHandler<ManufacturerFormData> = async (data, { reset }) => {
         try {
-            addManufacturerFormRef.current?.setErrors({});
+            setIsLoading("manufacturer");
             setWarning(["", ""]);
+            manufacturerFormRef.current?.setErrors({});
 
             const shema = Yup.object().shape({
                 cnpj: Yup.string().trim()
@@ -277,36 +257,35 @@ const RegisterMaterial = () => {
                 abortEarly: false
             });
 
-            let newIndex = manufacturers.length;
-
-            setManufacturers([...manufacturers, {
+            postManufacturerHttp({
                 cnpj: data.cnpj,
-                nome: data.name,
-                endereco: concatenateAddressData({ ...data }),
-                contato: data.contact
-            }]);
+                nomeFabricante: data.name,
+                enderecoFabricante: concatenateAddressData({ ...data }),
+                contatoFabricante: data.contact
+            }).then(response => {
+                toggleModal();
+                setWarning(["success", "Fabricante adicionado e selecionado com sucesso."]);
+                setManufacturerIndex(manufacturers.length);
+                setManufacturers([...manufacturers, response]);
+                reset();
 
-            setTimeout(() => {
-                registerFormRef.current?.setFieldValue("manufacturerCnpj", data.cnpj);
-            }, 100);
-
-            reset();
-            toggleModal();
-            setWarning(["success", "Fabricante adicionado e selecionado com sucesso."]);
-            setManufacturerIndex(newIndex);
+                setTimeout(() => {
+                    materialFormRef.current?.setFieldValue("manufacturerCnpj", response.cnpj);
+                }, 100);
+            }).catch(() => {
+                setWarning(["danger", "Não foi possível cadastrar o fabricante."]);
+            }).finally(() => { setIsLoading(""); });
         }
         catch (err) {
             if (err instanceof Yup.ValidationError)
-                addManufacturerFormRef.current?.setErrors(getValidationErrors(err));
+                manufacturerFormRef.current?.setErrors(getValidationErrors(err));
             setWarning(["warning", "Campos do fabricante inválidos."]);
+            setIsLoading("");
         }
     }
 
     const handlerChangeManufacturer = (optionValue: string) => {
         let index = manufacturers.findIndex(x => x.cnpj === optionValue);
-        if (!manufacturers[index])
-            return;
-
         setManufacturerIndex(index);
     }
 
@@ -328,11 +307,11 @@ const RegisterMaterial = () => {
             }
 
             <Form
-                ref={registerFormRef}
-                onSubmit={submitRegisterForm}
+                ref={materialFormRef}
+                onSubmit={submitMaterialForm}
                 className="form-data"
                 initialData={{
-                    name: _itemMaterial.nome,
+                    name: _itemMaterial.nomeMaterial,
                     description: _itemMaterial.descricao,
                     unitMeasurement: _itemMaterial.unidadeDeMedida
                 }}
@@ -361,9 +340,10 @@ const RegisterMaterial = () => {
                     label='Categoria'
                     placeholder='Selecione a categoria'
                     options={categories.map(x => ({
-                        value: x.idCategoriaMaterial.toString(),
-                        label: x.nome
+                        value: x.idCategoria?.toString() as string,
+                        label: x.nomeCategoria
                     }))}
+                    disabled={editedMaterial !== undefined}
                 />
 
                 <SelectInput
@@ -372,19 +352,17 @@ const RegisterMaterial = () => {
                     placeholder='Selecione o fabricante'
                     options={manufacturers.map(x => ({
                         value: x.cnpj,
-                        label: x.nome
+                        label: x.nomeFabricante
                     }))}
                     handlerChange={handlerChangeManufacturer}
+                    disabled={editedMaterial !== undefined}
                 />
 
-                <Button
-                    type='submit'
-                >
-                    {isLoading === "register"
-                        ? <Spinner size="sm" />
-                        : editedMaterial ? "Editar" : "Cadastrar"
-                    }
-                </Button>
+                <LoadingButton
+                    text={editedMaterial ? "Editar" : "Cadastrar"}
+                    isLoading={isLoading === "material"}
+                    type="submit"
+                />
 
                 {modal === "" && <Warning value={warning} />}
             </Form>
@@ -392,80 +370,113 @@ const RegisterMaterial = () => {
             <h2>Dados do fabricante</h2>
 
             {manufacturers[manufacturerIndex]
-                ? <>
-                    <DataCard
-                        title={manufacturers[manufacturerIndex].nome}
-                        subtitle={manufacturers[manufacturerIndex].cnpj}
-                    >
-                        <TextGroupGrid>
-                            <DataText
-                                label="Contato"
-                                value={manufacturers[manufacturerIndex].contato}
-                            />
+                ? <DataCard
+                    title={manufacturers[manufacturerIndex].nomeFabricante}
+                    subtitle={manufacturers[manufacturerIndex].cnpj}
+                >
+                    <TextGroupGrid>
+                        <DataText
+                            label="Contato"
+                            value={manufacturers[manufacturerIndex].contatoFabricante}
+                        />
 
-                            <DataText
-                                label="Endereço"
-                                value={manufacturers[manufacturerIndex].endereco}
-                            />
-                        </TextGroupGrid>
-                    </DataCard>
-                </>
+                        <DataText
+                            label="Endereço"
+                            value={manufacturers[manufacturerIndex].enderecoFabricante}
+                        />
+                    </TextGroupGrid>
+                </DataCard>
                 : <Alert color="warning">
                     Nenhum fabricante foi selecionado
                 </Alert>
             }
 
-            <h2>Adicionar categoria</h2>
-            <p>Você pode adicionar uma nova categoria de material caso não tenha encontrado a opção desejada.</p>
-            <Button
-                onClick={() => toggleModal("add-category")}
-                outline
-            >
-                Adicionar categoria
-            </Button>
+            {routeParams.materialId === undefined && <>
+                <h2>Adicionar categoria</h2>
+                <p>Você pode adicionar uma nova categoria de material caso não tenha encontrado a opção desejada.</p>
 
-            <h2>Adicionar fabricante</h2>
-            <p>Você pode adicionar uma novo fabricante caso não tenha encontrado a opção desejada.</p>
-            <Button
-                onClick={() => toggleModal("add-manufacturer")}
-                outline
-            >
-                Adicionar fabricante
-            </Button>
-
-            <DataModal
-                isOpen={modal === "add-category" || modal === "add-manufacturer"}
-                toggle={toggleModal}
-                centered
-                size={modal === "add-category" ? "" : "lg"}
-            >
-                <ModalHeader
-                    toggle={() => toggleModal()}
+                <Button
+                    onClick={() => toggleModal("category")}
+                    outline
                 >
-                    {modal === "add-category" ? "Adicionar categoria" : "Adicionar fabricante"}
-                </ModalHeader>
+                    Adicionar categoria
+                </Button>
 
-                <ModalBody>
-                    {modal === "add-category"
-                        ? <Form
-                            ref={addCategoryFormRef}
-                            onSubmit={submitAddCategoryForm}
+                <DataModal
+                    isOpen={modal === "category"}
+                    toggle={toggleModal}
+                    centered
+                >
+                    <ModalHeader
+                        toggle={() => toggleModal()}
+                    >
+                        Adicionar categoria
+                    </ModalHeader>
+
+                    <ModalBody>
+                        <Form
+                            ref={categoryFormRef}
+                            onSubmit={submitCategoryForm}
                             className="form-modal"
+                            initialData={{
+                                name: _itemCategory.nomeCategoria
+                            }}
                         >
                             <FieldInput
-                                name='categoryName'
+                                name='name'
                                 label='Nome da categoria'
                                 placeholder='Coloque o nome da categoria'
                             />
                         </Form>
-                        : <Form
-                            ref={addManufacturerFormRef}
-                            onSubmit={submitAddManufacturerForm}
+                    </ModalBody>
+
+                    <ModalFooter>
+                        <LoadingButton
+                            text="Adicionar categoria"
+                            isLoading={isLoading === "category"}
+                            type='button'
+                            onClick={() => categoryFormRef.current?.submitForm()}
+                        />
+
+                        <Button
+                            onClick={() => toggleModal()}
+                        >
+                            Cancelar
+                        </Button>
+                    </ModalFooter>
+                </DataModal>
+
+                <h2>Adicionar fabricante</h2>
+                <p>Você pode adicionar uma novo fabricante caso não tenha encontrado a opção desejada.</p>
+
+                <Button
+                    onClick={() => toggleModal("manufacturer")}
+                    outline
+                >
+                    Adicionar fabricante
+                </Button>
+
+                <DataModal
+                    isOpen={modal === "manufacturer"}
+                    toggle={toggleModal}
+                    centered
+                    size="lg"
+                >
+                    <ModalHeader
+                        toggle={() => toggleModal()}
+                    >
+                        Adicionar fabricante
+                    </ModalHeader>
+
+                    <ModalBody>
+                        <Form
+                            ref={manufacturerFormRef}
+                            onSubmit={submitManufacturerForm}
                             className="form-modal"
                             initialData={{
                                 cnpj: _itemManufacturer.cnpj,
-                                name: _itemManufacturer.nome,
-                                contact: _itemManufacturer.contato,
+                                name: _itemManufacturer.nomeFabricante,
+                                contact: _itemManufacturer.contatoFabricante,
                                 cep: _itemAddress.cep,
                                 street: _itemAddress.street,
                                 number: _itemAddress.number,
@@ -536,33 +547,26 @@ const RegisterMaterial = () => {
                                 placeholder='SP'
                             />
 
-                            {modal === "add-manufacturer" && <Warning value={warning} />}
-                        </Form>}
-                </ModalBody>
+                            {modal === "manufacturer" && <Warning value={warning} />}
+                        </Form>
+                    </ModalBody>
 
-                <ModalFooter>
-                    {modal === "add-category"
-                        ? <Button
-                            type='submit'
-                            onClick={() => addCategoryFormRef.current?.submitForm()}
-                        >
-                            Adicionar categoria
-                        </Button>
-                        : <Button
-                            type='submit'
-                            onClick={() => addManufacturerFormRef.current?.submitForm()}
-                        >
-                            Adicionar fabricante
-                        </Button>
-                    }
+                    <ModalFooter>
+                        <LoadingButton
+                            text="Adicionar fabricante"
+                            isLoading={isLoading === "manufacturer"}
+                            type='button'
+                            onClick={() => manufacturerFormRef.current?.submitForm()}
+                        />
 
-                    <Button
-                        onClick={() => toggleModal()}
-                    >
-                        Cancelar
-                    </Button>
-                </ModalFooter>
-            </DataModal>
+                        <Button
+                            onClick={() => toggleModal()}
+                        >
+                            Cancelar
+                        </Button>
+                    </ModalFooter>
+                </DataModal>
+            </>}
         </>
     );
 }

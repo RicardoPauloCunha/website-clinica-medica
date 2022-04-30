@@ -1,24 +1,26 @@
-import { SuccessResponse } from "../defaultEntities";
+import { post } from "../api";
 import Servico from "../entities/servico";
+
+const ROOT = "servicos/";
 
 export const _listService: Servico[] = [
     {
         idServico: 1,
-        nome: "Consulta especializada",
+        nomeServico: "Consulta especializada",
         valor: 100.00,
-        descricao: "Consultas especializadas por área, como cardiologia, neurologia, pediatria, ortopedia, ginecologia e outros"
+        descricaoServico: "Consultas especializadas por área, como cardiologia, neurologia, pediatria, ortopedia, ginecologia e outros"
     },
     {
         idServico: 2,
-        nome: "Exame básico",
+        nomeServico: "Exame básico",
         valor: 110.00,
-        descricao: "Exames realizados internamente, permitindo que o paciente tenha mais facilidade e agilidade na realização das solicitações médicas."
+        descricaoServico: "Exames realizados internamente, permitindo que o paciente tenha mais facilidade e agilidade na realização das solicitações médicas."
     },
     {
         idServico: 3,
-        nome: "Procedimentos simples com ou sem anestesia local",
+        nomeServico: "Procedimentos simples com ou sem anestesia local",
         valor: 120.00,
-        descricao: "Procedimentos básicos internos para dar agilidade e eficiência ao atendimento médico."
+        descricaoServico: "Procedimentos básicos internos para dar agilidade e eficiência ao atendimento médico."
     }
 ];
 
@@ -26,6 +28,15 @@ export const listServiceHttp = async (): Promise<Servico[]> => {
     return _listService;
 }
 
-export const postServiceHttp = async (requestData: Servico): Promise<SuccessResponse> => {
-    return { message: "" };
+interface PostServiceRequest {
+    nomeServico: string;
+    valor: number;
+    descricaoServico: string;
+    especialidade: {
+        idEspecialidade: number;
+    }
+}
+
+export const postServiceHttp = async (requestData: PostServiceRequest): Promise<void> => {
+    await post<PostServiceRequest, void>(ROOT, requestData);
 }

@@ -64,9 +64,9 @@ const SelectInput = ({ name, label, placeholder, options, handlerChange, ...rest
                     {placeholder}
                 </option>
 
-                {options.map(opt => (
+                {options.map((opt, index) => (
                     <option
-                        key={opt.value}
+                        key={`${index}-${opt.value}`}
                         value={opt.value}
                     >
                         {opt.label}

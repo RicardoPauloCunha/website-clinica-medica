@@ -1,10 +1,10 @@
-type Paciente = {
+interface Paciente {
     cpf: string;
-    nome: string;
+    nomePaciente: string;
     dataNascimento: string;
     sexo: number;
-    endereco: string;
-    contato: string;
+    enderecoPaciente: string;
+    contatoPaciente: string;
 }
 
 export default Paciente;
