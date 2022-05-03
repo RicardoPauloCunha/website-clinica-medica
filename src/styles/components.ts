@@ -15,6 +15,13 @@ export const Form = styled(Unform)`
             margin-top: 1rem;
             width: 100%;
         }
+
+        .col-md-2 {
+            >button {
+                margin-top: 1.85rem;
+                width: 100%;
+            }
+        }
     }
 
     &.form-search {

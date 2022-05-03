@@ -16,7 +16,7 @@ import { useAuth } from "../../contexts/auth";
 import { getEnumRecordType, listRecordType } from "../../services/enums/recordType";
 import Material from "../../services/entities/material";
 import CategoriaMaterial from "../../services/entities/categoriaMaterial";
-import { listMaterialByCategoryHttp } from "../../services/http/material";
+import { listMaterialByCategoryHttp, putMaterialHttp } from "../../services/http/material";
 import { listCategoryHttp } from "../../services/http/category";
 import { postRecordHttp } from "../../services/http/record";
 import getValidationErrors from "../../util/getValidationErrors";
@@ -37,7 +37,7 @@ const Materials = () => {
 
     const { loggedUser } = useAuth();
 
-    const _typesRecord = listRecordType();
+    const _recordTypes = listRecordType();
 
     const INPUT_TYPE = getEnumRecordType("input");
 
@@ -122,7 +122,8 @@ const Materials = () => {
             }).then(() => {
                 setWarning(["success", "Registro de material cadastrado com sucesso."]);
                 reset();
-                // TODO: Atualizar produto
+                
+                sendChangeQuantity();
             }).catch(() => {
                 setWarning(["danger", "Não foi possível cadastrar o registro de material."]);
             }).finally(() => { setIsLoading(""); });
@@ -133,6 +134,23 @@ const Materials = () => {
             setWarning(["warning", "Campos do registro inválidos."]);
             setIsLoading("");
         }
+    }
+
+    const sendChangeQuantity = () => {
+        putMaterialHttp({
+            idMaterial: materials[materialIndex].idMaterial,
+            nomeMaterial: materials[materialIndex].nomeMaterial,
+            unidadeDeMedida: materials[materialIndex].unidadeDeMedida,
+            quantidade: materials[materialIndex].quantidade,
+            descricao: materials[materialIndex].descricao,
+            categoriaMaterial: {
+                idCategoria: materials[materialIndex].categoriaMaterial?.idCategoria as number,
+            },
+            fabricante: {
+                cnpj: materials[materialIndex].fabricante?.cnpj as string,
+            },
+            statusMaterial: materials[materialIndex].statusMaterial
+        });
     }
 
     const handlerChangeCategoryId = (optionValue: string) => {
@@ -258,7 +276,7 @@ const Materials = () => {
                             name='recordTypeIndex'
                             label='Tipo do registro'
                             placeholder='Selecione o tipo do registro'
-                            options={_typesRecord.map((x, index) => ({
+                            options={_recordTypes.map((x, index) => ({
                                 value: `${index + 1}`,
                                 label: x
                             }))}

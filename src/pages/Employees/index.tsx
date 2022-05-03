@@ -20,7 +20,7 @@ type ModalString = "status" | "";
 const Employees = () => {
     const navigate = useNavigate();
 
-    const _typesEmployee = listAllEmployeeType();
+    const _employeeTypes = listAllEmployeeType();
 
     const ENABLED_STATUS = getEnumEmployeeStatus("enabled");
 
@@ -107,7 +107,7 @@ const Employees = () => {
                     name='employeeTypeIndex'
                     label='Tipo do funcionário'
                     placeholder='Filtrar pelo tipo do funcionário'
-                    options={_typesEmployee.map((x, index) => ({
+                    options={_employeeTypes.map((x, index) => ({
                         value: `${index + 1}`,
                         label: x
                     }))}

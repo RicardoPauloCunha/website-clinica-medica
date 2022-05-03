@@ -1,4 +1,4 @@
-import { post } from "../api";
+import { get, post } from "../api";
 import Servico from "../entities/servico";
 
 const ROOT = "servicos/";
@@ -25,7 +25,8 @@ export const _listService: Servico[] = [
 ];
 
 export const listServiceHttp = async (): Promise<Servico[]> => {
-    return _listService;
+    let { data } = await get<Servico[]>(ROOT);
+    return data;
 }
 
 interface PostServiceRequest {

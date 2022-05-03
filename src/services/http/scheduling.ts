@@ -1,6 +1,9 @@
+import { post } from "../api";
 import { SuccessResponse } from "../defaultEntities";
 import Agendamento from "../entities/agendamento";
 import { getEnumScheduleStatus } from "../enums/scheduleStatus";
+
+const ROOT = "agendamentos/";
 
 export const _listScheduling: Agendamento[] = [
     {
@@ -59,12 +62,22 @@ export const listDoctorSchedulingByParamsHttp = async (paramsData: listDoctorSch
     let list: Agendamento[] = _listScheduling.filter(x => x.medico?.crm === paramsData.crm);
 
     // TODO - filtro por periodo
-    
+
     return list;
 }
 
-export const postSchedulingHttp = async (requestData: Agendamento): Promise<SuccessResponse> => {
-    return { message: "" };
+type PostSchedulingRequest = {
+    recepcionistaId: number;
+    pacienteCpf: string;
+    medicoId: number;
+    dataAgendada: string;
+    horaAgendada: string;
+    servicoId: number;
+    status: number;
+}
+
+export const postSchedulingHttp = async (requestData: PostSchedulingRequest): Promise<void> => {
+    await post<PostSchedulingRequest, void>(ROOT, requestData);
 }
 
 export const putSchedulingHttp = async (requestData: Agendamento): Promise<SuccessResponse> => {

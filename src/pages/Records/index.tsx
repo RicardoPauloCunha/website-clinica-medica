@@ -63,18 +63,17 @@ const MaterialRecords = () => {
                     <TextGroupGrid>
                         <DataText
                             label="Data"
-                            value={x.data as string}
+                            value={new Date(x.data).toLocaleDateString()}
                         />
 
                         <DataText
                             label="Quantidade"
-                            value={x.quantidade.toString()}
+                            value={`${x.tipoEntradaSaida === INPUT_TYPE ? "+" : "-"} ${x.quantidade}`}
                         />
 
                         <DataText
                             label="Descrição"
                             value={x.descricao}
-                            isFullRow={true}
                         />
                     </TextGroupGrid>
                 </DataCard>

@@ -18,6 +18,8 @@ import MaterialRecords from './pages/Records';
 import EmployeeMenu from './components/Menu/employee';
 import MaterialMenu from './components/Menu/material';
 import ServiceMenu from './components/Menu/service';
+import SchedulingMenu from './components/Menu/scheduling';
+import RegisterScheduling from './pages/RegisterScheduling';
 
 type RequireAuthProps = {
     employeeType: EmployeeType;
@@ -88,6 +90,12 @@ const PagesRoutes = () => {
                     } />
                     <Route path=":materialId/registros" element={
                         <RequireAuth employeeType="stockist" children={<MaterialRecords />} />
+                    } />
+                </Route>
+
+                <Route path="agendamentos" element={<SchedulingMenu />}>
+                    <Route path="cadastrar" element={
+                        <RequireAuth employeeType="receptionist" children={<RegisterScheduling />} />
                     } />
                 </Route>
 

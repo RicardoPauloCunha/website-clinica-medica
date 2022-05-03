@@ -42,7 +42,7 @@ const RegisterEmployee = () => {
 
     const _itemEmployee = _listEmployee[1];
     const _itemDoctor = _listDoctor[0];
-    const _typesEmployee = listEmployeeType();
+    const _employeeTypes = listEmployeeType();
 
     const DOCTOR_TYPE = getEnumEmployeeType("doctor");
 
@@ -56,11 +56,17 @@ const RegisterEmployee = () => {
     const [editedDoctor, setEditedDoctor] = useState<Medico | undefined>(undefined);
 
     useEffect(() => {
-        console.log("98");
         setWarning(["", ""]);
-        setIsDoctor(location.pathname.split("/")[2] === "medicos");
-        setIsEdition(routeParams.employeeId !== undefined || routeParams.doctorId !== undefined);
-        if (!isEdition) {
+        
+        let pathIsDoctor = location.pathname.split("/")[2] === "medicos";
+        setIsDoctor(pathIsDoctor);
+
+        if (routeParams.employeeId !== undefined || routeParams.doctorId !== undefined) {
+            setIsEdition(true);
+        }
+        else
+        {
+            setIsEdition(false);
             // employeeFormRef.current?.reset();
             // doctorFormRef.current?.reset();
             // TODO: Descomentar
@@ -71,10 +77,10 @@ const RegisterEmployee = () => {
         else if (routeParams.doctorId !== undefined)
             getDoctor();
 
-        if (isDoctor)
+        if (pathIsDoctor)
             getSpecialties();
         // eslint-disable-next-line
-    }, [location.pathname]);
+    }, [routeParams]);
 
     const getSpecialties = () => {
         listSpecialtyHttp().then(response => {
@@ -346,7 +352,7 @@ const RegisterEmployee = () => {
                         name='employeeType'
                         label='Tipo do funcionário'
                         placeholder='Selecione o tipo do funcionário'
-                        options={_typesEmployee.map((x, index) => ({
+                        options={_employeeTypes.map((x, index) => ({
                             value: `${index + 1}`,
                             label: x
                         }))}

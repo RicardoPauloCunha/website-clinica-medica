@@ -69,10 +69,24 @@ const RegisterMaterial = () => {
     const [manufacturers, setManufacturers] = useState<Fabricante[]>([]);
     const [manufacturerIndex, setManufacturerIndex] = useState(-1);
     const [editedMaterial, setEditedMaterial] = useState<Material | undefined>(undefined);
+    const [isEdition, setIsEdition] = useState(routeParams.materialId !== undefined);
 
     useEffect(() => {
+        setWarning(["", ""]);
+
         if (routeParams.materialId !== undefined)
+        {
+            setIsEdition(true);
             getMaterial();
+        }
+        else
+        {
+            setIsEdition(false);
+            // materialFormRef.current?.reset();
+            // categoryFormRef.current?.reset();
+            // manufacturerFormRef.current?.reset();
+            // TODO: Descomentar
+        }
 
         getCategories();
         getManufacturers()
@@ -145,7 +159,7 @@ const RegisterMaterial = () => {
                 abortEarly: false
             });
 
-            let material = {
+            let materialData = {
                 nomeMaterial: data.name,
                 unidadeDeMedida: data.unitMeasurement,
                 quantidade: 0,
@@ -160,25 +174,27 @@ const RegisterMaterial = () => {
             }
 
             if (editedMaterial === undefined) {
-                postMaterialHttp(material).then(() => {
+                postMaterialHttp(materialData).then(() => {
                     setWarning(["success", "Material cadastrado com sucesso."]);
                     reset();
                     setManufacturerIndex(-1);
                 }).catch(() => {
                     setWarning(["danger", "Não foi possível cadastrar o material."]);
                 }).finally(() => { setIsLoading(""); });
-
-                return;
             }
+            else
+            {
+                materialData.statusMaterial = editedMaterial.statusMaterial;
 
-            putMaterialHttp({
-                idMaterial: editedMaterial.idMaterial,
-                ...material
-            }).then(() => {
-                setWarning(["success", "Material editado com sucesso."]);
-            }).catch(() => {
-                setWarning(["danger", "Não foi possível editar o material."]);
-            }).finally(() => { setIsLoading(""); });
+                putMaterialHttp({
+                    idMaterial: editedMaterial.idMaterial,
+                    ...materialData
+                }).then(() => {
+                    setWarning(["success", "Material editado com sucesso."]);
+                }).catch(() => {
+                    setWarning(["danger", "Não foi possível editar o material."]);
+                }).finally(() => { setIsLoading(""); });
+            }
         }
         catch (err) {
             if (err instanceof Yup.ValidationError)
@@ -291,7 +307,7 @@ const RegisterMaterial = () => {
 
     return (
         <>
-            {routeParams.materialId !== undefined
+            {isEdition
                 ? <h1>
                     Edição de material
 
@@ -343,7 +359,6 @@ const RegisterMaterial = () => {
                         value: x.idCategoria?.toString() as string,
                         label: x.nomeCategoria
                     }))}
-                    disabled={editedMaterial !== undefined}
                 />
 
                 <SelectInput
@@ -355,11 +370,10 @@ const RegisterMaterial = () => {
                         label: x.nomeFabricante
                     }))}
                     handlerChange={handlerChangeManufacturer}
-                    disabled={editedMaterial !== undefined}
                 />
 
                 <LoadingButton
-                    text={editedMaterial ? "Editar" : "Cadastrar"}
+                    text={isEdition ? "Editar" : "Cadastrar"}
                     isLoading={isLoading === "material"}
                     type="submit"
                 />
@@ -387,11 +401,11 @@ const RegisterMaterial = () => {
                     </TextGroupGrid>
                 </DataCard>
                 : <Alert color="warning">
-                    Nenhum fabricante foi selecionado
+                    Nenhum fabricante foi selecionado.
                 </Alert>
             }
 
-            {routeParams.materialId === undefined && <>
+            {!isEdition && <>
                 <h2>Adicionar categoria</h2>
                 <p>Você pode adicionar uma nova categoria de material caso não tenha encontrado a opção desejada.</p>
 

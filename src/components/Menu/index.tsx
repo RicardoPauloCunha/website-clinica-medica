@@ -13,6 +13,7 @@ const Menu = () => {
     const { loggedUser, defineLoggedUser } = useAuth();
 
     const ADMIN_TYPE = getValueEmployeeType("admin");
+    const RECEPTIONIST_TYPE = getValueEmployeeType("receptionist");
     const STOCKIST_TYPE = getValueEmployeeType("stockist");
 
     const [isOpen, setIsOpen] = useState(false);
@@ -83,6 +84,17 @@ const Menu = () => {
                                     tag={Link}
                                 >
                                     Funcionários
+                                </NavLink>
+                            </NavItem>
+                        </>}
+
+                        {employeeType === RECEPTIONIST_TYPE && <>
+                            <NavItem>
+                                <NavLink
+                                    to="/agendamentos"
+                                    tag={Link}
+                                >
+                                    Agendamentos
                                 </NavLink>
                             </NavItem>
                         </>}

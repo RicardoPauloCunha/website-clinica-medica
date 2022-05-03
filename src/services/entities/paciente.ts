@@ -1,10 +1,10 @@
 interface Paciente {
     cpf: string;
-    nomePaciente: string;
+    nome: string;
     dataNascimento: string;
     sexo: number;
-    enderecoPaciente: string;
-    contatoPaciente: string;
+    endereco: string;
+    contato: string;
 }
 
 export default Paciente;

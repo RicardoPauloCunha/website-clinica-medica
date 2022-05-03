@@ -31,6 +31,15 @@ export const normalize = (value?: string) => {
         return value.replace(/[^0-9]/g, '');
 }
 
+export const normalizeDate = (value?: string) => {
+    if (value === undefined)
+        return "";
+
+    let dates = value.split("/");
+
+    return `${dates[2]}-${dates[1]}-${dates[0]}`;
+}
+
 export const formatQuantity = (value?: number) => {
     if (value === undefined || value === null)
         return "";

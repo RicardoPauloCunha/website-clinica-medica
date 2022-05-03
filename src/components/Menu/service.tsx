@@ -6,8 +6,8 @@ const ServiceMenu = () => {
     return (
         <>
             <Nav
-            tabs
-            className="mb-4"
+                tabs
+                className="mb-4"
             >
                 <NavItem>
                     <NavLink
