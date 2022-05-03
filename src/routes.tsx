@@ -15,6 +15,9 @@ import Employees from './pages/Employees';
 import RegisterMaterial from './pages/RegisterMaterial';
 import Materials from './pages/Materials';
 import MaterialRecords from './pages/Records';
+import EmployeeMenu from './components/Menu/employee';
+import MaterialMenu from './components/Menu/material';
+import ServiceMenu from './components/Menu/service';
 
 type RequireAuthProps = {
     employeeType: EmployeeType;
@@ -46,14 +49,14 @@ const PagesRoutes = () => {
                 <Route path="" element={<Home />} />
                 <Route path="login" element={<Login />} />
 
-                <Route path="servico">
+                <Route path="servicos" element={<ServiceMenu />}>
                     <Route path="cadastrar" element={
                         <RequireAuth employeeType="admin" children={<RegisterService />} />
                     } />
                 </Route>
 
-                <Route path="funcionario">
-                    <Route path="" element={
+                <Route path="funcionarios" element={<EmployeeMenu />}>
+                    <Route path="listar" element={
                         <RequireAuth employeeType="admin" children={<Employees />} />
                     } />
                     <Route path="cadastrar" element={
@@ -62,10 +65,19 @@ const PagesRoutes = () => {
                     <Route path=":employeeId/editar" element={
                         <RequireAuth employeeType="admin" children={<RegisterEmployee />} />
                     } />
+
+                    <Route path="medicos">
+                        <Route path="cadastrar" element={
+                            <RequireAuth employeeType="admin" children={<RegisterEmployee />} />
+                        } />
+                        <Route path=":doctorId/editar" element={
+                            <RequireAuth employeeType="admin" children={<RegisterEmployee />} />
+                        } />
+                    </Route>
                 </Route>
 
-                <Route path="material">
-                    <Route path="" element={
+                <Route path="materiais" element={<MaterialMenu />}>
+                    <Route path="listar" element={
                         <RequireAuth employeeType="stockist" children={<Materials />} />
                     } />
                     <Route path="cadastrar" element={

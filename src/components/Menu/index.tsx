@@ -70,25 +70,16 @@ const Menu = () => {
                         {employeeType === ADMIN_TYPE && <>
                             <NavItem>
                                 <NavLink
-                                    to="/servico/cadastrar"
+                                    to="/servicos"
                                     tag={Link}
                                 >
-                                    Cadastrar serviço
+                                    Serviços
                                 </NavLink>
                             </NavItem>
 
                             <NavItem>
                                 <NavLink
-                                    to="/funcionario/cadastrar"
-                                    tag={Link}
-                                >
-                                    Cadastrar funcionário
-                                </NavLink>
-                            </NavItem>
-
-                            <NavItem>
-                                <NavLink
-                                    to="/funcionario"
+                                    to="/funcionarios"
                                     tag={Link}
                                 >
                                     Funcionários
@@ -99,16 +90,7 @@ const Menu = () => {
                         {employeeType === STOCKIST_TYPE && <>
                             <NavItem>
                                 <NavLink
-                                    to="/material/cadastrar"
-                                    tag={Link}
-                                >
-                                    Cadastrar material
-                                </NavLink>
-                            </NavItem>
-
-                            <NavItem>
-                                <NavLink
-                                    to="/material"
+                                    to="/materiais"
                                     tag={Link}
                                 >
                                     Materiais

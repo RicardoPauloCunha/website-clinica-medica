@@ -1,32 +1,46 @@
-import { SuccessResponse } from "../defaultEntities";
+import { getParams, post, put } from "../api";
 import Medico from "../entities/medico";
-import { _listEmployee } from "./employee";
+import { PostEmployeeRequest, _listEmployee } from "./employee";
 import { _listSpecialty } from "./specialty";
+
+const ROOT = "medicos/";
 
 export const _listDoctor: Medico[] = [
     {
         crm: "000000/SP",
         especialidade: _listSpecialty[0],
-        ..._listEmployee[2]
+        ..._listEmployee[3]
     }
 ];
 
-export const getDoctorByIdHttp = async (crm: string): Promise<Medico | undefined> => {
-    return _listDoctor.find(x => x.crm === crm);
+export const getDoctorByEmployeeIdHttp = async (employeeId: number): Promise<Medico> => {
+    return _listDoctor[0];
 }
 
-export const getDoctorByEmployeeIdHttp = async (EmployeeId: number): Promise<Medico | undefined> => {
-    return _listDoctor.find(x => x.idFuncionario === EmployeeId);
+interface FilterDoctorParams {
+    idEspecialidade: number | null;
 }
 
-export const listDoctorBySpecialtyHttp = async (specialtyId: number): Promise<Medico[] | undefined> => {
-    return _listDoctor.filter(x => x.especialidade?.idEspecialidade === specialtyId);
+export const listDoctorBySpecialtyHttp = async (paramsData: FilterDoctorParams): Promise<Medico[]> => {
+    let { data } = await getParams<FilterDoctorParams, Medico[]>(ROOT + "listar-por-id-especialidade", paramsData);
+    return data;
 }
 
-export const postDoctorHttp = async (requestData: Medico): Promise<SuccessResponse> => {
-    return { message: "" };
+interface PostDoctorRequest extends PostEmployeeRequest {
+    crm: string;
+    especialidade: {
+        idEspecialidade: number;
+    }
 }
 
-export const putDoctorHttp = async (requestData: Medico): Promise<SuccessResponse> => {
-    return { message: "" };
+export const postDoctorHttp = async (requestData: PostDoctorRequest): Promise<void> => {
+    await post<PostEmployeeRequest, void>(ROOT, requestData);
+}
+
+interface PutDoctorRequest extends PostDoctorRequest {
+    idFuncionario: number;
+}
+
+export const putDoctorHttp = async (requestData: PutDoctorRequest): Promise<void> => {
+    await put<PostEmployeeRequest, void>(ROOT + "alterar-medico", requestData);
 }

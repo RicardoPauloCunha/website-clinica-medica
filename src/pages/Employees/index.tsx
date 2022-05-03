@@ -1,26 +1,28 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { getEnumEmployeeType, getValueEmployeeType, listAllEmployeeType } from "../../services/enums/employeeType";
+import { getEnumEmployeeStatus, getValueEmployeeStatus } from "../../services/enums/employeeStatus";
+import Funcionario from "../../services/entities/funcionario";
+import { listEmployeeByTypeHttp, putEmployeeHttp } from "../../services/http/employee";
+import { WarningTuple } from "../../util/getHttpErrors";
+
+import { Button, ModalBody, ModalFooter, ModalHeader, Spinner } from "reactstrap";
+import { ButtonGroupRow, DataModal, Form, TextGroupGrid } from "../../styles/components";
 import SelectInput from "../../components/Input/select";
 import SpinnerBlock from "../../components/SpinnerBlock";
 import Warning from "../../components/Warning";
-import Funcionario from "../../services/entities/funcionario";
-import { getValueEmployeeType, listEmployeeType } from "../../services/enums/employeeType";
-import { listEmployeeByTypeHttp, putEmployeeHttp } from "../../services/http/employee";
-import { ButtonGroupRow, DataModal, Form, TextGroupGrid } from "../../styles/components";
-import { WarningTuple } from "../../util/getHttpErrors";
 import DataCard from "../../components/DataCard";
 import DataText from "../../components/DataText";
-import { Button, ModalBody, ModalFooter, ModalHeader, Spinner } from "reactstrap";
-import { getEnumEmployeeStatus, getValueEmployeeStatus } from "../../services/enums/employeeStatus";
-import { useNavigate } from "react-router-dom";
 
 type ModalString = "status" | "";
 
 const Employees = () => {
     const navigate = useNavigate();
 
-    const _typesEmployee = listEmployeeType();
+    const _typesEmployee = listAllEmployeeType();
 
-    const ENABLED_STATUS = getValueEmployeeStatus("enabled");
+    const ENABLED_STATUS = getEnumEmployeeStatus("enabled");
 
     const [isLoading, setIsLoading] = useState<"get" | "status" | "">("");
     const [warning, setWarning] = useState<WarningTuple>(["", ""]);
@@ -31,18 +33,16 @@ const Employees = () => {
     const [employeeIsEnabled, setEmployeeIsEnabled] = useState(true);
 
     useEffect(() => {
-        getEmployees(0);
+        getEmployees(null);
     }, []);
 
-    const toggleModal = (modalName?: ModalString) => {
-        setModal(modalName !== undefined ? modalName : "");
-    }
-
-    const getEmployees = (employeeType: number) => {
-        setIsLoading("get");
+    const getEmployees = (employeeType: number | null) => {
         setWarning(["", ""]);
 
-        listEmployeeByTypeHttp(employeeType).then(response => {
+        setIsLoading("get");
+        listEmployeeByTypeHttp({
+            tipoFuncionario: employeeType
+        }).then(response => {
             setEmployees([...response]);
 
             if (response.length === 0)
@@ -52,14 +52,17 @@ const Employees = () => {
         });
     }
 
+    const toggleModal = (modalName?: ModalString) => {
+        setModal(modalName !== undefined ? modalName : "");
+    }
+
     const sendChangeStatus = () => {
         if (employeeIndex === -1)
             return;
 
         setIsLoading("status");
-        let currentStatus = getValueEmployeeStatus(undefined, employees[employeeIndex].statusFuncionario);
 
-        if (currentStatus === ENABLED_STATUS)
+        if (employees[employeeIndex].statusFuncionario === ENABLED_STATUS)
             employees[employeeIndex].statusFuncionario = getEnumEmployeeStatus("disabled");
         else
             employees[employeeIndex].statusFuncionario = getEnumEmployeeStatus("enabled");
@@ -71,7 +74,7 @@ const Employees = () => {
     }
 
     const handlerChangeEmployeeType = (optionValue: string) => {
-        let employeeType = Number(optionValue) + 1;
+        let employeeType = Number(optionValue);
         getEmployees(employeeType);
     }
 
@@ -79,12 +82,15 @@ const Employees = () => {
         if (index === -1)
             return;
 
-        navigate("/funcionario/" + employees[index].idFuncionario + "/editar");
+        if (employees[index].tipoFuncionario === getEnumEmployeeType("doctor"))
+            navigate("/funcionarios/medicos/" + employees[index].idFuncionario + "/editar");
+        else
+            navigate("/funcionarios/" + employees[index].idFuncionario + "/editar");
     }
 
     const onClickChangeStatus = (index: number) => {
         setEmployeeIndex(index);
-        setEmployeeIsEnabled(getValueEmployeeStatus(undefined, employees[index].statusFuncionario) === ENABLED_STATUS);
+        setEmployeeIsEnabled(employees[index].statusFuncionario === ENABLED_STATUS);
         toggleModal("status");
     }
 
@@ -102,7 +108,7 @@ const Employees = () => {
                     label='Tipo do funcionário'
                     placeholder='Filtrar pelo tipo do funcionário'
                     options={_typesEmployee.map((x, index) => ({
-                        value: index.toString(),
+                        value: `${index + 1}`,
                         label: x
                     }))}
                     handlerChange={handlerChangeEmployeeType}
@@ -113,51 +119,47 @@ const Employees = () => {
 
             {isLoading === "get" && <SpinnerBlock />}
 
-            {employees.map((x, index) => {
-                let status = getValueEmployeeStatus(undefined, x.statusFuncionario);
+            {employees.map((x, index) => (
+                <DataCard
+                    key={x.idFuncionario}
+                    title={x.nomeFuncionario}
+                    subtitle={x.email}
+                >
+                    <TextGroupGrid>
+                        <DataText
+                            label="Tipo funcionário"
+                            value={getValueEmployeeType(undefined, x.tipoFuncionario)}
+                        />
 
-                return (
-                    <DataCard
-                        key={x.idFuncionario}
-                        title={x.nomeFuncionario}
-                        subtitle={x.email}
-                    >
-                        <TextGroupGrid>
-                            <DataText
-                                label="Tipo funcionário"
-                                value={getValueEmployeeType(undefined, x.tipoFuncionario)}
-                            />
+                        <DataText
+                            label="Setor"
+                            value={x.setor}
+                        />
 
-                            <DataText
-                                label="Setor"
-                                value={x.setor}
-                            />
+                        <DataText
+                            label="Status"
+                            value={getValueEmployeeStatus(undefined, x.statusFuncionario)}
+                        />
+                    </TextGroupGrid>
 
-                            <DataText
-                                label="Status"
-                                value={status}
-                            />
-                        </TextGroupGrid>
+                    <ButtonGroupRow>
+                        <Button
+                            color="warning"
+                            outline
+                            onClick={() => onClickEditData(index)}
+                        >
+                            Editar
+                        </Button>
 
-                        <ButtonGroupRow>
-                            <Button
-                                color="warning"
-                                outline
-                                onClick={() => onClickEditData(index)}
-                            >
-                                Editar
-                            </Button>
-
-                            <Button
-                                color={status === ENABLED_STATUS ? "danger" : "success"}
-                                onClick={() => onClickChangeStatus(index)}
-                            >
-                                {status === ENABLED_STATUS ? "Desabilitar" : "Habilitar"}
-                            </Button>
-                        </ButtonGroupRow>
-                    </DataCard>
-                )
-            })}
+                        <Button
+                            color={x.statusFuncionario === ENABLED_STATUS ? "danger" : "success"}
+                            onClick={() => onClickChangeStatus(index)}
+                        >
+                            {x.statusFuncionario ? "Desabilitar" : "Habilitar"}
+                        </Button>
+                    </ButtonGroupRow>
+                </DataCard>
+            ))}
 
             <DataModal
                 isOpen={modal === "status"}

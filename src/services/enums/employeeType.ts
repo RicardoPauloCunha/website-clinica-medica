@@ -1,4 +1,4 @@
-type EmployeeType = "admin" | "receptionist" | "doctor" | "stockist";
+type EmployeeType = "admin" | "receptionist" | "stockist" | "doctor";
 
 export const getValueEmployeeType = (typeString?: EmployeeType, typeNumber?: number) => {
     let type: number;
@@ -16,9 +16,9 @@ export const getValueEmployeeType = (typeString?: EmployeeType, typeNumber?: num
         case 2:
             return "Recepcionista";
         case 3:
-            return "Médico";
-        case 4:
             return "Estoquista";
+        case 4:
+            return "Médico";
         default:
             return "";
     }
@@ -30,9 +30,9 @@ export const getEnumEmployeeType = (type: EmployeeType) => {
             return 1;
         case "receptionist":
             return 2;
-        case "doctor":
-            return 3;
         case "stockist":
+            return 3;
+        case "doctor":
             return 4;
         default:
             return 0;
@@ -40,6 +40,15 @@ export const getEnumEmployeeType = (type: EmployeeType) => {
 }
 
 export const listEmployeeType = () => {
+    let list: string[] = [];
+
+    for (let i = 1; i <= 3; i++)
+        list.push(getValueEmployeeType(undefined, i));
+
+    return list;
+}
+
+export const listAllEmployeeType = () => {
     let list: string[] = [];
 
     for (let i = 1; i <= 4; i++)

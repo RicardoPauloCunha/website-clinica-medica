@@ -1,60 +1,80 @@
-import { FormHandles, SubmitHandler } from "@unform/core";
 import { useEffect, useRef, useState } from "react";
-import { Button, Spinner } from "reactstrap";
-import SelectInput from "../../components/Input/select";
-import Warning from "../../components/Warning";
-import Especialidade from "../../services/entities/especialidade";
-import { getValueEmployeeType, listEmployeeType } from "../../services/enums/employeeType";
-import { listSpecialtyHttp } from "../../services/http/specialty";
-import { Form } from "../../styles/components";
-import { WarningTuple } from "../../util/getHttpErrors";
+import { useLocation, useParams } from "react-router-dom";
+import { FormHandles, SubmitHandler } from "@unform/core";
 import * as Yup from 'yup';
-import getValidationErrors from "../../util/getValidationErrors";
-import FieldInput from "../../components/Input";
-import { getEmployeeByIdHttp, postEmployeeHttp, putEmployeeHttp, _listEmployee } from "../../services/http/employee";
-import { getDoctorByEmployeeIdHttp, postDoctorHttp, putDoctorHttp, _listDoctor } from "../../services/http/doctor";
-import { useParams } from "react-router-dom";
+
+import { getEnumEmployeeType, listEmployeeType } from "../../services/enums/employeeType";
 import { getEnumEmployeeStatus } from "../../services/enums/employeeStatus";
+import Especialidade from "../../services/entities/especialidade";
 import Medico from "../../services/entities/medico";
 import Funcionario from "../../services/entities/funcionario";
+import { listSpecialtyHttp } from "../../services/http/specialty";
+import { getEmployeeByIdHttp, postEmployeeHttp, putEmployeeHttp, _listEmployee } from "../../services/http/employee";
+import { getDoctorByEmployeeIdHttp, postDoctorHttp, putDoctorHttp, _listDoctor } from "../../services/http/doctor";
+import { WarningTuple } from "../../util/getHttpErrors";
+import getValidationErrors from "../../util/getValidationErrors";
 
-type RegisterFormData = {
+import { Button, Spinner } from "reactstrap";
+import { Form } from "../../styles/components";
+import SelectInput from "../../components/Input/select";
+import Warning from "../../components/Warning";
+import FieldInput from "../../components/Input";
+
+interface EmployeeFormData {
     name: string;
     email: string;
     password: string;
     confirmPassword: string;
     sector: string;
-    employeeTypeIndex: number;
+    employeeType: number;
 }
 
-type ComplementFormData = {
+interface DoctorFormData extends EmployeeFormData {
     crm: string;
     specialtyId: number;
 }
 
 const RegisterEmployee = () => {
+    const location = useLocation();
     const routeParams = useParams();
-    const registerFormRef = useRef<FormHandles>(null);
-    const complementFormRef = useRef<FormHandles>(null);
+    const employeeFormRef = useRef<FormHandles>(null);
+    const doctorFormRef = useRef<FormHandles>(null);
 
-    const _itemEmployee = _listEmployee[2];
+    const _itemEmployee = _listEmployee[1];
     const _itemDoctor = _listDoctor[0];
     const _typesEmployee = listEmployeeType();
 
-    const DOCTOR_TYPE = getValueEmployeeType("doctor");
+    const DOCTOR_TYPE = getEnumEmployeeType("doctor");
 
-    const [isLoading, setIsLoading] = useState<"register" | "getEmployee" | "getDoctor" | "">("");
+    const [isLoading, setIsLoading] = useState<"register" | "get" | "">("");
     const [warning, setWarning] = useState<WarningTuple>(["", ""]);
-    const [isDoctorType, setIsDoctorType] = useState(false);
+    const [isDoctor, setIsDoctor] = useState(location.pathname.split("/")[1] === "medicos");
+    const [isEdition, setIsEdition] = useState(routeParams.employeeId !== undefined || routeParams.doctorId !== undefined);
 
     const [specialties, setSpecialties] = useState<Especialidade[]>([]);
+    const [editedEmployee, setEditedEmployee] = useState<Funcionario | undefined>(undefined);
     const [editedDoctor, setEditedDoctor] = useState<Medico | undefined>(undefined);
 
     useEffect(() => {
+        console.log("98");
+        setWarning(["", ""]);
+        setIsDoctor(location.pathname.split("/")[2] === "medicos");
+        setIsEdition(routeParams.employeeId !== undefined || routeParams.doctorId !== undefined);
+        if (!isEdition) {
+            // employeeFormRef.current?.reset();
+            // doctorFormRef.current?.reset();
+            // TODO: Descomentar
+        }
+
         if (routeParams.employeeId !== undefined)
-            getEmployee()
+            getEmployee();
+        else if (routeParams.doctorId !== undefined)
+            getDoctor();
+
+        if (isDoctor)
+            getSpecialties();
         // eslint-disable-next-line
-    }, [routeParams]);
+    }, [location.pathname]);
 
     const getSpecialties = () => {
         listSpecialtyHttp().then(response => {
@@ -64,50 +84,40 @@ const RegisterEmployee = () => {
 
     const getEmployee = () => {
         let id = Number(routeParams.employeeId);
-
         if (isNaN(id))
             return;
 
-        setIsLoading("getEmployee");
+        setIsLoading("get");
         getEmployeeByIdHttp(id).then(response => {
-            if (response === undefined)
-                return;
-
-            let employeeTypeIndex = (response.idFuncionario as number) - 1;
-
-            registerFormRef.current?.setData({
+            employeeFormRef.current?.setData({
                 name: response.nomeFuncionario,
                 email: response.email,
                 password: response.senha,
                 confirmPassword: response.senha,
                 sector: response.setor,
-                employeeTypeIndex: employeeTypeIndex
+                employeeType: response.tipoFuncionario.toString()
             });
 
-            handlerChangeEmployeeType(employeeTypeIndex.toString());
-
-            if (getValueEmployeeType(undefined, response.idFuncionario) !== DOCTOR_TYPE) {
-                setEditedDoctor({
-                    crm: "",
-                    ...response
-                });
-                setIsLoading("");
-                return;
-            }
-
-            getDoctor(response.idFuncionario as number);
+            setEditedEmployee(response);
+            setIsLoading("");
         });
     }
 
-    const getDoctor = (employeeId: number) => {
-        setIsLoading("getDoctor");
-        getDoctorByEmployeeIdHttp(employeeId).then(response => {
-            if (response === undefined)
-                return;
+    const getDoctor = () => {
+        let id = Number(routeParams.doctorId);
+        if (isNaN(id))
+            return;;
 
-            complementFormRef.current?.setData({
+        setIsLoading("get");
+        getDoctorByEmployeeIdHttp(id).then(response => {
+            doctorFormRef.current?.setData({
+                name: response.nomeFuncionario,
+                email: response.email,
+                password: response.senha,
+                confirmPassword: response.senha,
+                sector: response.setor,
                 crm: response.crm,
-                specialtyId: response.especialidade?.idEspecialidade?.toString()
+                specialtyId: response.especialidade?.idEspecialidade.toString()
             });
 
             setEditedDoctor(response)
@@ -115,11 +125,11 @@ const RegisterEmployee = () => {
         });
     }
 
-    const submitRegisterForm: SubmitHandler<RegisterFormData> = async (data, { reset }) => {
+    const submitEmployeeForm: SubmitHandler<EmployeeFormData> = async (data, { reset }) => {
         try {
             setIsLoading("register");
             setWarning(["", ""]);
-            registerFormRef.current?.setErrors({});
+            employeeFormRef.current?.setErrors({});
 
             const shema = Yup.object().shape({
                 name: Yup.string().trim()
@@ -132,7 +142,7 @@ const RegisterEmployee = () => {
                     .oneOf([Yup.ref('password'), null], 'As senhas precisam ser iguais.'),
                 sector: Yup.string().trim()
                     .required("Coloque o setor do funcionário."),
-                employeeTypeIndex: Yup.string()
+                employeeType: Yup.string()
                     .required("Selecione o tipo do funcionário.")
             });
 
@@ -140,95 +150,64 @@ const RegisterEmployee = () => {
                 abortEarly: false
             });
 
-            data.employeeTypeIndex = Number(data.employeeTypeIndex);
+            data.employeeType = Number(data.employeeType);
 
-            let specialty: Especialidade | undefined = undefined;
-            if (_typesEmployee[data.employeeTypeIndex] === DOCTOR_TYPE) {
-                let specialtyId = Number(complementFormRef.current?.getFieldValue("specialtyId"));
+            let employeeData = {
+                nomeFuncionario: data.name,
+                email: data.email,
+                senha: data.password,
+                setor: data.sector,
+                tipoFuncionario: data.employeeType,
+                statusFuncionario: getEnumEmployeeStatus("enabled")
+            };
 
-                specialty = specialties.find(x => x.idEspecialidade === specialtyId);
-                if (specialty === undefined) {
-                    setWarning(["warning", "Especialidade do médico não encontrada."]);
-                    return;
-                }
-            }
-
-            if (editedDoctor === undefined) {
-                let employee: Funcionario = {
-                    idFuncionario: 0,
-                    nomeFuncionario: data.name,
-                    email: data.email,
-                    senha: data.password,
-                    setor: data.sector,
-                    statusFuncionario: getEnumEmployeeStatus("enabled"),
-                    tipoFuncionario: data.employeeTypeIndex + 1
-                };
-
-                if (_typesEmployee[data.employeeTypeIndex] !== DOCTOR_TYPE) {
-                    await postEmployeeHttp(employee).then(() => {
-                        setWarning(["success", "Funcionário criado com sucesso."]);
-                        reset();
-                    }).catch(() => {
-                        setWarning(["danger", "Não foi possível criar o funcionário."]);
-                    }).finally(() => { setIsLoading(""); });
-
-                    return;
-                }
-
-                let crm = complementFormRef.current?.getFieldValue("crm") as string;
-
-                await postDoctorHttp({
-                    crm: crm,
-                    especialidade: specialty,
-                    ...employee
-                }).then(() => {
-                    setWarning(["success", "Médico criado com sucesso."]);
+            if (editedEmployee === undefined) {
+                await postEmployeeHttp(employeeData).then(() => {
+                    setWarning(["success", "Funcionário cadastrado com sucesso."]);
                     reset();
-                    complementFormRef.current?.reset();
                 }).catch(() => {
-                    setWarning(["danger", "Não foi possível criar o médico."]);
+                    setWarning(["danger", "Não foi possível cadastrar o funcionário."]);
                 }).finally(() => { setIsLoading(""); });
-
-                return;
             }
+            else {
+                employeeData.senha = editedEmployee.senha;
+                employeeData.statusFuncionario = editedEmployee.statusFuncionario;
 
-            editedDoctor.nomeFuncionario = data.name;
-            editedDoctor.email = data.email;
-            editedDoctor.senha = data.password;
-            editedDoctor.setor = data.sector;
-
-            if (_typesEmployee[data.employeeTypeIndex] !== DOCTOR_TYPE) {
-                await putEmployeeHttp(editedDoctor).then(() => {
+                await putEmployeeHttp({
+                    idFuncionario: editedEmployee.idFuncionario,
+                    ...employeeData
+                }).then(() => {
                     setWarning(["success", "Funcionário editado com sucesso."]);
                 }).catch(() => {
                     setWarning(["danger", "Não foi possível editar o funcionário."]);
                 }).finally(() => { setIsLoading(""); });
-
-                return;
             }
-
-            editedDoctor.especialidade = specialty;
-
-            await putDoctorHttp(editedDoctor).then(() => {
-                setWarning(["success", "Médico editado com sucesso."]);
-            }).catch(() => {
-                setWarning(["danger", "Não foi possível editar o médico."]);
-            }).finally(() => { setIsLoading(""); });
         }
         catch (err) {
             if (err instanceof Yup.ValidationError)
-                registerFormRef.current?.setErrors(getValidationErrors(err));
+                employeeFormRef.current?.setErrors(getValidationErrors(err));
             setWarning(["warning", "Campos do funcionário inválidos."]);
             setIsLoading("");
         }
     }
 
-    const submitComplementForm: SubmitHandler<ComplementFormData> = async (data) => {
+    const submitDoctorForm: SubmitHandler<DoctorFormData> = async (data, { reset }) => {
         try {
-            complementFormRef.current?.setErrors({});
+            setIsLoading("register");
             setWarning(["", ""]);
+            doctorFormRef.current?.setErrors({});
 
             const shema = Yup.object().shape({
+                name: Yup.string().trim()
+                    .required("Coloque o nome do médico."),
+                email: Yup.string().trim()
+                    .required("Coloque o email do médico."),
+                password: Yup.string().trim()
+                    .required("Coloque a senha do médico."),
+                confirmPassword: Yup.string()
+                    .oneOf([Yup.ref('password'), null], 'As senhas precisam ser iguais.'),
+                sector: Yup.string().trim()
+                    .required("Coloque o setor do médico."),
                 crm: Yup.string().trim()
                     .required("Coloque o CRM do médico."),
                 specialtyId: Yup.string()
@@ -239,33 +218,56 @@ const RegisterEmployee = () => {
                 abortEarly: false
             });
 
-            registerFormRef.current?.submitForm();
+            let doctorData = {
+                nomeFuncionario: data.name,
+                email: data.email,
+                senha: data.password,
+                setor: data.sector,
+                tipoFuncionario: DOCTOR_TYPE,
+                statusFuncionario: getEnumEmployeeStatus("enabled"),
+                crm: data.crm,
+                especialidade: {
+                    idEspecialidade: Number(data.specialtyId)
+                }
+            };
+
+            if (editedDoctor === undefined) {
+                await postDoctorHttp(doctorData).then(() => {
+                    setWarning(["success", "Médico cadastrado com sucesso."]);
+                    reset();
+                }).catch(() => {
+                    setWarning(["danger", "Não foi possível cadastrar o médico."]);
+                }).finally(() => { setIsLoading(""); });
+            }
+            else {
+                doctorData.senha = editedDoctor.senha;
+                doctorData.statusFuncionario = editedDoctor.statusFuncionario;
+
+                await putDoctorHttp({
+                    idFuncionario: editedDoctor.idFuncionario,
+                    ...doctorData
+                }).then(() => {
+                    setWarning(["success", "Médico editado com sucesso."]);
+                }).catch(() => {
+                    setWarning(["danger", "Não foi possível editar o médico."]);
+                }).finally(() => { setIsLoading(""); });
+            }
         }
         catch (err) {
             if (err instanceof Yup.ValidationError)
-                complementFormRef.current?.setErrors(getValidationErrors(err));
+                doctorFormRef.current?.setErrors(getValidationErrors(err));
             setWarning(["warning", "Campos do médico inválidos."]);
+            setIsLoading("");
         }
-    }
-
-    const handlerChangeEmployeeType = (optionValue: string) => {
-        let index = Number(optionValue);
-        let isDoctor = _typesEmployee[index] === DOCTOR_TYPE;
-        setWarning(["", ""]);
-
-        if (isDoctor && specialties.length === 0)
-            getSpecialties();
-
-        setIsDoctorType(isDoctor);
     }
 
     return (
         <>
-            {routeParams.employeeId !== undefined
+            {isEdition
                 ? <h1>
-                    Edição de funcionário
+                    Edição de {isDoctor ? "médico" : "funcionário"}
 
-                    {isLoading === "getEmployee" && <>
+                    {isLoading === "get" && <>
                         {' '}
                         <Spinner
                             color="primary"
@@ -273,12 +275,12 @@ const RegisterEmployee = () => {
                         />
                     </>}
                 </h1>
-                : <h1>Cadastro de funcionário</h1>
+                : <h1>Cadastro de {isDoctor ? "médico" : "funcionário"}</h1>
             }
 
             <Form
-                ref={registerFormRef}
-                onSubmit={submitRegisterForm}
+                ref={isDoctor ? doctorFormRef : employeeFormRef}
+                onSubmit={isDoctor ? submitDoctorForm : submitEmployeeForm}
                 className="form-data"
                 initialData={{
                     name: _itemEmployee.nomeFuncionario,
@@ -286,12 +288,13 @@ const RegisterEmployee = () => {
                     password: _itemEmployee.senha,
                     confirmPassword: _itemEmployee.senha,
                     sector: _itemEmployee.setor,
+                    crm: _itemDoctor.crm
                 }}
             >
                 <FieldInput
                     name='name'
                     label='Nome'
-                    placeholder='Coloque o nome do funcionário'
+                    placeholder='Coloque o nome'
                 />
 
                 <FieldInput
@@ -317,89 +320,50 @@ const RegisterEmployee = () => {
 
                 <FieldInput
                     name='sector'
-                    label='Setor do funcionário'
-                    placeholder='Coloque o setor do funcionário'
+                    label='Setor'
+                    placeholder='Coloque o setor'
                 />
 
-                <SelectInput
-                    name='employeeTypeIndex'
-                    label='Tipo do funcionário'
-                    placeholder='Selecione o tipo do funcionário'
-                    options={_typesEmployee.map((x, index) => ({
-                        value: index.toString(),
-                        label: x
-                    }))}
-                    handlerChange={handlerChangeEmployeeType}
-                    disabled={editedDoctor !== undefined}
-                />
+                {isDoctor
+                    ? <>
+                        <FieldInput
+                            name='crm'
+                            label='CRM'
+                            placeholder='Coloque o CRM'
+                        />
 
-                {!isDoctorType && <>
-                    <Button
-                        type='submit'
-                    >
-                        {isLoading === "register"
-                            ? <Spinner size="sm" />
-                            : editedDoctor ? "Editar" : "Cadastrar"
-                        }
-                    </Button>
-
-                    <Warning value={warning} />
-                </>}
-            </Form>
-
-            {isDoctorType && <>
-                {editedDoctor
-                    ? <h2>
-                        Editar dados do médico
-
-                        {isLoading === "getDoctor" && <>
-                            {' '}
-                            <Spinner
-                                color="primary"
-                                type="grow"
-                            />
-                        </>}
-                    </h2>
-                    : <h2>Complementar dados do médico</h2>
-                }
-
-                <Form
-                    ref={complementFormRef}
-                    onSubmit={submitComplementForm}
-                    className="form-data"
-                    initialData={{
-                        crm: _itemDoctor.crm
-                    }}
-                >
-                    <FieldInput
-                        name='crm'
-                        label='CRM do médico'
-                        placeholder='Coloque o CRM do médico'
-                        disabled={editedDoctor !== undefined}
-                    />
-
-                    <SelectInput
-                        name='specialtyId'
-                        label='Especialidade'
-                        placeholder='Selecione a especialidade'
-                        options={specialties.map(x => ({
-                            value: x.idEspecialidade?.toString() as string,
-                            label: x.nomeEspecialidade
+                        <SelectInput
+                            name='specialtyId'
+                            label='Especialidade do médico'
+                            placeholder='Selecione a especialidade do médico'
+                            options={specialties.map(x => ({
+                                value: x.idEspecialidade?.toString(),
+                                label: x.nomeEspecialidade
+                            }))}
+                        />
+                    </>
+                    : <SelectInput
+                        name='employeeType'
+                        label='Tipo do funcionário'
+                        placeholder='Selecione o tipo do funcionário'
+                        options={_typesEmployee.map((x, index) => ({
+                            value: `${index + 1}`,
+                            label: x
                         }))}
                     />
+                }
 
-                    <Button
-                        type='submit'
-                    >
-                        {isLoading === "register"
-                            ? <Spinner size="sm" />
-                            : editedDoctor ? "Editar" : "Cadastrar"
-                        }
-                    </Button>
+                <Button
+                    type='submit'
+                >
+                    {isLoading === "register"
+                        ? <Spinner size="sm" />
+                        : isEdition ? "Editar" : "Cadastrar"
+                    }
+                </Button>
 
-                    <Warning value={warning} />
-                </Form>
-            </>}
+                <Warning value={warning} />
+            </Form>
         </>
     );
 }

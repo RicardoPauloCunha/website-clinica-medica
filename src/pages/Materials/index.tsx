@@ -141,11 +141,11 @@ const Materials = () => {
     }
 
     const onClickEditData = (index: number) => {
-        navigate("/material/" + materials[index].idMaterial + "/editar");
+        navigate("/materiais/" + materials[index].idMaterial + "/editar");
     }
 
     const onClickViewRecords = (index: number) => {
-        navigate("/material/" + materials[index].idMaterial + "/registros");
+        navigate("/materiais/" + materials[index].idMaterial + "/registros");
     }
 
     const onClickAddRecord = (index: number) => {

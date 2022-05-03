@@ -1,5 +1,4 @@
-import { get, post } from '../api';
-import { SuccessResponse } from '../defaultEntities';
+import { get, getParams, post, put } from '../api';
 import Funcionario from '../entities/funcionario';
 import { getEnumEmployeeStatus } from '../enums/employeeStatus';
 import { getEnumEmployeeType } from '../enums/employeeType';
@@ -27,20 +26,20 @@ export const _listEmployee: Funcionario[] = [
     },
     {
         idFuncionario: 3,
-        nomeFuncionario: "Médico",
-        email: "medic@cm.com",
-        senha: "147852369",
-        setor: "Atendimento",
-        tipoFuncionario: getEnumEmployeeType("doctor"),
-        statusFuncionario: getEnumEmployeeStatus("enabled")
-    },
-    {
-        idFuncionario: 4,
         nomeFuncionario: "Estoquista",
         email: "estoq@cm.com",
         senha: "147852369",
         setor: "Almoxarifado",
         tipoFuncionario: getEnumEmployeeType("stockist"),
+        statusFuncionario: getEnumEmployeeStatus("enabled")
+    },
+    {
+        idFuncionario: 4,
+        nomeFuncionario: "Médico",
+        email: "medic@cm.com",
+        senha: "147852369",
+        setor: "Atendimento",
+        tipoFuncionario: getEnumEmployeeType("doctor"),
         statusFuncionario: getEnumEmployeeStatus("enabled")
     }
 ];
@@ -50,11 +49,13 @@ export const getEmployeeByIdHttp = async (employeeId: number): Promise<Funcionar
     return data;
 }
 
-export const listEmployeeByTypeHttp = async (type: number): Promise<Funcionario[]> => {
-    if (type === 0)
-        return _listEmployee;
-    else
-        return _listEmployee.filter(x => x.tipoFuncionario === type);
+interface FilterEmployeeParams {
+    tipoFuncionario: number | null;
+}
+
+export const listEmployeeByTypeHttp = async (paramsData: FilterEmployeeParams): Promise<Funcionario[]> => {
+    let { data } = await getParams<FilterEmployeeParams, Funcionario[]>(ROOT + "tipofuncionario", paramsData);
+    return data;
 }
 
 interface LoginRequest {
@@ -67,10 +68,23 @@ export const postLoginEmployeeHttp = async (requestData: LoginRequest): Promise<
     return data;
 }
 
-export const postEmployeeHttp = async (requestData: Funcionario): Promise<SuccessResponse> => {
-    return { message: "" };
+export interface PostEmployeeRequest {
+    nomeFuncionario: string;
+    email: string;
+    senha: string;
+    setor: string;
+    tipoFuncionario: number;
+    statusFuncionario: number;
 }
 
-export const putEmployeeHttp = async (requestData: Funcionario): Promise<SuccessResponse> => {
-    return { message: "" };
+export const postEmployeeHttp = async (requestData: PostEmployeeRequest): Promise<void> => {
+    await post<PostEmployeeRequest, void>(ROOT, requestData);
+}
+
+interface PutEmployeeRequest extends PostEmployeeRequest {
+    idFuncionario: number;
+}
+
+export const putEmployeeHttp = async (requestData: PutEmployeeRequest): Promise<void> => {
+    await put<PutEmployeeRequest, void>(ROOT + "alterar-funcionario", requestData);
 }
