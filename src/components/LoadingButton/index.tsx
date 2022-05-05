@@ -9,6 +9,7 @@ const LoadingButton = ({ text, isLoading, ...rest }: LoadingButtonProps) => {
     return (
         <Button
             {...rest}
+            disabled={isLoading}
         >
             {isLoading
                 ? <Spinner size="sm" />

@@ -2,7 +2,7 @@ import { NavLink as Link, Outlet } from 'react-router-dom';
 
 import { NavLink, NavItem, Nav } from 'reactstrap';
 
-const MaterialMenu = () => {
+const DoctorSchedulesMenu = () => {
     return (
         <>
             <Nav
@@ -11,19 +11,10 @@ const MaterialMenu = () => {
             >
                 <NavItem>
                     <NavLink
-                        to="/materiais/listar"
+                        to="/consultas/listar"
                         tag={Link}
                     >
                         Listar
-                    </NavLink>
-                </NavItem>
-
-                <NavItem>
-                    <NavLink
-                        to="/materiais/cadastrar"
-                        tag={Link}
-                    >
-                        Cadastrar
                     </NavLink>
                 </NavItem>
             </Nav>
@@ -33,4 +24,4 @@ const MaterialMenu = () => {
     );
 }
 
-export default MaterialMenu;
+export default DoctorSchedulesMenu;

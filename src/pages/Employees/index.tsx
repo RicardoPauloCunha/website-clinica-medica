@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { getEnumEmployeeType, getValueEmployeeType, listAllEmployeeType } from "../../services/enums/employeeType";
-import { getEnumEmployeeStatus, getValueEmployeeStatus } from "../../services/enums/employeeStatus";
+import EmployeeTypeEnum, { getValueEmployeeType, listEmployeeType } from "../../services/enums/employeeType";
+import EmployeeStatusEnum, { getValueEmployeeStatus } from "../../services/enums/employeeStatus";
 import Funcionario from "../../services/entities/funcionario";
 import { listEmployeeByTypeHttp, putEmployeeHttp } from "../../services/http/employee";
 import { WarningTuple } from "../../util/getHttpErrors";
@@ -20,9 +20,7 @@ type ModalString = "status" | "";
 const Employees = () => {
     const navigate = useNavigate();
 
-    const _employeeTypes = listAllEmployeeType();
-
-    const ENABLED_STATUS = getEnumEmployeeStatus("enabled");
+    const _employeeTypes = listEmployeeType();
 
     const [isLoading, setIsLoading] = useState<"get" | "status" | "">("");
     const [warning, setWarning] = useState<WarningTuple>(["", ""]);
@@ -54,6 +52,7 @@ const Employees = () => {
 
     const toggleModal = (modalName?: ModalString) => {
         setModal(modalName !== undefined ? modalName : "");
+        setWarning(["", ""]);
     }
 
     const sendChangeStatus = () => {
@@ -62,10 +61,10 @@ const Employees = () => {
 
         setIsLoading("status");
 
-        if (employees[employeeIndex].statusFuncionario === ENABLED_STATUS)
-            employees[employeeIndex].statusFuncionario = getEnumEmployeeStatus("disabled");
+        if (employees[employeeIndex].statusFuncionario === EmployeeStatusEnum.Enabled)
+            employees[employeeIndex].statusFuncionario = EmployeeStatusEnum.Disabled;
         else
-            employees[employeeIndex].statusFuncionario = getEnumEmployeeStatus("enabled");
+            employees[employeeIndex].statusFuncionario = EmployeeStatusEnum.Enabled;
 
         putEmployeeHttp(employees[employeeIndex]).then(() => {
             setIsLoading("");
@@ -82,7 +81,7 @@ const Employees = () => {
         if (index === -1)
             return;
 
-        if (employees[index].tipoFuncionario === getEnumEmployeeType("doctor"))
+        if (employees[index].tipoFuncionario === EmployeeTypeEnum.Doctor)
             navigate("/funcionarios/medicos/" + employees[index].idFuncionario + "/editar");
         else
             navigate("/funcionarios/" + employees[index].idFuncionario + "/editar");
@@ -90,7 +89,7 @@ const Employees = () => {
 
     const onClickChangeStatus = (index: number) => {
         setEmployeeIndex(index);
-        setEmployeeIsEnabled(employees[index].statusFuncionario === ENABLED_STATUS);
+        setEmployeeIsEnabled(employees[index].statusFuncionario === EmployeeStatusEnum.Enabled);
         toggleModal("status");
     }
 
@@ -104,7 +103,7 @@ const Employees = () => {
                 className="form-search"
             >
                 <SelectInput
-                    name='employeeTypeIndex'
+                    name='employeeType'
                     label='Tipo do funcionário'
                     placeholder='Filtrar pelo tipo do funcionário'
                     options={_employeeTypes.map((x, index) => ({
@@ -128,7 +127,7 @@ const Employees = () => {
                     <TextGroupGrid>
                         <DataText
                             label="Tipo funcionário"
-                            value={getValueEmployeeType(undefined, x.tipoFuncionario)}
+                            value={getValueEmployeeType(x.tipoFuncionario)}
                         />
 
                         <DataText
@@ -138,7 +137,7 @@ const Employees = () => {
 
                         <DataText
                             label="Status"
-                            value={getValueEmployeeStatus(undefined, x.statusFuncionario)}
+                            value={getValueEmployeeStatus(x.statusFuncionario)}
                         />
                     </TextGroupGrid>
 
@@ -152,7 +151,7 @@ const Employees = () => {
                         </Button>
 
                         <Button
-                            color={x.statusFuncionario === ENABLED_STATUS ? "danger" : "success"}
+                            color={x.statusFuncionario === EmployeeStatusEnum.Enabled ? "danger" : "success"}
                             onClick={() => onClickChangeStatus(index)}
                         >
                             {x.statusFuncionario ? "Desabilitar" : "Habilitar"}

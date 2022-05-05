@@ -3,7 +3,7 @@ import { FormHandles, SubmitHandler } from "@unform/core";
 import * as Yup from 'yup';
 import { useParams } from "react-router-dom";
 
-import { getEnumMaterialStatus } from "../../services/enums/materialStatus";
+import MaterialStatusEnum from "../../services/enums/materialStatus";
 import CategoriaMaterial from "../../services/entities/categoriaMaterial";
 import Fabricante from "../../services/entities/fabricante";
 import Material from "../../services/entities/material";
@@ -170,7 +170,7 @@ const RegisterMaterial = () => {
                 fabricante: {
                     cnpj: data.manufacturerCnpj
                 },
-                statusMaterial: getEnumMaterialStatus("enabled"),
+                statusMaterial: MaterialStatusEnum.Enabled,
             }
 
             if (editedMaterial === undefined) {
@@ -343,6 +343,7 @@ const RegisterMaterial = () => {
                     label='Descrição'
                     placeholder='Coloque a descrição do serviço'
                     type="textarea"
+                    rows="4"
                 />
 
                 <FieldInput

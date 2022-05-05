@@ -49,7 +49,7 @@ const Login = () => {
         let user = getLoggedUser();
 
         if (user !== null) {
-            await getEmployeeByIdHttp(user.idEmployee).then(response => {
+            await getEmployeeByIdHttp(user.employeeId).then(response => {
                 handlerLogin(response);
             });
         }
@@ -92,7 +92,7 @@ const Login = () => {
 
     const handlerLogin = (user: Funcionario) => {
         let dataToken = handlerSignIn({
-            idEmployee: user.idFuncionario,
+            employeeId: user.idFuncionario,
             name: user.nomeFuncionario,
             employeeType: user.tipoFuncionario
         });

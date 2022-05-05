@@ -3,33 +3,21 @@ import { NavLink as Link, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../../contexts/auth';
 import { getLoggedUser, handlerLogout } from '../../localStorages/auth';
+import EmployeeTypeEnum, { } from '../../services/enums/employeeType';
 
 import { Button, Collapse, NavLink, Nav, Navbar, NavbarBrand, NavbarText, NavbarToggler, NavItem } from 'reactstrap';
 import { NavbarProfile } from './styles';
-import { getValueEmployeeType } from '../../services/enums/employeeType';
 
 const Menu = () => {
     const navigate = useNavigate();
     const { loggedUser, defineLoggedUser } = useAuth();
 
-    const ADMIN_TYPE = getValueEmployeeType("admin");
-    const RECEPTIONIST_TYPE = getValueEmployeeType("receptionist");
-    const STOCKIST_TYPE = getValueEmployeeType("stockist");
-
     const [isOpen, setIsOpen] = useState(false);
-    const [employeeType, setEmployeeType] = useState("");
 
     useEffect(() => {
         defineLoggedUser(getLoggedUser());
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line
     }, []);
-
-    useEffect(() => {
-        if (loggedUser !== null)
-            setEmployeeType(getValueEmployeeType(undefined, loggedUser.employeeType));
-        else
-            setEmployeeType("");
-    }, [loggedUser]);
 
     const toggleIsOpen = () => {
         setIsOpen(!isOpen);
@@ -68,7 +56,7 @@ const Menu = () => {
                         className="me-auto"
                         navbar
                     >
-                        {employeeType === ADMIN_TYPE && <>
+                        {loggedUser?.employeeType === EmployeeTypeEnum.Admin && <>
                             <NavItem>
                                 <NavLink
                                     to="/servicos"
@@ -88,7 +76,7 @@ const Menu = () => {
                             </NavItem>
                         </>}
 
-                        {employeeType === RECEPTIONIST_TYPE && <>
+                        {loggedUser?.employeeType === EmployeeTypeEnum.Receptionist && <>
                             <NavItem>
                                 <NavLink
                                     to="/agendamentos"
@@ -99,13 +87,24 @@ const Menu = () => {
                             </NavItem>
                         </>}
 
-                        {employeeType === STOCKIST_TYPE && <>
+                        {loggedUser?.employeeType === EmployeeTypeEnum.Stockist && <>
                             <NavItem>
                                 <NavLink
                                     to="/materiais"
                                     tag={Link}
                                 >
                                     Materiais
+                                </NavLink>
+                            </NavItem>
+                        </>}
+
+                        {loggedUser?.employeeType === EmployeeTypeEnum.Doctor && <>
+                            <NavItem>
+                                <NavLink
+                                    to="/consultas"
+                                    tag={Link}
+                                >
+                                    Agendamentos médicos
                                 </NavLink>
                             </NavItem>
                         </>}

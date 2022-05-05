@@ -15,13 +15,6 @@ export const Form = styled(Unform)`
             margin-top: 1rem;
             width: 100%;
         }
-
-        .col-md-2 {
-            >button {
-                margin-top: 1.85rem;
-                width: 100%;
-            }
-        }
     }
 
     &.form-search {
@@ -35,6 +28,32 @@ export const Form = styled(Unform)`
 
         .alert {
             margin: 2rem 0 1rem 0;
+        }
+    }
+
+    &.form-data, &.form-search {
+        .col-md-2 {
+            >button {
+                padding: 0.5rem 1rem 0.5rem 1rem !important;
+                margin-top: 1rem;
+                width: 100%;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .col-md-2 {
+                >button {
+                margin-top: 1.85rem;
+                }
+            }
+        }
+
+        @media (min-width: 992px) {
+            .col-md-2 {
+                >button {
+                    padding: 0.5rem 2rem 0.5rem 2rem !important;
+                }
+            }
         }
     }
 `;

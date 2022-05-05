@@ -2,27 +2,32 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 import { useAuth } from './contexts/auth';
 import { userIsAuth } from './localStorages/auth';
+import EmployeeTypeEnum from './services/enums/employeeType';
 
 import Layout from './components/Layout';
+import MaterialMenu from './components/Menu/material';
+import ServiceMenu from './components/Menu/service';
+import SchedulingMenu from './components/Menu/scheduling';
+import EmployeeMenu from './components/Menu/employee';
 
 import Home from './pages/Home';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
 import RegisterService from './pages/RegisterService';
-import EmployeeType, { getEnumEmployeeType } from './services/enums/employeeType';
 import RegisterEmployee from './pages/RegisterEmployee';
 import Employees from './pages/Employees';
 import RegisterMaterial from './pages/RegisterMaterial';
 import Materials from './pages/Materials';
 import MaterialRecords from './pages/Records';
-import EmployeeMenu from './components/Menu/employee';
-import MaterialMenu from './components/Menu/material';
-import ServiceMenu from './components/Menu/service';
-import SchedulingMenu from './components/Menu/scheduling';
 import RegisterScheduling from './pages/RegisterScheduling';
+import Schedules from './pages/Schedules';
+import ConfirmPayment from './pages/ConfirmPayment';
+import RefundPayment from './pages/RefundPayment';
+import DoctorSchedulesMenu from './components/Menu/doctorSchedules';
+import DoctorSchedules from './pages/DoctorSchedules';
 
 type RequireAuthProps = {
-    employeeType: EmployeeType;
+    employeeType: EmployeeTypeEnum;
     children: React.ReactNode;
 }
 
@@ -31,7 +36,7 @@ const RequireAuth = ({ employeeType, children }: RequireAuthProps): JSX.Element 
 
     let { userIsChecked, loggedUser } = useAuth();
 
-    if ((loggedUser !== null && loggedUser.employeeType === getEnumEmployeeType(employeeType)) || (!userIsChecked && userIsAuth()))
+    if (loggedUser?.employeeType === employeeType || (!userIsChecked && userIsAuth()))
         return <>{children}</>;
 
     return <Navigate
@@ -53,49 +58,67 @@ const PagesRoutes = () => {
 
                 <Route path="servicos" element={<ServiceMenu />}>
                     <Route path="cadastrar" element={
-                        <RequireAuth employeeType="admin" children={<RegisterService />} />
+                        <RequireAuth employeeType={EmployeeTypeEnum.Admin} children={<RegisterService />} />
                     } />
                 </Route>
 
                 <Route path="funcionarios" element={<EmployeeMenu />}>
                     <Route path="listar" element={
-                        <RequireAuth employeeType="admin" children={<Employees />} />
+                        <RequireAuth employeeType={EmployeeTypeEnum.Admin} children={<Employees />} />
                     } />
                     <Route path="cadastrar" element={
-                        <RequireAuth employeeType="admin" children={<RegisterEmployee />} />
+                        <RequireAuth employeeType={EmployeeTypeEnum.Admin} children={<RegisterEmployee />} />
                     } />
                     <Route path=":employeeId/editar" element={
-                        <RequireAuth employeeType="admin" children={<RegisterEmployee />} />
+                        <RequireAuth employeeType={EmployeeTypeEnum.Admin} children={<RegisterEmployee />} />
                     } />
 
                     <Route path="medicos">
                         <Route path="cadastrar" element={
-                            <RequireAuth employeeType="admin" children={<RegisterEmployee />} />
+                            <RequireAuth employeeType={EmployeeTypeEnum.Admin} children={<RegisterEmployee />} />
                         } />
                         <Route path=":doctorId/editar" element={
-                            <RequireAuth employeeType="admin" children={<RegisterEmployee />} />
+                            <RequireAuth employeeType={EmployeeTypeEnum.Admin} children={<RegisterEmployee />} />
                         } />
                     </Route>
                 </Route>
 
                 <Route path="materiais" element={<MaterialMenu />}>
                     <Route path="listar" element={
-                        <RequireAuth employeeType="stockist" children={<Materials />} />
+                        <RequireAuth employeeType={EmployeeTypeEnum.Stockist} children={<Materials />} />
                     } />
                     <Route path="cadastrar" element={
-                        <RequireAuth employeeType="stockist" children={<RegisterMaterial />} />
+                        <RequireAuth employeeType={EmployeeTypeEnum.Stockist} children={<RegisterMaterial />} />
                     } />
                     <Route path=":materialId/editar" element={
-                        <RequireAuth employeeType="stockist" children={<RegisterMaterial />} />
+                        <RequireAuth employeeType={EmployeeTypeEnum.Stockist} children={<RegisterMaterial />} />
                     } />
                     <Route path=":materialId/registros" element={
-                        <RequireAuth employeeType="stockist" children={<MaterialRecords />} />
+                        <RequireAuth employeeType={EmployeeTypeEnum.Stockist} children={<MaterialRecords />} />
                     } />
                 </Route>
 
                 <Route path="agendamentos" element={<SchedulingMenu />}>
+                    <Route path="listar" element={
+                        <RequireAuth employeeType={EmployeeTypeEnum.Receptionist} children={<Schedules />} />
+                    } />
                     <Route path="cadastrar" element={
-                        <RequireAuth employeeType="receptionist" children={<RegisterScheduling />} />
+                        <RequireAuth employeeType={EmployeeTypeEnum.Receptionist} children={<RegisterScheduling />} />
+                    } />
+                    <Route path=":schedulingId/confirmar-pagamento" element={
+                        <RequireAuth employeeType={EmployeeTypeEnum.Receptionist} children={<ConfirmPayment />} />
+                    } />
+                </Route>
+
+                <Route path="consultas" element={<DoctorSchedulesMenu />}>
+                    <Route path="listar" element={
+                        <RequireAuth employeeType={EmployeeTypeEnum.Doctor} children={<DoctorSchedules />} />
+                    } />
+                </Route>
+
+                <Route path="pagamentos" element={<SchedulingMenu />}>
+                    <Route path=":paymentId/ressarcir" element={
+                        <RequireAuth employeeType={EmployeeTypeEnum.Receptionist} children={<RefundPayment />} />
                     } />
                 </Route>
 

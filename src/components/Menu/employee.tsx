@@ -14,7 +14,7 @@ const EmployeeMenu = () => {
                         to="/funcionarios/listar"
                         tag={Link}
                     >
-                        Lista
+                        Listar
                     </NavLink>
                 </NavItem>
 
@@ -23,7 +23,7 @@ const EmployeeMenu = () => {
                         to="/funcionarios/cadastrar"
                         tag={Link}
                     >
-                        Cadastro
+                        Cadastrar
                     </NavLink>
                 </NavItem>
 

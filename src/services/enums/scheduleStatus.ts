@@ -1,41 +1,22 @@
-type ScheduleStatus = "scheduled" | "unchecked" | "progress" | "concluded";
+enum ScheduleStatusEnum {
+    Scheduled = 1,
+    Unchecked = 2,
+    Progress = 3,
+    Concluded = 4
+}
 
-export const getValueScheduleStatus = (typeString?: ScheduleStatus, typeNumber?: number) => {
-    let type: number;
-
-    if (typeString !== undefined)
-        type = (getEnumScheduleStatus(typeString));
-    else if (typeNumber !== undefined)
-        type = typeNumber;
-    else
-        return "";
-
-    switch (type) {
-        case 1:
+export const getValueScheduleStatus = (status: ScheduleStatusEnum) => {
+    switch (status) {
+        case ScheduleStatusEnum.Scheduled:
             return "Agendado";
-        case 2:
+        case ScheduleStatusEnum.Unchecked:
             return "Desmarcado";
-        case 3:
+        case ScheduleStatusEnum.Progress:
             return "Andamento";
-        case 4:
+        case ScheduleStatusEnum.Concluded:
             return "Concluído";
         default:
             return "";
-    }
-}
-
-export const getEnumScheduleStatus = (type: ScheduleStatus) => {
-    switch (type) {
-        case "scheduled":
-            return 1;
-        case "unchecked":
-            return 2;
-        case "progress":
-            return 3;
-        case "concluded":
-            return 4;
-        default:
-            return 0;
     }
 }
 
@@ -43,9 +24,9 @@ export const listScheduleStatus = () => {
     let list: string[] = [];
 
     for (let i = 1; i <= 4; i++)
-        list.push(getValueScheduleStatus(undefined, i));
+        list.push(getValueScheduleStatus(i));
 
     return list;
 }
 
-export default ScheduleStatus;
+export default ScheduleStatusEnum;

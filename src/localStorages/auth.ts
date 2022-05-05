@@ -1,9 +1,10 @@
+import EmployeeTypeEnum from '../services/enums/employeeType';
 import { decryptData, encryptData } from '../util/cryptography';
 
 export type TokenData = {
-    idEmployee: number;
+    employeeId: number;
     name: string;
-    employeeType: number;
+    employeeType: EmployeeTypeEnum;
 }
 
 const LOGGED_USER_KEY = "@Template:logged-user";

@@ -10,6 +10,7 @@ interface Agendamento {
     medico?: Medico;
     data: string;
     dataAgendada: string;
+    horaAgendada: string;
     servico?: Servico;
     status: number;
 }

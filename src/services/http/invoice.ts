@@ -1,28 +1,28 @@
 import NotaFiscal from "../entities/notaFiscal";
 import Paciente from "../entities/paciente";
-import { getEnumInvoiceType } from "../enums/invoiceType";
+import InvoiceTypeEnum from "../enums/invoiceType";
 
 export const _listInvoice: NotaFiscal[] = [
     {
         idNotaFiscal: 1,
         valorNota: 110.00,
-        dataEmissao: "24/04/2022",
+        dataEmissao: "2022-05-03",
         impostos: 0.00,
-        tipoNotaFiscal: getEnumInvoiceType("payment") 
+        tipoNotaFiscal: InvoiceTypeEnum.Payment 
     },
     {
         idNotaFiscal: 2,
         valorNota: 120.00,
-        dataEmissao: "24/04/2022",
+        dataEmissao: "2022-05-03",
         impostos: 0.00,
-        tipoNotaFiscal: getEnumInvoiceType("payment") 
+        tipoNotaFiscal: InvoiceTypeEnum.Payment
     },
     {
         idNotaFiscal: 3,
         valorNota: 120.00,
-        dataEmissao: "24/04/2022",
+        dataEmissao: "2022-05-03",
         impostos: 0.00,
-        tipoNotaFiscal: getEnumInvoiceType("refund") 
+        tipoNotaFiscal: InvoiceTypeEnum.Refund
     }
 ];
 

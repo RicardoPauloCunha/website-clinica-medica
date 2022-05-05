@@ -1,33 +1,16 @@
-type RecordType = "input" | "output";
+enum RecordTypeEnum {
+    Input = 1,
+    Output = 2
+}
 
-export const getValueRecordType = (typeString?: RecordType, typeNumber?: number) => {
-    let type: number;
-
-    if (typeString !== undefined)
-        type = (getEnumRecordType(typeString));
-    else if (typeNumber !== undefined)
-        type = typeNumber;
-    else
-        return "";
-
+export const getValueRecordType = (type: RecordTypeEnum) => {
     switch (type) {
-        case 1:
+        case RecordTypeEnum.Input:
             return "Entrada";
-        case 2:
+        case RecordTypeEnum.Output:
             return "Saída";
         default:
             return "";
-    }
-}
-
-export const getEnumRecordType = (type: RecordType) => {
-    switch (type) {
-        case "input":
-            return 1;
-        case "output":
-            return 2;
-        default:
-            return 0;
     }
 }
 
@@ -35,9 +18,9 @@ export const listRecordType = () => {
     let list: string[] = [];
 
     for (let i = 1; i <= 2; i++)
-        list.push(getValueRecordType(undefined, i));
+        list.push(getValueRecordType(i));
 
     return list;
 }
 
-export default RecordType;
+export default RecordTypeEnum;

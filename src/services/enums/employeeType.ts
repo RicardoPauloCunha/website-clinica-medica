@@ -1,60 +1,41 @@
-type EmployeeType = "admin" | "receptionist" | "stockist" | "doctor";
+enum EmployeeTypeEnum {
+    Admin = 1,
+    Receptionist = 2,
+    Stockist = 3,
+    Doctor = 4
+}
 
-export const getValueEmployeeType = (typeString?: EmployeeType, typeNumber?: number) => {
-    let type: number;
-
-    if (typeString !== undefined)
-        type = (getEnumEmployeeType(typeString));
-    else if (typeNumber !== undefined)
-        type = typeNumber;
-    else
-        return "";
-
+export const getValueEmployeeType = (type: EmployeeTypeEnum) => {
     switch (type) {
-        case 1:
+        case EmployeeTypeEnum.Admin:
             return "Administrador";
-        case 2:
+        case EmployeeTypeEnum.Receptionist:
             return "Recepcionista";
-        case 3:
+        case EmployeeTypeEnum.Stockist:
             return "Estoquista";
-        case 4:
+        case EmployeeTypeEnum.Doctor:
             return "Médico";
         default:
             return "";
     }
 }
 
-export const getEnumEmployeeType = (type: EmployeeType) => {
-    switch (type) {
-        case "admin":
-            return 1;
-        case "receptionist":
-            return 2;
-        case "stockist":
-            return 3;
-        case "doctor":
-            return 4;
-        default:
-            return 0;
-    }
-}
-
 export const listEmployeeType = () => {
     let list: string[] = [];
 
-    for (let i = 1; i <= 3; i++)
-        list.push(getValueEmployeeType(undefined, i));
+    for (let i = 1; i <= 4; i++)
+        list.push(getValueEmployeeType(i));
 
     return list;
 }
 
-export const listAllEmployeeType = () => {
+export const listToRegisterEmployeeType = () => {
     let list: string[] = [];
 
-    for (let i = 1; i <= 4; i++)
-        list.push(getValueEmployeeType(undefined, i));
+    for (let i = 1; i <= 3; i++)
+        list.push(getValueEmployeeType(i));
 
     return list;
 }
 
-export default EmployeeType;
+export default EmployeeTypeEnum;

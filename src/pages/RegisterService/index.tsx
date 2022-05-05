@@ -167,6 +167,7 @@ const RegisterService = () => {
                     label='Descrição'
                     placeholder='Coloque a descrição do serviço'
                     type="textarea"
+                    rows="4"
                 />
 
                 <SelectInput

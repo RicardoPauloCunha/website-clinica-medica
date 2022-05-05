@@ -1,33 +1,16 @@
-type InvoiceType = "payment" | "refund";
+enum InvoiceTypeEnum {
+    Payment = 1,
+    Refund = 2 
+}
 
-export const getValueInvoiceType = (typeString?: InvoiceType, typeNumber?: number) => {
-    let type: number;
-
-    if (typeString !== undefined)
-        type = (getEnumInvoiceType(typeString));
-    else if (typeNumber !== undefined)
-        type = typeNumber;
-    else
-        return "";
-
+export const getValueInvoiceType = (type: InvoiceTypeEnum) => {
     switch (type) {
-        case 1:
+        case InvoiceTypeEnum.Payment:
             return "Pagamento";
-        case 2:
+        case InvoiceTypeEnum.Refund:
             return "Ressarcimento";
         default:
             return "";
-    }
-}
-
-export const getEnumInvoiceType = (type: InvoiceType) => {
-    switch (type) {
-        case "payment":
-            return 1;
-        case "refund":
-            return 2;
-        default:
-            return 0;
     }
 }
 
@@ -35,9 +18,9 @@ export const listInvoiceType = () => {
     let list: string[] = [];
 
     for (let i = 1; i <= 2; i++)
-        list.push(getValueInvoiceType(undefined, i));
+        list.push(getValueInvoiceType(i));
 
     return list;
 }
 
-export default InvoiceType;
+export default InvoiceTypeEnum;

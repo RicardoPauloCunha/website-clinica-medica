@@ -1,8 +1,18 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FormHandles, SubmitHandler } from "@unform/core";
 import * as Yup from 'yup';
 
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/auth";
+import RecordTypeEnum, { listRecordType } from "../../services/enums/recordType";
+import Material from "../../services/entities/material";
+import CategoriaMaterial from "../../services/entities/categoriaMaterial";
+import { listMaterialByCategoryHttp, putMaterialHttp } from "../../services/http/material";
+import { listCategoryHttp } from "../../services/http/category";
+import { postRecordHttp } from "../../services/http/record";
+import getValidationErrors from "../../util/getValidationErrors";
+import { WarningTuple } from "../../util/getHttpErrors";
+
 import { Button, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import { ButtonGroupRow, DataModal, Form, TextGroupGrid } from "../../styles/components";
 import SelectInput from "../../components/Input/select";
@@ -11,16 +21,6 @@ import Warning from "../../components/Warning";
 import DataCard from "../../components/DataCard";
 import DataText from "../../components/DataText";
 import FieldInput from "../../components/Input";
-
-import { useAuth } from "../../contexts/auth";
-import { getEnumRecordType, listRecordType } from "../../services/enums/recordType";
-import Material from "../../services/entities/material";
-import CategoriaMaterial from "../../services/entities/categoriaMaterial";
-import { listMaterialByCategoryHttp, putMaterialHttp } from "../../services/http/material";
-import { listCategoryHttp } from "../../services/http/category";
-import { postRecordHttp } from "../../services/http/record";
-import getValidationErrors from "../../util/getValidationErrors";
-import { WarningTuple } from "../../util/getHttpErrors";
 import LoadingButton from "../../components/LoadingButton";
 
 type RecordFormData = {
@@ -38,8 +38,6 @@ const Materials = () => {
     const { loggedUser } = useAuth();
 
     const _recordTypes = listRecordType();
-
-    const INPUT_TYPE = getEnumRecordType("input");
 
     const [isLoading, setIsLoading] = useState<"get" | "record" | "">("");
     const [warning, setWarning] = useState<WarningTuple>(["", ""]);
@@ -104,7 +102,7 @@ const Materials = () => {
             data.recordTypeIndex = Number(data.recordTypeIndex);
             data.quantity = Number(data.quantity);
 
-            if (data.recordTypeIndex === INPUT_TYPE)
+            if (data.recordTypeIndex === RecordTypeEnum.Input)
                 materials[materialIndex].quantidade += data.quantity;
             else
                 materials[materialIndex].quantidade -= data.quantity;
@@ -116,7 +114,7 @@ const Materials = () => {
                     idMaterial: materials[materialIndex].idMaterial
                 },
                 funcionario: {
-                    idFuncionario: loggedUser?.idEmployee as number
+                    idFuncionario: loggedUser?.employeeId as number
                 },
                 tipoEntradaSaida: data.recordTypeIndex
             }).then(() => {
@@ -294,6 +292,7 @@ const Materials = () => {
                             label='Descrição'
                             placeholder='Coloque a descrição do registro'
                             type="textarea"
+                            rows="4"
                         />
 
                         <Warning value={warning} />

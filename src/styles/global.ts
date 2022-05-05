@@ -10,13 +10,14 @@ export default createGlobalStyle`
 
     :root {
         --color-white-0: #FFFFFF;
-        --color-white-100: #F3F3F3;
+        --color-white-100: #f9f9f9;
 
         --color-black-100: #212529;
+        --color-black-200: #1f2732;
 
         --color-gray-100: #C6CDD8;
         --color-gray-200: #6C757D;
-        --color-gray-300: #4A5C73;
+        --color-gray-300: #374558;
 
         --color-blue-200: #4198F7;
         --color-blue-300: #0D53FC;

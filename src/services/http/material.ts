@@ -1,6 +1,6 @@
 import { get, getParams, post, put } from "../api";
 import Material from "../entities/material";
-import { getEnumMaterialStatus } from "../enums/materialStatus";
+import MaterialStatusEnum from "../enums/materialStatus";
 import { _listManufacturer } from "./manufacturer";
 import { _listCategory } from "./category";
 
@@ -13,7 +13,7 @@ export const _listMaterial: Material[] = [
         descricao: "Lorem Ipsum é simplesmente uma simulação de texto da",
         unidadeDeMedida: "Unidade",
         quantidade: 101,
-        statusMaterial: getEnumMaterialStatus("enabled"),
+        statusMaterial: MaterialStatusEnum.Enabled,
         categoriaMaterial: _listCategory[0],
         fabricante: _listManufacturer[0]
     },
@@ -23,7 +23,7 @@ export const _listMaterial: Material[] = [
         descricao: "Lorem Ipsum é simplesmente uma simulação de texto da indústria tipográfica e de impressos, e vem sendo utilizado desde",
         unidadeDeMedida: "Unidade",
         quantidade: 60,
-        statusMaterial: getEnumMaterialStatus("enabled"),
+        statusMaterial: MaterialStatusEnum.Enabled,
         categoriaMaterial: _listCategory[0],
         fabricante: _listManufacturer[0]
     },
@@ -33,7 +33,7 @@ export const _listMaterial: Material[] = [
         descricao: "Lorem Ipsum é simplesmente uma simulação de texto da indústria tipográfica e de impressos, e vem sendo utilizado desde o século XVI, quando um impressor desconhecido pegou uma",
         unidadeDeMedida: "Unidade",
         quantidade: 50,
-        statusMaterial: getEnumMaterialStatus("enabled"),
+        statusMaterial: MaterialStatusEnum.Enabled,
         categoriaMaterial: _listCategory[1],
         fabricante: _listManufacturer[0]
     },
@@ -43,7 +43,7 @@ export const _listMaterial: Material[] = [
         descricao: "Lorem Ipsum é simplesmente uma simulação de texto da indústria tipográfica e de impressos, e vem sendo utilizado desde o século XVI, quando um impressor desconhecido pegou uma bandeja de tipos e os embaralhou para fazer um livro de modelos",
         unidadeDeMedida: "Unidade",
         quantidade: 20,
-        statusMaterial: getEnumMaterialStatus("enabled"),
+        statusMaterial: MaterialStatusEnum.Enabled,
         categoriaMaterial: _listCategory[1],
         fabricante: _listManufacturer[0]
     },
@@ -53,7 +53,7 @@ export const _listMaterial: Material[] = [
         descricao: "Lorem Ipsum é simplesmente uma simulação de texto da indústria tipográfica e de impressos, e vem sendo utilizado desde o século XVI, quando um impressor desconhecido pegou uma bandeja de tipos e os embaralhou para fazer um livro de modelos de tipos. Lorem Ipsum sobreviveu não só a cinco séculos, com",
         unidadeDeMedida: "Unidade",
         quantidade: 10,
-        statusMaterial: getEnumMaterialStatus("enabled"),
+        statusMaterial: MaterialStatusEnum.Enabled,
         categoriaMaterial: _listCategory[2],
         fabricante: _listManufacturer[0]
     },
@@ -63,7 +63,7 @@ export const _listMaterial: Material[] = [
         descricao: "É um fato conhecido de todos que um leitor se distrairá com o",
         unidadeDeMedida: "Unidade",
         quantidade: 200,
-        statusMaterial: getEnumMaterialStatus("enabled"),
+        statusMaterial: MaterialStatusEnum.Enabled,
         categoriaMaterial: _listCategory[2],
         fabricante: _listManufacturer[0]
     },
@@ -73,7 +73,7 @@ export const _listMaterial: Material[] = [
         descricao: "É um fato conhecido de todos que um leitor se distrairá com o conteúdo de texto legível de uma página quando estiver",
         unidadeDeMedida: "Unidade",
         quantidade: 100,
-        statusMaterial: getEnumMaterialStatus("enabled"),
+        statusMaterial: MaterialStatusEnum.Enabled,
         categoriaMaterial: _listCategory[3],
         fabricante: _listManufacturer[1]
     },
@@ -83,7 +83,7 @@ export const _listMaterial: Material[] = [
         descricao: "É um fato conhecido de todos que um leitor se distrairá com o conteúdo de texto legível de uma página quando estiver examinando sua diagramação. A vantagem de usar Lorem Ipsum é",
         unidadeDeMedida: "Unidade",
         quantidade: 150,
-        statusMaterial: getEnumMaterialStatus("enabled"),
+        statusMaterial: MaterialStatusEnum.Enabled,
         categoriaMaterial: _listCategory[3],
         fabricante: _listManufacturer[1]
     },
@@ -93,7 +93,7 @@ export const _listMaterial: Material[] = [
         descricao: "É um fato conhecido de todos que um leitor se distrairá com o conteúdo de texto legível de uma página quando estiver examinando sua diagramação. A vantagem de usar Lorem Ipsum é que ele tem uma distribuição normal de letras, ao contrário de",
         unidadeDeMedida: "Unidade",
         quantidade: 130,
-        statusMaterial: getEnumMaterialStatus("enabled"),
+        statusMaterial: MaterialStatusEnum.Enabled,
         categoriaMaterial: _listCategory[4],
         fabricante: _listManufacturer[1]
     },
@@ -103,7 +103,7 @@ export const _listMaterial: Material[] = [
         descricao: "É um fato conhecido de todos que um leitor se distrairá com o conteúdo de texto legível de uma página quando estiver examinando sua diagramação. A vantagem de usar Lorem Ipsum é que ele tem uma distribuição normal de letras, ao contrário de 'Conteúdo aqui, conteúdo aqui', fazendo com que ele tenha",
         unidadeDeMedida: "Unidade",
         quantidade: 140,
-        statusMaterial: getEnumMaterialStatus("enabled"),
+        statusMaterial: MaterialStatusEnum.Enabled,
         categoriaMaterial: _listCategory[4],
         fabricante: _listManufacturer[1]
     },
@@ -113,7 +113,7 @@ export const _listMaterial: Material[] = [
         descricao: "Ao contrário do que se acredita, Lorem Ipsum não é simplesmente",
         unidadeDeMedida: "Unidade",
         quantidade: 10,
-        statusMaterial: getEnumMaterialStatus("enabled"),
+        statusMaterial: MaterialStatusEnum.Enabled,
         categoriaMaterial: _listCategory[5],
         fabricante: _listManufacturer[1]
     },
@@ -123,7 +123,7 @@ export const _listMaterial: Material[] = [
         descricao: "Ao contrário do que se acredita, Lorem Ipsum não é simplesmente um texto randômico. Com mais de 2000 anos, suas raízes podem",
         unidadeDeMedida: "Unidade",
         quantidade: 0,
-        statusMaterial: getEnumMaterialStatus("enabled"),
+        statusMaterial: MaterialStatusEnum.Enabled,
         categoriaMaterial: _listCategory[6],
         fabricante: _listManufacturer[1]
     }

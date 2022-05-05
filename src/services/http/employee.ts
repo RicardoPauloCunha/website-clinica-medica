@@ -1,7 +1,7 @@
 import { get, getParams, post, put } from '../api';
 import Funcionario from '../entities/funcionario';
-import { getEnumEmployeeStatus } from '../enums/employeeStatus';
-import { getEnumEmployeeType } from '../enums/employeeType';
+import EmployeeStatusEnum from '../enums/employeeStatus';
+import EmployeeTypeEnum from '../enums/employeeType';
 
 const ROOT = "funcionarios/";
 
@@ -12,8 +12,8 @@ export const _listEmployee: Funcionario[] = [
         email: "admin@cm.com",
         senha: "147852369",
         setor: "Gestão",
-        tipoFuncionario: getEnumEmployeeType("admin"),
-        statusFuncionario: getEnumEmployeeStatus("enabled")
+        tipoFuncionario: EmployeeTypeEnum.Admin,
+        statusFuncionario: EmployeeStatusEnum.Enabled
     },
     {
         idFuncionario: 2,
@@ -21,8 +21,8 @@ export const _listEmployee: Funcionario[] = [
         email: "recep@cm.com",
         senha: "147852369",
         setor: "Recepção",
-        tipoFuncionario: getEnumEmployeeType("receptionist"),
-        statusFuncionario: getEnumEmployeeStatus("enabled")
+        tipoFuncionario: EmployeeTypeEnum.Receptionist,
+        statusFuncionario: EmployeeStatusEnum.Enabled
     },
     {
         idFuncionario: 3,
@@ -30,8 +30,8 @@ export const _listEmployee: Funcionario[] = [
         email: "estoq@cm.com",
         senha: "147852369",
         setor: "Almoxarifado",
-        tipoFuncionario: getEnumEmployeeType("stockist"),
-        statusFuncionario: getEnumEmployeeStatus("enabled")
+        tipoFuncionario: EmployeeTypeEnum.Stockist,
+        statusFuncionario: EmployeeStatusEnum.Enabled
     },
     {
         idFuncionario: 4,
@@ -39,8 +39,8 @@ export const _listEmployee: Funcionario[] = [
         email: "medic@cm.com",
         senha: "147852369",
         setor: "Atendimento",
-        tipoFuncionario: getEnumEmployeeType("doctor"),
-        statusFuncionario: getEnumEmployeeStatus("enabled")
+        tipoFuncionario: EmployeeTypeEnum.Doctor,
+        statusFuncionario: EmployeeStatusEnum.Enabled
     }
 ];
 

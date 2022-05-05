@@ -14,7 +14,7 @@ const ServiceMenu = () => {
                         to="/servicos/cadastrar"
                         tag={Link}
                     >
-                        Cadastro
+                        Cadastrar
                     </NavLink>
                 </NavItem>
             </Nav>

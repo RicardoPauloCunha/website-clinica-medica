@@ -11,10 +11,19 @@ const SchedulingMenu = () => {
             >
                 <NavItem>
                     <NavLink
+                        to="/agendamentos/listar"
+                        tag={Link}
+                    >
+                        Listar
+                    </NavLink>
+                </NavItem>
+
+                <NavItem>
+                    <NavLink
                         to="/agendamentos/cadastrar"
                         tag={Link}
                     >
-                        Cadastro
+                        Cadastrar
                     </NavLink>
                 </NavItem>
             </Nav>

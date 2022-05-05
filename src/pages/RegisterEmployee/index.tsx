@@ -3,8 +3,8 @@ import { useLocation, useParams } from "react-router-dom";
 import { FormHandles, SubmitHandler } from "@unform/core";
 import * as Yup from 'yup';
 
-import { getEnumEmployeeType, listEmployeeType } from "../../services/enums/employeeType";
-import { getEnumEmployeeStatus } from "../../services/enums/employeeStatus";
+import EmployeeTypeEnum, { listToRegisterEmployeeType } from "../../services/enums/employeeType";
+import EmployeeStatusEnum from "../../services/enums/employeeStatus";
 import Especialidade from "../../services/entities/especialidade";
 import Medico from "../../services/entities/medico";
 import Funcionario from "../../services/entities/funcionario";
@@ -42,9 +42,7 @@ const RegisterEmployee = () => {
 
     const _itemEmployee = _listEmployee[1];
     const _itemDoctor = _listDoctor[0];
-    const _employeeTypes = listEmployeeType();
-
-    const DOCTOR_TYPE = getEnumEmployeeType("doctor");
+    const _employeeTypes = listToRegisterEmployeeType();
 
     const [isLoading, setIsLoading] = useState<"register" | "get" | "">("");
     const [warning, setWarning] = useState<WarningTuple>(["", ""]);
@@ -57,15 +55,14 @@ const RegisterEmployee = () => {
 
     useEffect(() => {
         setWarning(["", ""]);
-        
+
         let pathIsDoctor = location.pathname.split("/")[2] === "medicos";
         setIsDoctor(pathIsDoctor);
 
         if (routeParams.employeeId !== undefined || routeParams.doctorId !== undefined) {
             setIsEdition(true);
         }
-        else
-        {
+        else {
             setIsEdition(false);
             // employeeFormRef.current?.reset();
             // doctorFormRef.current?.reset();
@@ -164,7 +161,7 @@ const RegisterEmployee = () => {
                 senha: data.password,
                 setor: data.sector,
                 tipoFuncionario: data.employeeType,
-                statusFuncionario: getEnumEmployeeStatus("enabled")
+                statusFuncionario: EmployeeStatusEnum.Enabled
             };
 
             if (editedEmployee === undefined) {
@@ -229,8 +226,8 @@ const RegisterEmployee = () => {
                 email: data.email,
                 senha: data.password,
                 setor: data.sector,
-                tipoFuncionario: DOCTOR_TYPE,
-                statusFuncionario: getEnumEmployeeStatus("enabled"),
+                tipoFuncionario: EmployeeTypeEnum.Doctor,
+                statusFuncionario: EmployeeStatusEnum.Enabled,
                 crm: data.crm,
                 especialidade: {
                     idEspecialidade: Number(data.specialtyId)

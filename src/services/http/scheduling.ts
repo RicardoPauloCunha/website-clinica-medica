@@ -1,34 +1,53 @@
-import { post } from "../api";
+import { get, post } from "../api";
 import { SuccessResponse } from "../defaultEntities";
 import Agendamento from "../entities/agendamento";
-import { getEnumScheduleStatus } from "../enums/scheduleStatus";
+import ScheduleStatusEnum from "../enums/scheduleStatus";
+import { _listDoctor } from "./doctor";
+import { _listPatient } from "./patient";
+import { _listService } from "./service";
 
 const ROOT = "agendamentos/";
 
 export const _listScheduling: Agendamento[] = [
     {
         idAgendamento: 1,
-        data: "24/04/2022",
-        dataAgendada: "25/04/2022",
-        status: getEnumScheduleStatus("scheduled")
+        data: "2022-05-03",
+        dataAgendada: "2022-05-03",
+        horaAgendada: "13:00:00",
+        status: ScheduleStatusEnum.Progress,
+        medico: _listDoctor[0],
+        paciente: _listPatient[0],
+        servico: _listService[0]
     },
     {
         idAgendamento: 2,
-        data: "24/04/2022",
-        dataAgendada: "25/04/2022",
-        status: getEnumScheduleStatus("scheduled")
+        data: "2022-05-03",
+        dataAgendada: "2022-05-03",
+        horaAgendada: "13:00:00",
+        status: ScheduleStatusEnum.Scheduled,
+        medico: _listDoctor[0],
+        paciente: _listPatient[0],
+        servico: _listService[0]
     },
     {
         idAgendamento: 3,
-        data: "24/04/2022",
-        dataAgendada: "26/04/2022",
-        status: getEnumScheduleStatus("scheduled")
+        data: "2022-05-03",
+        dataAgendada: "2022-05-03",
+        horaAgendada: "13:00:00",
+        status: ScheduleStatusEnum.Scheduled,
+        medico: _listDoctor[0],
+        paciente: _listPatient[0],
+        servico: _listService[0]
     },
     {
         idAgendamento: 4,
-        data: "24/04/2022",
-        dataAgendada: "26/04/2022",
-        status: getEnumScheduleStatus("scheduled")
+        data: "2022-05-03",
+        dataAgendada: "2022-05-03",
+        horaAgendada: "13:00:00",
+        status: ScheduleStatusEnum.Scheduled,
+        medico: _listDoctor[0],
+        paciente: _listPatient[0],
+        servico: _listService[0]
     },
 ];
 
@@ -36,34 +55,24 @@ export const getSchedulingByIdHttp = async (id: number): Promise<Agendamento | u
     return _listScheduling.find(x => x.idAgendamento === id);
 }
 
-type listReceptionistSchedulingByParamsRequest = {
-    cpf?: string;
-    status?: number;
+type listReceptionistSchedulingByParams = {
+    cpf: string | null;
+    status: number | null;
 }
 
-export const listReceptionistSchedulingByParamsHttp = async (paramsData: listReceptionistSchedulingByParamsRequest): Promise<Agendamento[]> => {
-    let list: Agendamento[] = _listScheduling;
-
-    if (paramsData.cpf)
-        list = list.filter(x => x.paciente?.cpf === paramsData.cpf);
-
-    if (paramsData.status)
-        list = list.filter(x => x.status === paramsData.status)
-
-    return list;
+export const listReceptionistSchedulingByParamsHttp = async (paramsData: listReceptionistSchedulingByParams): Promise<Agendamento[]> => {
+    let { data } = await get<Agendamento[]>(ROOT);
+    return data;
 }
 
 type listDoctorSchedulingByParamsRequest = {
-    crm: string;
-    periodo?: number;
+    funcionarioId: number;
+    periodo: number;
 }
 
 export const listDoctorSchedulingByParamsHttp = async (paramsData: listDoctorSchedulingByParamsRequest): Promise<Agendamento[]> => {
-    let list: Agendamento[] = _listScheduling.filter(x => x.medico?.crm === paramsData.crm);
-
-    // TODO - filtro por periodo
-
-    return list;
+    let { data } = await get<Agendamento[]>(ROOT);
+    return data;
 }
 
 type PostSchedulingRequest = {

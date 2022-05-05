@@ -13,7 +13,7 @@ export const DataTextEl = styled.div<DataTextElProps>`
     `}
 
     >b {
-        color: var(--color-gray-300);
+        color: var(--color-black-200);
         font-weight: 600;
     }
 `;

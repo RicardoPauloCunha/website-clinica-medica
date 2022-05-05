@@ -1,33 +1,16 @@
-type GenderType = "masculine" | "feminine";
+enum GenderTypeEnum {
+    Masculine = 1,
+    Feminine = 2
+}
 
-export const getValueGenderType = (typeString?: GenderType, typeNumber?: number) => {
-    let type: number;
-
-    if (typeString !== undefined)
-        type = (getEnumGenderType(typeString));
-    else if (typeNumber !== undefined)
-        type = typeNumber;
-    else
-        return "";
-
+export const getValueGenderType = (type: GenderTypeEnum) => {
     switch (type) {
-        case 1:
+        case GenderTypeEnum.Masculine:
             return "Masculino";
-        case 2:
+        case GenderTypeEnum.Feminine:
             return "Feminino";
         default:
             return "";
-    }
-}
-
-export const getEnumGenderType = (type: GenderType) => {
-    switch (type) {
-        case "masculine":
-            return 1;
-        case "feminine":
-            return 2;
-        default:
-            return 0;
     }
 }
 
@@ -35,9 +18,9 @@ export const listGenderType = () => {
     let list: string[] = [];
 
     for (let i = 1; i <= 2; i++)
-        list.push(getValueGenderType(undefined, i));
+        list.push(getValueGenderType(i));
 
     return list;
 }
 
-export default GenderType;
+export default GenderTypeEnum;

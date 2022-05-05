@@ -1,29 +1,31 @@
-import { FormHandles, SubmitHandler } from "@unform/core";
 import { useEffect, useRef, useState } from "react";
+import { FormHandles, SubmitHandler } from "@unform/core";
+import * as Yup from "yup";
+
+import { useAuth } from "../../contexts/auth";
+import ScheduleStatusEnum from "../../services/enums/scheduleStatus";
+import { getValueGenderType, listGenderType } from "../../services/enums/genderType";
 import Medico from "../../services/entities/medico";
 import Paciente from "../../services/entities/paciente";
 import Servico from "../../services/entities/servico";
+import { postSchedulingHttp } from "../../services/http/scheduling";
 import { listDoctorBySpecialtyHttp } from "../../services/http/doctor";
 import { getPatientByCpfHttp, postPatientHttp, _listPatient } from "../../services/http/patient";
 import { listServiceHttp } from "../../services/http/service";
 import { WarningTuple } from "../../util/getHttpErrors";
 import { concatenateAddressData, normalize, normalizeDate, splitAddressData } from "../../util/stringFormat";
-import * as Yup from "yup";
 import getValidationErrors from "../../util/getValidationErrors";
-import { getValueGenderType, listGenderType } from "../../services/enums/genderType";
-import Warning from "../../components/Warning";
+import { numberToCurrency } from "../../util/convertCurrency";
+
+import { Alert, Button, Col, ModalBody, ModalFooter, ModalHeader, Row } from "reactstrap";
 import { DataModal, Form, TextGroupGrid } from "../../styles/components";
+import Warning from "../../components/Warning";
 import LoadingButton from "../../components/LoadingButton";
 import FieldInput from "../../components/Input";
 import SelectInput from "../../components/Input/select";
-import { Alert, Button, Col, ModalBody, ModalFooter, ModalHeader, Row } from "reactstrap";
 import MaskInput from "../../components/Input/mask";
 import DataCard from "../../components/DataCard";
-import { numberToCurrency } from "../../util/convertCurrency";
 import DataText from "../../components/DataText";
-import { postSchedulingHttp } from "../../services/http/scheduling";
-import { useAuth } from "../../contexts/auth";
-import { getEnumScheduleStatus } from "../../services/enums/scheduleStatus";
 
 type SchedulingFormData = {
     serviceId: number;
@@ -157,13 +159,13 @@ const RegisterScheduling = () => {
             data.serviceId = Number(data.serviceId);
 
             postSchedulingHttp({
-                recepcionistaId: loggedUser?.idEmployee as number,
+                recepcionistaId: loggedUser?.employeeId as number,
                 pacienteCpf: data.patientCpf,
                 medicoId: data.doctorId,
                 dataAgendada: data.date,
                 horaAgendada: data.time,
                 servicoId: data.serviceId,
-                status: getEnumScheduleStatus("scheduled")
+                status: ScheduleStatusEnum.Scheduled
             }).then(() => {
                 setWarning(["success", "Agendamento cadastrado com sucesso."]);
                 reset();
@@ -299,21 +301,21 @@ const RegisterScheduling = () => {
 
                 <Row>
                     <Col md={6}>
+                        <FieldInput
+                            name='date'
+                            label='Data'
+                            placeholder='Selecione a data'
+                            type="date"
+                        />
+                    </Col>
+
+                    <Col md={6}>
                         <MaskInput
                             name='time'
                             label='Horário'
                             placeholder='00:00'
                             mask="99:99"
                             maskChar=""
-                        />
-                    </Col>
-
-                    <Col md={6}>
-                        <FieldInput
-                            name='date'
-                            label='Data'
-                            placeholder='Selecione a data'
-                            type="date"
                         />
                     </Col>
                 </Row>
@@ -390,12 +392,12 @@ const RegisterScheduling = () => {
                     <TextGroupGrid>
                         <DataText
                             label="Data de nascimento"
-                            value={patient.dataNascimento}
+                            value={new Date(patient.dataNascimento).toLocaleDateString()}
                         />
 
                         <DataText
                             label="Gênero"
-                            value={getValueGenderType(undefined, patient.sexo)}
+                            value={getValueGenderType(patient.sexo)}
                         />
 
                         <DataText

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { getEnumRecordType } from "../../services/enums/recordType";
+import RecordTypeEnum from "../../services/enums/recordType";
 import EntradaSaidaMaterial from "../../services/entities/entradaSaidaMaterial";
 import { listRecordByMaterialIdHttp } from "../../services/http/record";
 import { WarningTuple } from "../../util/getHttpErrors";
@@ -14,8 +14,6 @@ import DataText from "../../components/DataText";
 
 const MaterialRecords = () => {
     const routeParams = useParams();
-
-    const INPUT_TYPE = getEnumRecordType("input");
 
     const [isLoading, setIsLoading] = useState<"get" | "record" | "">("");
     const [warning, setWarning] = useState<WarningTuple>(["", ""]);
@@ -58,7 +56,7 @@ const MaterialRecords = () => {
             {records.map(x => (
                 <DataCard
                     key={x.idEntradaSaidaMaterial}
-                    title={`Registro de ${x.tipoEntradaSaida === INPUT_TYPE ? "entrada" : "saída"}`}
+                    title={`Registro de ${x.tipoEntradaSaida === RecordTypeEnum.Input ? "entrada" : "saída"}`}
                 >
                     <TextGroupGrid>
                         <DataText
@@ -68,7 +66,7 @@ const MaterialRecords = () => {
 
                         <DataText
                             label="Quantidade"
-                            value={`${x.tipoEntradaSaida === INPUT_TYPE ? "+" : "-"} ${x.quantidade}`}
+                            value={`${x.tipoEntradaSaida === RecordTypeEnum.Input ? "+" : "-"} ${x.quantidade}`}
                         />
 
                         <DataText
