@@ -7,7 +7,7 @@ export const _listRefund: Ressarcimento[] = [
     {
         idRessarcimento: 1,
         data: "2022-05-03",
-        valor: 120.00,
+        valor: 120,
         motivoRessarcimento: "Existem muitas variações disponíveis de passagens de Lorem Ipsum, mas a maioria sofreu algum tipo de alteração, seja por inserção de passagens com humor, ou palavras aleatórias que não parecem nem um pouco convincentes.",
         formaDeRessarcimento: PaymentMethodTypeEnum.Pix,
         pagamento: _listPayment[0]

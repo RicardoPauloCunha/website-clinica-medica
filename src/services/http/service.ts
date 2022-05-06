@@ -7,19 +7,19 @@ export const _listService: Servico[] = [
     {
         idServico: 1,
         nomeServico: "Consulta especializada",
-        valor: 100.00,
+        valor: 100,
         descricaoServico: "Consultas especializadas por área, como cardiologia, neurologia, pediatria, ortopedia, ginecologia e outros"
     },
     {
         idServico: 2,
         nomeServico: "Exame básico",
-        valor: 110.00,
+        valor: 110,
         descricaoServico: "Exames realizados internamente, permitindo que o paciente tenha mais facilidade e agilidade na realização das solicitações médicas."
     },
     {
         idServico: 3,
         nomeServico: "Procedimentos simples com ou sem anestesia local",
-        valor: 120.00,
+        valor: 120,
         descricaoServico: "Procedimentos básicos internos para dar agilidade e eficiência ao atendimento médico."
     }
 ];

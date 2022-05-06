@@ -63,4 +63,25 @@ export default createGlobalStyle`
     .alert {
         margin: 2rem 0 0 0;
     }
+
+    small {
+        &.text-link-action {
+            color: var(--color-blue-200);
+            font-weight: 500;
+            padding-bottom: 0rem;
+            border-bottom: solid 2px var(--color-blue-200);
+            cursor: pointer;
+            transition: font-weight 0.3s, border-bottom 0.3s;
+
+            &:hover {
+                font-weight: 400;
+                border-bottom: solid 1px var(--color-blue-200);
+            }
+
+            &:active {
+                font-weight: 500;
+                border-bottom: none;
+            }
+        }
+    }
 `;

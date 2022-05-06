@@ -215,7 +215,7 @@ const RefundPayment = () => {
                         />
 
                         <DataText
-                            label="Data cadastro"
+                            label="Data"
                             value={new Date(payment.agendamento?.data as string).toLocaleDateString()}
                         />
 

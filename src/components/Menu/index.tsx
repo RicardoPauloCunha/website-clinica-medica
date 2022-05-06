@@ -85,6 +85,15 @@ const Menu = () => {
                                     Agendamentos
                                 </NavLink>
                             </NavItem>
+
+                            <NavItem>
+                                <NavLink
+                                    to="/pagamentos"
+                                    tag={Link}
+                                >
+                                    Pagamentos
+                                </NavLink>
+                            </NavItem>
                         </>}
 
                         {loggedUser?.employeeType === EmployeeTypeEnum.Stockist && <>

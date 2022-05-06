@@ -32,7 +32,7 @@ const EmployeeMenu = () => {
                         to="/funcionarios/medicos/cadastrar"
                         tag={Link}
                     >
-                        Médico
+                        Cadastrar médico
                     </NavLink>
                 </NavItem>
             </Nav>

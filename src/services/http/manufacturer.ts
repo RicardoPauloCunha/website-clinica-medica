@@ -5,16 +5,16 @@ const ROOT = "fabricantes/";
 
 export const _listManufacturer: Fabricante[] = [
     {
-        cnpj: "74.101.016/0001-27",
+        cnpj: "74101016000127",
         nomeFabricante: "Gabriel e Emanuel Produtos Hospitalares ME",
         enderecoFabricante: "Rua José Alves de Miranda, 975, Parque Imperial - Jacareí/SP - 12329-025",
-        contatoFabricante: "(12) 2815-6315"
+        contatoFabricante: "1228156315"
     },
     {
-        cnpj: "73.004.626/0001-40",
+        cnpj: "73004626000140",
         nomeFabricante: "Filipe e Priscila Produtos Hospitalares ME",
         enderecoFabricante: "Rua Xingu, 730, Vila Almeida - Indaiatuba/SP - 13330-675",
-        contatoFabricante: "(19) 3876-5009"
+        contatoFabricante: "1938765009"
     }
 ];
 

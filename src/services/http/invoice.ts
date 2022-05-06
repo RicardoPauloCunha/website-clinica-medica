@@ -1,28 +1,31 @@
 import NotaFiscal from "../entities/notaFiscal";
-import Paciente from "../entities/paciente";
 import InvoiceTypeEnum from "../enums/invoiceType";
+import { _listPayment } from "./payment";
 
 export const _listInvoice: NotaFiscal[] = [
     {
         idNotaFiscal: 1,
-        valorNota: 110.00,
+        valorNota: 110,
         dataEmissao: "2022-05-03",
         impostos: 0.00,
-        tipoNotaFiscal: InvoiceTypeEnum.Payment 
+        tipoNotaFiscal: InvoiceTypeEnum.Refund,
+        pagamento: _listPayment[0]
     },
     {
         idNotaFiscal: 2,
-        valorNota: 120.00,
+        valorNota: 120,
         dataEmissao: "2022-05-03",
-        impostos: 0.00,
-        tipoNotaFiscal: InvoiceTypeEnum.Payment
+        impostos: 0,
+        tipoNotaFiscal: InvoiceTypeEnum.Payment,
+        pagamento: _listPayment[1]
     },
     {
         idNotaFiscal: 3,
-        valorNota: 120.00,
+        valorNota: 120,
         dataEmissao: "2022-05-03",
-        impostos: 0.00,
-        tipoNotaFiscal: InvoiceTypeEnum.Refund
+        impostos: 0,
+        tipoNotaFiscal: InvoiceTypeEnum.Payment,
+        pagamento: _listPayment[0]
     }
 ];
 
@@ -31,18 +34,9 @@ type listInvoiceByParamsRequest = {
 }
 
 export const listInvoiceByParamsHttp = async (paramsData: listInvoiceByParamsRequest): Promise<NotaFiscal[]> => {
-    let list: NotaFiscal[] = _listInvoice;
-    
-    // TODO - filtro por periodo
-    paramsData;
-    
-    return list;
+    return _listInvoice;
 }
 
 export const getInvoiceBySchedulingIdHttp = async (schedulingId: number): Promise<NotaFiscal[]> => {
-    return _listInvoice.filter(x => x.pagamento?.agendamento?.idAgendamento === schedulingId);
-}
-
-export const getPatientByInvoiceNumberHttp = async (invoiceId: number): Promise<Paciente | undefined> => {
-    return _listInvoice.find(x => x.idNotaFiscal === invoiceId)?.pagamento?.agendamento?.paciente;
+    return _listInvoice;
 }

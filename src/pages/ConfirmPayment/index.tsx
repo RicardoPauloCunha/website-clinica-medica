@@ -192,7 +192,7 @@ const ConfirmPayment = () => {
                     />
 
                     <DataText
-                        label="Data cadastro"
+                        label="Data"
                         value={new Date(scheduling.data).toLocaleDateString()}
                     />
 

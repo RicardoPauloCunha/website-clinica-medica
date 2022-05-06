@@ -61,7 +61,7 @@ export const hasValueNumber = (value?: any) => {
         return true;
 }
 
-type AddressData = {
+export type AddressData = {
     cep: string;
     street: string;
     number: string;

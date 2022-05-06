@@ -130,7 +130,7 @@ const Schedules = () => {
         if (index === -1)
             return;
 
-        navigate("/agendamentos/" + schedules[index].idAgendamento + "/confirmar-pagamento");
+        navigate("/agendamentos/" + schedules[index].idAgendamento + "/pagamento/confirmar");
     }
 
     const onClickOpenPayment = (index: number) => {
@@ -152,14 +152,14 @@ const Schedules = () => {
         if (payment === undefined)
             return;
 
-        navigate("/pagamentos/" + payment.idPagamento + "/nota-fiscal");
+        navigate("/pagamentos/" + payment.idPagamento + "/notas-fiscais");
     }
 
     const onClickPaymentRefund = () => {
         if (payment === undefined)
             return;
 
-        navigate("/pagamentos/" + payment.idPagamento + "/ressarcir");
+        navigate("agendamentos" + payment.agendamento?.idAgendamento + "/pagamento/" + payment.idPagamento + "/ressarcir");
     }
 
     return (
@@ -227,7 +227,7 @@ const Schedules = () => {
                         />
 
                         <DataText
-                            label="Data cadastro"
+                            label="Data"
                             value={new Date(x.data).toLocaleDateString()}
                         />
 

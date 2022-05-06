@@ -15,7 +15,7 @@ import DataText from "../../components/DataText";
 const MaterialRecords = () => {
     const routeParams = useParams();
 
-    const [isLoading, setIsLoading] = useState<"get" | "record" | "">("");
+    const [isLoading, setIsLoading] = useState<"get" | "">("");
     const [warning, setWarning] = useState<WarningTuple>(["", ""]);
 
     const [records, setRecords] = useState<EntradaSaidaMaterial[]>([]);
@@ -52,6 +52,11 @@ const MaterialRecords = () => {
             {isLoading === "get" && <SpinnerBlock />}
 
             <Warning value={warning} />
+
+            {records[0] !== undefined && <DataCard
+                title="Material"
+                subtitle={records[0].material?.nomeMaterial as string}
+            />}
 
             {records.map(x => (
                 <DataCard

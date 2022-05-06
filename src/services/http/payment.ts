@@ -7,8 +7,8 @@ export const _listPayment: Pagamento[] = [
     {
         idPagamento: 1,
         data: "2022-05-03",
-        valor: 110.00,
-        desconto: 0.00,
+        valor: 110,
+        desconto: 0,
         formaDePagamento: PaymentMethodTypeEnum.Cash,
         status: PaymentStatusEnum.Reimbursed,
         agendamento: _listScheduling[0]
@@ -16,8 +16,8 @@ export const _listPayment: Pagamento[] = [
     {
         idPagamento: 2,
         data: "2022-05-03",
-        valor: 120.00,
-        desconto: 0.00,
+        valor: 120,
+        desconto: 0,
         formaDePagamento: PaymentMethodTypeEnum.Card,
         status: PaymentStatusEnum.PaidOut,
         agendamento: _listScheduling[1]

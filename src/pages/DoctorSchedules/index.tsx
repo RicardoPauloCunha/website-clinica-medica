@@ -40,7 +40,6 @@ const DoctorSchedules = () => {
     const [isLoading, setIsLoading] = useState<"get" | "attendance" | "">("");
     const [warning, setWarning] = useState<WarningTuple>(["", ""]);
     const [modal, setModal] = useState<ModalString>("");
-
     const [periods] = useState<[string, string][]>([
         ["-30", "Último mês"],
         ["-7", "Última semana"],
@@ -50,6 +49,7 @@ const DoctorSchedules = () => {
         ["7", "Próxima semana"],
         ["30", "Próximo mês"],
     ]);
+
     const [schedules, setSchedules] = useState<Agendamento[]>([]);
     const [scheduleIndex, setScheduleIndex] = useState(-1);
 
@@ -160,7 +160,7 @@ const DoctorSchedules = () => {
                 <SelectInput
                     name='period'
                     label='Filtro de período'
-                    placeholder='Filtrar pelo data de agendamento'
+                    placeholder='Filtrar pela data de agendamento'
                     options={periods.map(x => ({
                         value: x[0],
                         label: x[1]
