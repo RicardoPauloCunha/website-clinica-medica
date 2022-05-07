@@ -68,9 +68,14 @@ const RefundPayment = () => {
         if (payment === undefined)
             return;
 
-        payment.status = PaymentStatusEnum.Reimbursed;
-
-        await putPaymentHttp(payment).catch(() => {
+        await putPaymentHttp({
+            pagamentoId: payment.idPagamento,
+            agendamentoId: payment.agendamento?.idAgendamento as number,
+            valor: payment.valor,
+            status: PaymentStatusEnum.Reimbursed,
+            formaDePagamento: payment.formaDePagamento,
+            desconto: payment.desconto
+        }).catch(() => {
             setWarning(["danger", "Não foi possível atualizar o pagamento."]);
             setIsLoading("");
         });
@@ -102,9 +107,10 @@ const RefundPayment = () => {
 
             postRefundHttp({
                 valor: data.price,
+                pagamentoId: payment.idPagamento,
+                status: 1,
                 formaDeRessarcimento: data.paymentMethodType,
                 motivoRessarcimento: data.description,
-                pagamentoId: payment.idPagamento
             }).then(() => {
                 sendPaymentStatus().then(() => {
                     reset();

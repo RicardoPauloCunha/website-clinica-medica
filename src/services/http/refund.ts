@@ -1,30 +1,39 @@
-import { SuccessResponse } from "../defaultEntities";
+import { post } from "../api";
 import Ressarcimento from "../entities/ressarcimento";
 import PaymentMethodTypeEnum from "../enums/paymentMethodType";
+
+import { _listInvoice } from "./invoice";
 import { _listPayment } from "./payment";
+
+const ROOT = "ressarcimentos/";
 
 export const _listRefund: Ressarcimento[] = [
     {
         idRessarcimento: 1,
+        pagamento: _listPayment[0],
+        notaFiscal: _listInvoice[0],
         data: "2022-05-03",
         valor: 120,
-        motivoRessarcimento: "Existem muitas variações disponíveis de passagens de Lorem Ipsum, mas a maioria sofreu algum tipo de alteração, seja por inserção de passagens com humor, ou palavras aleatórias que não parecem nem um pouco convincentes.",
+        status: 1,
         formaDeRessarcimento: PaymentMethodTypeEnum.Pix,
-        pagamento: _listPayment[0]
+        motivoRessarcimento: "Existem muitas variações disponíveis de passagens de Lorem Ipsum, mas a maioria sofreu algum tipo de alteração, seja por inserção de passagens com humor, ou palavras aleatórias que não parecem nem um pouco convincentes."
     }
 ];
 
 export const getRefundByPaymentIdHttp = async (paymentId: number): Promise<Ressarcimento | undefined> => {
-    return _listRefund.find(x => x.pagamento?.idPagamento === paymentId);
+    // TODO: integração API
+    return _listRefund[0];
 }
 
 type PostRefundRequest = {
-    valor: number;
-    motivoRessarcimento: string;
-    formaDeRessarcimento: number;
     pagamentoId: number;
+    valor: number;
+    status: 1;
+    formaDeRessarcimento: number;
+    motivoRessarcimento: string;
 }
 
-export const postRefundHttp = async (requestData: PostRefundRequest): Promise<SuccessResponse> => {
-    return { message: "" };
+export const postRefundHttp = async (requestData: PostRefundRequest): Promise<Ressarcimento> => {
+    let { data } = await post<PostRefundRequest, Ressarcimento>(ROOT, requestData);
+    return data;
 }

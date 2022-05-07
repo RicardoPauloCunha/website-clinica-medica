@@ -1,4 +1,4 @@
-import { get, post } from "../api";
+import { get, post, put } from "../api";
 import Especialidade from "../entities/especialidade";
 
 const ROOT = "especialidades/";
@@ -51,11 +51,20 @@ export const listSpecialtyHttp = async (): Promise<Especialidade[]> => {
     return data;
 }
 
-interface postSpecialtyRequest {
+interface PostSpecialtyRequest {
     nomeEspecialidade: string;
 }
 
-export const postSpecialtyHttp = async (requestData: postSpecialtyRequest): Promise<Especialidade> => {
-    let { data } = await post<postSpecialtyRequest, Especialidade>(ROOT, requestData);
+export const postSpecialtyHttp = async (requestData: PostSpecialtyRequest): Promise<Especialidade> => {
+    let { data } = await post<PostSpecialtyRequest, Especialidade>(ROOT, requestData);
     return data;
+}
+
+interface PutSpecialtyRequest extends PostSpecialtyRequest {
+    idEspecialidade: number;
+}
+
+export const putSpecialtyHttp = async (requestData: PutSpecialtyRequest): Promise<void> => {
+    // TODO: integração API
+    await put<PutSpecialtyRequest, void>(ROOT, requestData);
 }

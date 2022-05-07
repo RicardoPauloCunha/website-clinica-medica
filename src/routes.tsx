@@ -28,6 +28,7 @@ import DoctorSchedules from './pages/DoctorSchedules';
 import PatientAttendances from './pages/PatientAttendances';
 import PaymentMenu from './components/Menu/invoice';
 import Invoices from './pages/Invoices';
+import Services from './pages/Services';
 
 type RequireAuthProps = {
     employeeType: EmployeeTypeEnum;
@@ -60,7 +61,10 @@ const PagesRoutes = () => {
                 <Route path="login" element={<Login />} />
 
                 <Route path="servicos" element={<ServiceMenu />}>
+                    <Route path="" element={<RequireAuth employeeType={EmployeeTypeEnum.Admin} children={<Services />} />} />
+                    <Route path="listar" element={<RequireAuth employeeType={EmployeeTypeEnum.Admin} children={<Services />} />} />
                     <Route path="cadastrar" element={<RequireAuth employeeType={EmployeeTypeEnum.Admin} children={<RegisterService />} />} />
+                    <Route path=":serviceId/editar" element={<RequireAuth employeeType={EmployeeTypeEnum.Admin} children={<RegisterService />} />} />
                 </Route>
 
                 <Route path="funcionarios" element={<EmployeeMenu />}>

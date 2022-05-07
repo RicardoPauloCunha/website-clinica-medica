@@ -1,5 +1,6 @@
-import { getParams, post, put } from "../api";
+import { get, getParams, post, put } from "../api";
 import Medico from "../entities/medico";
+
 import { PostEmployeeRequest, _listEmployee } from "./employee";
 import { _listSpecialty } from "./specialty";
 
@@ -14,15 +15,16 @@ export const _listDoctor: Medico[] = [
 ];
 
 export const getDoctorByEmployeeIdHttp = async (employeeId: number): Promise<Medico> => {
-    return _listDoctor[0];
+    let { data } = await get<Medico>(ROOT + employeeId);
+    return data;
 }
 
-interface FilterDoctorParams {
+interface ListDoctorParams {
     idEspecialidade: number | null;
 }
 
-export const listDoctorBySpecialtyHttp = async (paramsData: FilterDoctorParams): Promise<Medico[]> => {
-    let { data } = await getParams<FilterDoctorParams, Medico[]>(ROOT + "listar-por-id-especialidade", paramsData);
+export const listDoctorByParamsHttp = async (paramsData: ListDoctorParams): Promise<Medico[]> => {
+    let { data } = await getParams<ListDoctorParams, Medico[]>(ROOT + "listar-por-id-especialidade", paramsData);
     return data;
 }
 

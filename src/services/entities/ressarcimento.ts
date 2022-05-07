@@ -1,12 +1,15 @@
+import NotaFiscal from "./notaFiscal";
 import Pagamento from "./pagamento";
 
 interface Ressarcimento {
     idRessarcimento: number;
+    pagamento?: Pagamento;
+    notaFiscal?: NotaFiscal
     data: string;
     valor: number;
-    motivoRessarcimento: string;
+    status: number;
     formaDeRessarcimento: number;
-    pagamento?: Pagamento;
+    motivoRessarcimento: string;
 }
 
 export default Ressarcimento;

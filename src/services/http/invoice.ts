@@ -1,31 +1,35 @@
+import { get } from "../api";
 import NotaFiscal from "../entities/notaFiscal";
-import InvoiceTypeEnum from "../enums/invoiceType";
+
+import { _listClinic } from "./clinic";
 import { _listPayment } from "./payment";
+
+const ROOT = "notasfiscais/";
 
 export const _listInvoice: NotaFiscal[] = [
     {
         idNotaFiscal: 1,
+        clinica: _listClinic[0],
         valorNota: 110,
         dataEmissao: "2022-05-03",
-        impostos: 0.00,
-        tipoNotaFiscal: InvoiceTypeEnum.Refund,
-        pagamento: _listPayment[0]
+        impostos: 0,
+        descricao: "Serviços de saúde, assistência médica e congêneres"
     },
     {
         idNotaFiscal: 2,
+        clinica: _listClinic[0],
         valorNota: 120,
         dataEmissao: "2022-05-03",
         impostos: 0,
-        tipoNotaFiscal: InvoiceTypeEnum.Payment,
-        pagamento: _listPayment[1]
+        descricao: "Serviços de saúde, assistência médica e congêneres"
     },
     {
-        idNotaFiscal: 3,
-        valorNota: 120,
+        idNotaFiscal: 2,
+        clinica: _listClinic[0],
+        valorNota: 130,
         dataEmissao: "2022-05-03",
         impostos: 0,
-        tipoNotaFiscal: InvoiceTypeEnum.Payment,
-        pagamento: _listPayment[0]
+        descricao: "Serviços de saúde, assistência médica e congêneres"
     }
 ];
 
@@ -34,9 +38,7 @@ type listInvoiceByParamsRequest = {
 }
 
 export const listInvoiceByParamsHttp = async (paramsData: listInvoiceByParamsRequest): Promise<NotaFiscal[]> => {
-    return _listInvoice;
-}
-
-export const getInvoiceBySchedulingIdHttp = async (schedulingId: number): Promise<NotaFiscal[]> => {
-    return _listInvoice;
+    // TODO: integração API
+    let { data } = await get<NotaFiscal[]>(ROOT);
+    return data;
 }

@@ -1,6 +1,7 @@
 import { get, getParams, post, put } from "../api";
 import Material from "../entities/material";
 import MaterialStatusEnum from "../enums/materialStatus";
+
 import { _listManufacturer } from "./manufacturer";
 import { _listCategory } from "./category";
 
@@ -138,7 +139,7 @@ interface FilterMaterialParams {
     idCategoria: number | null;
 }
 
-export const listMaterialByCategoryHttp = async (paramsData: FilterMaterialParams): Promise<Material[]> => {
+export const listMaterialByParamsHttp = async (paramsData: FilterMaterialParams): Promise<Material[]> => {
     let { data } = await getParams<FilterMaterialParams, Material[]>(ROOT + "idcategoria", paramsData);
     return data;
 }

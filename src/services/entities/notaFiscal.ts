@@ -1,12 +1,12 @@
-import Pagamento from "./pagamento";
+import Clinica from "./Clinica";
 
 interface NotaFiscal {
     idNotaFiscal: number;
+    clinica: Clinica;
     valorNota: number;
     dataEmissao: string;
     impostos: number;
-    tipoNotaFiscal: number;
-    pagamento?: Pagamento;
+    descricao: string;
 }
 
 export default NotaFiscal;

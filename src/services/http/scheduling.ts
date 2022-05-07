@@ -1,7 +1,7 @@
-import { get, post } from "../api";
-import { SuccessResponse } from "../defaultEntities";
+import { get, getParams, post, put } from "../api";
 import Agendamento from "../entities/agendamento";
 import ScheduleStatusEnum from "../enums/scheduleStatus";
+
 import { _listDoctor } from "./doctor";
 import { _listPatient } from "./patient";
 import { _listService } from "./service";
@@ -52,27 +52,28 @@ export const _listScheduling: Agendamento[] = [
 ];
 
 export const getSchedulingByIdHttp = async (id: number): Promise<Agendamento | undefined> => {
-    return _listScheduling.find(x => x.idAgendamento === id);
+    // TODO: integração API
+    return _listScheduling[0];
 }
 
-type listReceptionistSchedulingByParams = {
+type ListReceptionistSchedulingByParams = {
     cpf: string | null;
     status: number | null;
 }
 
-export const listReceptionistSchedulingByParamsHttp = async (paramsData: listReceptionistSchedulingByParams): Promise<Agendamento[]> => {
-    let { data } = await get<Agendamento[]>(ROOT);
+export const listReceptionistSchedulingByParamsHttp = async (paramsData: ListReceptionistSchedulingByParams): Promise<Agendamento[]> => {
+    let { data } = await getParams<ListReceptionistSchedulingByParams, Agendamento[]>(ROOT + "listar-por-cpf-e-status", paramsData);
     return data;
 }
 
-type listDoctorSchedulingByParamsRequest = {
+type ListDoctorSchedulingByParams = {
     funcionarioId: number;
     periodo: number;
 }
 
-export const listDoctorSchedulingByParamsHttp = async (paramsData: listDoctorSchedulingByParamsRequest): Promise<Agendamento[]> => {
-    let { data } = await get<Agendamento[]>(ROOT);
-    return data;
+export const listDoctorSchedulingByParamsHttp = async (paramsData: ListDoctorSchedulingByParams): Promise<Agendamento[]> => {
+    // TODO: integração API
+    return _listScheduling;
 }
 
 type PostSchedulingRequest = {
@@ -89,6 +90,6 @@ export const postSchedulingHttp = async (requestData: PostSchedulingRequest): Pr
     await post<PostSchedulingRequest, void>(ROOT, requestData);
 }
 
-export const putSchedulingHttp = async (requestData: Agendamento): Promise<SuccessResponse> => {
-    return { message: "" };
+export const putSchedulingHttp = async (requestData: Agendamento): Promise<void> => {
+    await put<Agendamento, void>(ROOT, requestData);
 }

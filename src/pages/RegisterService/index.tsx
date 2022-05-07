@@ -3,8 +3,8 @@ import { FormHandles, SubmitHandler } from "@unform/core";
 import * as Yup from 'yup';
 
 import Especialidade from "../../services/entities/especialidade";
-import { postServiceHttp, _listService } from "../../services/http/service";
-import { listSpecialtyHttp, postSpecialtyHttp, _listSpecialty } from "../../services/http/specialty";
+import { getServiceByIdHttp, postServiceHttp, putServiceHttp, _listService } from "../../services/http/service";
+import { listSpecialtyHttp, postSpecialtyHttp, putSpecialtyHttp, _listSpecialty } from "../../services/http/specialty";
 import { WarningTuple } from "../../util/getHttpErrors";
 import getValidationErrors from "../../util/getValidationErrors";
 
@@ -15,6 +15,9 @@ import CurrencyInput from "../../components/Input/currency";
 import SelectInput from "../../components/Input/select";
 import Warning from "../../components/Warning";
 import LoadingButton from "../../components/LoadingButton";
+import { useParams } from "react-router-dom";
+import Servico from "../../services/entities/servico";
+import ToggleTitle from "../../components/ToggleTitle";
 
 type ServiceFormData = {
     name: string;
@@ -30,22 +33,63 @@ type SpecialtyFormData = {
 type ModalString = "specialty" | "";
 
 const RegisterService = () => {
+    const routeParams = useParams();
     const serviceFormRef = useRef<FormHandles>(null);
     const specialtyFormRef = useRef<FormHandles>(null);
-
-    const [isLoading, setIsLoading] = useState<"service" | "specialty" | "">("");
-    const [warning, setWarning] = useState<WarningTuple>(["", ""]);
-    const [modal, setModal] = useState<ModalString>("");
 
     const _itemService = _listService[0];
     const _itemSpecialty = _listSpecialty[0];
 
+    const [isLoading, setIsLoading] = useState<"service" | "specialty" | "get" | "">("");
+    const [warning, setWarning] = useState<WarningTuple>(["", ""]);
+    const [modal, setModal] = useState<ModalString>("");
+    const [isEdition, setIsEdition] = useState(routeParams.materialId !== undefined);
+
     const [specialties, setSpecialties] = useState<Especialidade[]>([]);
+    const [editedService, setEditedService] = useState<Servico | undefined>(undefined);
 
     useEffect(() => {
+        setWarning(["", ""]);
+
+        if (routeParams.serviceId !== undefined) {
+            setIsEdition(true);
+            getService();
+        }
+        else {
+            setIsEdition(false);
+            // serviceFormRef.current?.reset();
+            // specialtyFormRef.current?.reset();
+            // TODO: Descomentar
+        }
+
         getSpecialties();
         // eslint-disable-next-line
     }, []);
+
+    useEffect(() => {
+        if (specialties.length !== 0 && editedService !== undefined) {
+            setTimeout(() => {
+                serviceFormRef.current?.setData({
+                    name: editedService.nomeServico,
+                    price: editedService.valor.toFixed(2),
+                    description: editedService.descricaoServico,
+                    specialtyId: editedService.especialidade?.idEspecialidade.toString()
+                });
+            }, 100);
+        }
+    }, [specialties, editedService]);
+
+    const getService = () => {
+        let id = Number(routeParams.serviceId);
+        if (isNaN(id))
+            return;
+
+        setIsLoading("get");
+        getServiceByIdHttp(id).then(response => {
+            setEditedService(response);
+            setIsLoading("");
+        });
+    }
 
     const getSpecialties = () => {
         listSpecialtyHttp().then(response => {
@@ -79,17 +123,33 @@ const RegisterService = () => {
                 abortEarly: false
             });
 
-            await postServiceHttp({
+            let serviceData = {
                 nomeServico: data.name,
                 valor: data.price,
                 descricaoServico: data.description,
-                especialidade: { idEspecialidade: Number(data.specialtyId) }
-            }).then(() => {
-                setWarning(["success", "Serviço cadastrado com sucesso."]);
-                reset();
-            }).catch(() => {
-                setWarning(["danger", "Não foi possível cadastrar o serviço."]);
-            }).finally(() => { setIsLoading(""); });
+                especialidade: {
+                    idEspecialidade: Number(data.specialtyId)
+                }
+            }
+
+            if (!isEdition) {
+                await postServiceHttp(serviceData).then(() => {
+                    setWarning(["success", "Serviço cadastrado com sucesso."]);
+                    reset();
+                }).catch(() => {
+                    setWarning(["danger", "Não foi possível cadastrar o serviço."]);
+                }).finally(() => { setIsLoading(""); });
+            }
+            else if (editedService !== undefined) {
+                await putServiceHttp({
+                    ...serviceData,
+                    idServico: editedService.idServico
+                }).then(() => {
+                    setWarning(["success", "Serviço editado com sucesso."]);
+                }).catch(() => {
+                    setWarning(["danger", "Não foi possível editar o serviço."]);
+                }).finally(() => { setIsLoading(""); });
+            }
         }
         catch (err) {
             if (err instanceof Yup.ValidationError)
@@ -114,20 +174,39 @@ const RegisterService = () => {
                 abortEarly: false
             });
 
-            postSpecialtyHttp({
+            let specialtyData = {
                 nomeEspecialidade: data.name
-            }).then(response => {
-                toggleModal();
-                setWarning(["success", "Especialidade adicionada e selecionada com sucesso."]);
-                setSpecialties([...specialties, response]);
-                reset();
+            }
 
-                setTimeout(() => {
-                    serviceFormRef.current?.setFieldValue("specialtyId", response.idEspecialidade.toString());
-                }, 100);
-            }).catch(() => {
-                setWarning(["danger", "Não foi possível cadastrar o serviço."]);
-            }).finally(() => { setIsLoading(""); });
+            if (!isEdition) {
+                postSpecialtyHttp(specialtyData).then(response => {
+                    toggleModal();
+                    setWarning(["success", "Especialidade cadastrada e selecionada com sucesso."]);
+                    setSpecialties([...specialties, response]);
+                    reset();
+
+                    setTimeout(() => {
+                        serviceFormRef.current?.setFieldValue("specialtyId", response.idEspecialidade.toString());
+                    }, 100);
+                }).catch(() => {
+                    setWarning(["danger", "Não foi possível cadastrar o serviço."]);
+                }).finally(() => { setIsLoading(""); });
+            }
+            else {
+                let specialtyId = Number(serviceFormRef.current?.getFieldValue("specialtyId"));
+
+                putSpecialtyHttp({
+                    ...specialtyData,
+                    idEspecialidade: specialtyId
+                }).then(() => {
+                    setWarning(["success", "Especialidade editada com sucesso."]);
+
+                    let index = specialties.findIndex(x => x.idEspecialidade === specialtyId);
+                    specialties[index].nomeEspecialidade = specialtyData.nomeEspecialidade;
+                }).catch(() => {
+                    setWarning(["danger", "Não foi possível editar a especialidade."]);
+                }).finally(() => { setIsLoading(""); });
+            }
         }
         catch (err) {
             if (err instanceof Yup.ValidationError)
@@ -137,9 +216,27 @@ const RegisterService = () => {
         }
     }
 
+    const onClickOpenSpecialty = () => {
+        toggleModal("specialty");
+
+        if (isEdition) {
+            let specialtyId = Number(serviceFormRef.current?.getFieldValue("specialtyId"));
+            let specialty = specialties.find(x => x.idEspecialidade === specialtyId);
+            
+            setTimeout(() => {
+                specialtyFormRef.current?.setFieldValue("name", specialty?.nomeEspecialidade);
+            }, 100);
+        }
+    }
+
     return (
         <>
-            <h1>Cadastro de serviço</h1>
+            <ToggleTitle
+                toggle={isEdition}
+                isLoading={isLoading === "get"}
+                title="Cadastro de serviço"
+                alternateTitle="Edição de serviço"
+            />
 
             <Form
                 ref={serviceFormRef}
@@ -181,23 +278,38 @@ const RegisterService = () => {
                 />
 
                 <LoadingButton
-                    text="Cadastrar"
+                    text={isEdition ? "Editar" : "Cadastrar"}
                     isLoading={isLoading === "service"}
-                    type='submit'
+                    type="submit"
                 />
 
                 {modal === "" && <Warning value={warning} />}
             </Form>
 
-            <h2>Adicionar especialidade</h2>
-            <p>Você pode adicionar uma nova especialidade caso não tenha encontrado a opção desejada.</p>
+            {isEdition
+                ? <>
+                    <h2>Editar especialidade</h2>
+                    <p>Você pode editar os dados da especialidade escolhida.</p>
 
-            <Button
-                onClick={() => toggleModal("specialty")}
-                outline
-            >
-                Adicionar especialidade
-            </Button>
+                    <Button
+                        onClick={() => onClickOpenSpecialty()}
+                        outline
+                        color="warning"
+                    >
+                        Editar especialidade
+                    </Button>
+                </>
+                : <>
+                    <h2>Adicionar especialidade</h2>
+                    <p>Você pode adicionar uma nova especialidade caso não tenha encontrado a opção desejada.</p>
+
+                    <Button
+                        onClick={() => onClickOpenSpecialty()}
+                        outline
+                    >
+                        Adicionar especialidade
+                    </Button>
+                </>}
 
             <DataModal
                 isOpen={modal === "specialty"}
@@ -207,7 +319,7 @@ const RegisterService = () => {
                 <ModalHeader
                     toggle={() => toggleModal()}
                 >
-                    Adicionar especialidade
+                    {isEdition ? "Editar" : "Adicionar"} especialidade
                 </ModalHeader>
 
                 <ModalBody>
@@ -225,12 +337,13 @@ const RegisterService = () => {
                             placeholder='Coloque o nome da especialidade'
                         />
                     </Form>
+                    
+                    {modal === "specialty" && <Warning value={warning} />}
                 </ModalBody>
 
                 <ModalFooter>
-                    {modal === "" && <Warning value={warning} />}
                     <LoadingButton
-                        text="Adicionar"
+                        text={isEdition ? "Editar" : "Adicionar"}
                         isLoading={isLoading === "specialty"}
                         type='button'
                         onClick={() => specialtyFormRef.current?.submitForm()}

@@ -11,6 +11,15 @@ const ServiceMenu = () => {
             >
                 <NavItem>
                     <NavLink
+                        to="/servicos/listar"
+                        tag={Link}
+                    >
+                        Listar
+                    </NavLink>
+                </NavItem>
+
+                <NavItem>
+                    <NavLink
                         to="/servicos/cadastrar"
                         tag={Link}
                     >

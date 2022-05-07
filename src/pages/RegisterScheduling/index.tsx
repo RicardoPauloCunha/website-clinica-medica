@@ -9,7 +9,7 @@ import Medico from "../../services/entities/medico";
 import Paciente from "../../services/entities/paciente";
 import Servico from "../../services/entities/servico";
 import { postSchedulingHttp } from "../../services/http/scheduling";
-import { listDoctorBySpecialtyHttp } from "../../services/http/doctor";
+import { listDoctorByParamsHttp } from "../../services/http/doctor";
 import { getPatientByCpfHttp, postPatientHttp, _listPatient } from "../../services/http/patient";
 import { listServiceHttp } from "../../services/http/service";
 import { WarningTuple } from "../../util/getHttpErrors";
@@ -64,11 +64,11 @@ const RegisterScheduling = () => {
     const [isLoading, setIsLoading] = useState<"scheduling" | "patient" | "getPatient" | "">("");
     const [warning, setWarning] = useState<WarningTuple>(["", ""]);
     const [modal, setModal] = useState<ModalString>("");
+    const [serviceIndex, setServiceIndex] = useState(-1);
+    const [doctorIndex, setDoctorIndex] = useState(-1);
 
     const [services, setServices] = useState<Servico[]>([]);
     const [doctors, setDoctors] = useState<Medico[]>([]);
-    const [serviceIndex, setServiceIndex] = useState(-1);
-    const [doctorIndex, setDoctorIndex] = useState(-1);
     const [patient, setPatient] = useState<Paciente | undefined>(undefined);
 
     useEffect(() => {
@@ -83,7 +83,7 @@ const RegisterScheduling = () => {
     }
 
     const getDoctors = (specialtyId: number | null) => {
-        listDoctorBySpecialtyHttp({
+        listDoctorByParamsHttp({
             idEspecialidade: specialtyId
         }).then(response => {
             setDoctors([...response]);
@@ -106,15 +106,8 @@ const RegisterScheduling = () => {
         }
 
         setIsLoading("getPatient");
-        getPatientByCpfHttp({
-            cpf
-        }).then(response => {
-            if (response.length === 0) {
-                setWarning(["danger", "Paciente não encontrado. Adicione o paciente para prosseguir."]);
-                return;
-            }
-
-            setPatient(response[0]);
+        getPatientByCpfHttp(cpf).then(response => {
+            setPatient(response);
 
             setWarning(["success", "Paciente encontrado."]);
             setTimeout(() => {
@@ -147,6 +140,8 @@ const RegisterScheduling = () => {
             await shema.validate(data, {
                 abortEarly: false
             });
+
+            data.patientCpf = normalize(data.patientCpf);
 
             if (patient === undefined || patient.cpf !== data.patientCpf) {
                 setIsLoading("");
@@ -222,7 +217,7 @@ const RegisterScheduling = () => {
             data.gender = Number(data.gender);
 
             postPatientHttp({
-                cpf: data.cpf,
+                cpf: normalize(data.cpf),
                 nome: data.name,
                 dataNascimento: normalizeDate(data.birthDate),
                 sexo: data.gender,
@@ -230,7 +225,7 @@ const RegisterScheduling = () => {
                 contato: data.contact
             }).then(response => {
                 toggleModal();
-                setWarning(["success", "Paciente adicionado e selecionado com sucesso."]);
+                setWarning(["success", "Paciente cadastrado e selecionado com sucesso."]);
                 setPatient(response);
                 reset();
 

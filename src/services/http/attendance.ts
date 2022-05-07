@@ -1,4 +1,5 @@
 import Atendimento from "../entities/atendimento";
+
 import { _listScheduling } from "./scheduling";
 
 export const _listAttendance: Atendimento[] = [
@@ -18,8 +19,9 @@ export const _listAttendance: Atendimento[] = [
     }
 ];
 
-export const getSchedulingByCpfHttp = async (cpf: string): Promise<Atendimento[]> => {
-    return _listAttendance.filter(x => x.agendamento?.paciente?.cpf === cpf);
+export const listAttendanceByCpfHttp = async (cpf: string): Promise<Atendimento[]> => {
+    // TODO: integração API
+    return _listAttendance;
 }
 
 type PostAttendanceRequest = {
@@ -29,5 +31,5 @@ type PostAttendanceRequest = {
 }
 
 export const postAttendanceHttp = async (requestData: PostAttendanceRequest): Promise<void> => {
-    
+    // TODO: integração API
 }

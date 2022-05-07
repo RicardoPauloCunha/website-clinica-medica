@@ -58,13 +58,13 @@ export const listEmployeeByTypeHttp = async (paramsData: FilterEmployeeParams): 
     return data;
 }
 
-interface LoginRequest {
+interface PostLoginEmployeeRequest {
     email: string;
     senha: string;
 }
 
-export const postLoginEmployeeHttp = async (requestData: LoginRequest): Promise<Funcionario> => {
-    let { data } = await post<LoginRequest, Funcionario>(ROOT + "login", requestData);
+export const postLoginEmployeeHttp = async (requestData: PostLoginEmployeeRequest): Promise<Funcionario> => {
+    let { data } = await post<PostLoginEmployeeRequest, Funcionario>(ROOT + "login", requestData);
     return data;
 }
 

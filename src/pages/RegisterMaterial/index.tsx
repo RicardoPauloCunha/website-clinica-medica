@@ -7,15 +7,15 @@ import MaterialStatusEnum from "../../services/enums/materialStatus";
 import CategoriaMaterial from "../../services/entities/categoriaMaterial";
 import Fabricante from "../../services/entities/fabricante";
 import Material from "../../services/entities/material";
-import { listManufacturerHttp, postManufacturerHttp, _listManufacturer } from "../../services/http/manufacturer";
+import { listManufacturerHttp, postManufacturerHttp, putManufacturerHttp, _listManufacturer } from "../../services/http/manufacturer";
 import { getMaterialByIdHttp, postMaterialHttp, putMaterialHttp, _listMaterial } from "../../services/http/material";
-import { listCategoryHttp, postCategoryHttp, _listCategory } from "../../services/http/category";
+import { listCategoryHttp, postCategoryHttp, putCategoryHttp, _listCategory } from "../../services/http/category";
 import { WarningTuple } from "../../util/getHttpErrors";
 import getValidationErrors from "../../util/getValidationErrors";
-import { concatenateAddressData, splitAddressData } from "../../util/stringFormat";
+import { concatenateAddressData, normalize, splitAddressData } from "../../util/stringFormat";
 
-import { Alert, Button, ModalBody, ModalFooter, ModalHeader, Spinner } from "reactstrap";
-import { DataModal, Form, TextGroupGrid } from "../../styles/components";
+import { Alert, Button, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
+import { ButtonGroupRow, DataModal, Form, TextGroupGrid } from "../../styles/components";
 import FieldInput from "../../components/Input";
 import SelectInput from "../../components/Input/select";
 import MaskInput from "../../components/Input/mask";
@@ -23,6 +23,7 @@ import Warning from "../../components/Warning";
 import DataCard from "../../components/DataCard";
 import DataText from "../../components/DataText";
 import LoadingButton from "../../components/LoadingButton";
+import ToggleTitle from "../../components/ToggleTitle";
 
 type MaterialFormData = {
     name: string;
@@ -56,31 +57,29 @@ const RegisterMaterial = () => {
     const categoryFormRef = useRef<FormHandles>(null);
     const manufacturerFormRef = useRef<FormHandles>(null);
 
-    const [isLoading, setIsLoading] = useState<"material" | "category" | "manufacturer" | "get" | "">("");
-    const [warning, setWarning] = useState<WarningTuple>(["", ""]);
-    const [modal, setModal] = useState<ModalString>("");
-
     const _itemMaterial = _listMaterial[0];
     const _itemCategory = _listCategory[0];
     const _itemManufacturer = _listManufacturer[0];
     const _itemAddress = splitAddressData(_itemManufacturer.enderecoFabricante);
 
+    const [isLoading, setIsLoading] = useState<"material" | "category" | "manufacturer" | "get" | "">("");
+    const [warning, setWarning] = useState<WarningTuple>(["", ""]);
+    const [modal, setModal] = useState<ModalString>("");
+    const [isEdition, setIsEdition] = useState(routeParams.materialId !== undefined);
+    const [manufacturerIndex, setManufacturerIndex] = useState(-1);
+
     const [categories, setCategories] = useState<CategoriaMaterial[]>([]);
     const [manufacturers, setManufacturers] = useState<Fabricante[]>([]);
-    const [manufacturerIndex, setManufacturerIndex] = useState(-1);
     const [editedMaterial, setEditedMaterial] = useState<Material | undefined>(undefined);
-    const [isEdition, setIsEdition] = useState(routeParams.materialId !== undefined);
 
     useEffect(() => {
         setWarning(["", ""]);
 
-        if (routeParams.materialId !== undefined)
-        {
+        if (routeParams.materialId !== undefined) {
             setIsEdition(true);
             getMaterial();
         }
-        else
-        {
+        else {
             setIsEdition(false);
             // materialFormRef.current?.reset();
             // categoryFormRef.current?.reset();
@@ -94,10 +93,21 @@ const RegisterMaterial = () => {
     }, [routeParams]);
 
     useEffect(() => {
-        if (manufacturers.length > 0 && editedMaterial?.fabricante?.cnpj)
-            handlerChangeManufacturer(editedMaterial?.fabricante?.cnpj);
+        if (categories.length !== 0 && manufacturers.length !== 0 && editedMaterial !== undefined) {
+            setTimeout(() => {
+                materialFormRef.current?.setData({
+                    name: editedMaterial.nomeMaterial,
+                    description: editedMaterial.descricao,
+                    unitMeasurement: editedMaterial.unidadeDeMedida,
+                    categoryId: editedMaterial.categoriaMaterial?.idCategoria.toString(),
+                    manufacturerCnpj: editedMaterial.fabricante?.cnpj
+                });
+
+                handlerChangeManufacturer(editedMaterial?.fabricante?.cnpj as string);
+            }, 100);
+        }
         // eslint-disable-next-line
-    }, [manufacturers, editedMaterial]);
+    }, [categories, manufacturers, editedMaterial]);
 
     const getMaterial = () => {
         let id = Number(routeParams.materialId);
@@ -106,14 +116,6 @@ const RegisterMaterial = () => {
 
         setIsLoading("get");
         getMaterialByIdHttp(id).then(response => {
-            materialFormRef.current?.setData({
-                name: response.nomeMaterial,
-                description: response.descricao,
-                unitMeasurement: response.unidadeDeMedida,
-                categoryId: response.categoriaMaterial?.idCategoria.toString(),
-                manufacturerCnpj: response.fabricante?.cnpj
-            });
-
             setEditedMaterial(response);
             setIsLoading("");
         });
@@ -168,12 +170,12 @@ const RegisterMaterial = () => {
                     idCategoria: Number(data.categoryId)
                 },
                 fabricante: {
-                    cnpj: data.manufacturerCnpj
+                    cnpj: normalize(data.manufacturerCnpj)
                 },
                 statusMaterial: MaterialStatusEnum.Enabled,
             }
 
-            if (editedMaterial === undefined) {
+            if (!isEdition) {
                 postMaterialHttp(materialData).then(() => {
                     setWarning(["success", "Material cadastrado com sucesso."]);
                     reset();
@@ -182,13 +184,11 @@ const RegisterMaterial = () => {
                     setWarning(["danger", "Não foi possível cadastrar o material."]);
                 }).finally(() => { setIsLoading(""); });
             }
-            else
-            {
-                materialData.statusMaterial = editedMaterial.statusMaterial;
-
+            else if (editedMaterial !== undefined) {
                 putMaterialHttp({
+                    ...materialData,
+                    statusMaterial: editedMaterial.statusMaterial,
                     idMaterial: editedMaterial.idMaterial,
-                    ...materialData
                 }).then(() => {
                     setWarning(["success", "Material editado com sucesso."]);
                 }).catch(() => {
@@ -219,20 +219,39 @@ const RegisterMaterial = () => {
                 abortEarly: false
             });
 
-            postCategoryHttp({
+            let categoryData = {
                 nomeCategoria: data.name
-            }).then(response => {
-                toggleModal();
-                setWarning(["success", "Categoria adicionada e selecionada com sucesso."]);
-                setCategories([...categories, response]);
-                reset();
+            }
 
-                setTimeout(() => {
-                    materialFormRef.current?.setFieldValue("categoryId", response.idCategoria.toString());
-                }, 100);
-            }).catch(() => {
-                setWarning(["danger", "Não foi possível cadastrar a categoria."]);
-            }).finally(() => { setIsLoading(""); });
+            if (!editedMaterial) {
+                postCategoryHttp(categoryData).then(response => {
+                    toggleModal();
+                    setWarning(["success", "Categoria cadastrada e selecionada com sucesso."]);
+                    setCategories([...categories, response]);
+                    reset();
+
+                    setTimeout(() => {
+                        materialFormRef.current?.setFieldValue("categoryId", response.idCategoria.toString());
+                    }, 100);
+                }).catch(() => {
+                    setWarning(["danger", "Não foi possível cadastrar a categoria."]);
+                }).finally(() => { setIsLoading(""); });
+            }
+            else {
+                let categoryId = Number(materialFormRef.current?.getFieldValue("categoryId"));
+
+                putCategoryHttp({
+                    ...categoryData,
+                    idCategoria: categoryId
+                }).then(() => {
+                    setWarning(["success", "Categoria editada com sucesso."]);
+
+                    let index = categories.findIndex(x => x.idCategoria === categoryId);
+                    categories[index].nomeCategoria = categoryData.nomeCategoria;
+                }).catch(() => {
+                    setWarning(["danger", "Não foi possível editar a categoria."]);
+                }).finally(() => { setIsLoading(""); });
+            }
         }
         catch (err) {
             if (err instanceof Yup.ValidationError)
@@ -273,24 +292,38 @@ const RegisterMaterial = () => {
                 abortEarly: false
             });
 
-            postManufacturerHttp({
-                cnpj: data.cnpj,
+            let manufacturerData = {
+                cnpj: normalize(data.cnpj),
                 nomeFabricante: data.name,
                 enderecoFabricante: concatenateAddressData({ ...data }),
                 contatoFabricante: data.contact
-            }).then(response => {
-                toggleModal();
-                setWarning(["success", "Fabricante adicionado e selecionado com sucesso."]);
-                setManufacturerIndex(manufacturers.length);
-                setManufacturers([...manufacturers, response]);
-                reset();
+            }
 
-                setTimeout(() => {
-                    materialFormRef.current?.setFieldValue("manufacturerCnpj", response.cnpj);
-                }, 100);
-            }).catch(() => {
-                setWarning(["danger", "Não foi possível cadastrar o fabricante."]);
-            }).finally(() => { setIsLoading(""); });
+            if (!editedMaterial) {
+                postManufacturerHttp(manufacturerData).then(response => {
+                    toggleModal();
+                    setWarning(["success", "Fabricante cadastrado e selecionado com sucesso."]);
+                    setManufacturerIndex(manufacturers.length);
+                    setManufacturers([...manufacturers, response]);
+                    reset();
+    
+                    setTimeout(() => {
+                        materialFormRef.current?.setFieldValue("manufacturerCnpj", response.cnpj);
+                    }, 100);
+                }).catch(() => {
+                    setWarning(["danger", "Não foi possível cadastrar o fabricante."]);
+                }).finally(() => { setIsLoading(""); });
+            }
+            else {
+                putManufacturerHttp(manufacturerData).then(() => {
+                    setWarning(["success", "Fabricante editado com sucesso."]);
+
+                    let index = manufacturers.findIndex(x => x.cnpj === manufacturerData.cnpj);
+                    manufacturers[index] = {...manufacturerData};
+                }).catch(() => {
+                    setWarning(["danger", "Não foi possível editar o fabricante."]);
+                }).finally(() => { setIsLoading(""); });
+            }
         }
         catch (err) {
             if (err instanceof Yup.ValidationError)
@@ -301,26 +334,55 @@ const RegisterMaterial = () => {
     }
 
     const handlerChangeManufacturer = (optionValue: string) => {
+        optionValue = normalize(optionValue);
         let index = manufacturers.findIndex(x => x.cnpj === optionValue);
         setManufacturerIndex(index);
     }
 
+    const onClickOpenCategory = () => {
+        toggleModal("category");
+
+        if (isEdition) {
+            let categoryId = Number(materialFormRef.current?.getFieldValue("categoryId"));
+            let category = categories.find(x => x.idCategoria === categoryId);
+
+            setTimeout(() => {
+                categoryFormRef.current?.setFieldValue("name", category?.nomeCategoria);
+            }, 100);
+        }
+    }
+
+    const onClickOpenManufacturer = () => {
+        toggleModal("manufacturer");
+
+        if (isEdition) {
+            let manufacturerCnpj = normalize(materialFormRef.current?.getFieldValue("manufacturerCnpj"));
+            let manufacturer = manufacturers.find(x => x.cnpj === manufacturerCnpj);
+
+            if (manufacturer === undefined)
+                return;
+
+            let address = splitAddressData(manufacturer.enderecoFabricante);
+
+            setTimeout(() => {
+                manufacturerFormRef.current?.setData({
+                    cnpj: manufacturer?.cnpj,
+                    name: manufacturer?.nomeFabricante,
+                    contact: manufacturer?.contatoFabricante,
+                    ...address
+                });
+            }, 100);
+        }
+    }
+
     return (
         <>
-            {isEdition
-                ? <h1>
-                    Edição de material
-
-                    {isLoading === "get" && <>
-                        {' '}
-                        <Spinner
-                            color="primary"
-                            type="grow"
-                        />
-                    </>}
-                </h1>
-                : <h1>Cadastro de material</h1>
-            }
+            <ToggleTitle
+                toggle={isEdition}
+                isLoading={isLoading === "get"}
+                title="Cadastro de material"
+                alternateTitle="Edição de material"
+            />
 
             <Form
                 ref={materialFormRef}
@@ -400,67 +462,95 @@ const RegisterMaterial = () => {
                             value={manufacturers[manufacturerIndex].enderecoFabricante}
                         />
                     </TextGroupGrid>
+
+                    {isEdition && <ButtonGroupRow>
+                        <Button
+                            color="warning"
+                            outline
+                            onClick={() => onClickOpenManufacturer()}
+                        >
+                            Editar
+                        </Button>
+                    </ButtonGroupRow>}
                 </DataCard>
                 : <Alert color="warning">
                     Nenhum fabricante foi selecionado.
                 </Alert>
             }
 
-            {!isEdition && <>
-                <h2>Adicionar categoria</h2>
-                <p>Você pode adicionar uma nova categoria de material caso não tenha encontrado a opção desejada.</p>
+            {isEdition
+                ? <>
+                    <h2>Editar categoria</h2>
+                    <p>Você pode editar os dados da categoria escolhida.</p>
 
-                <Button
-                    onClick={() => toggleModal("category")}
-                    outline
-                >
-                    Adicionar categoria
-                </Button>
+                    <Button
+                        onClick={() => onClickOpenCategory()}
+                        outline
+                        color="warning"
+                    >
+                        Editar categoria
+                    </Button>
+                </>
+                : <>
+                    <h2>Adicionar categoria</h2>
+                    <p>Você pode adicionar uma nova categoria de material caso não tenha encontrado a opção desejada.</p>
 
-                <DataModal
-                    isOpen={modal === "category"}
-                    toggle={toggleModal}
-                    centered
-                >
-                    <ModalHeader
-                        toggle={() => toggleModal()}
+                    <Button
+                        onClick={() => onClickOpenCategory()}
+                        outline
                     >
                         Adicionar categoria
-                    </ModalHeader>
+                    </Button>
+                </>
+            }
 
-                    <ModalBody>
-                        <Form
-                            ref={categoryFormRef}
-                            onSubmit={submitCategoryForm}
-                            className="form-modal"
-                            initialData={{
-                                name: _itemCategory.nomeCategoria
-                            }}
-                        >
-                            <FieldInput
-                                name='name'
-                                label='Nome da categoria'
-                                placeholder='Coloque o nome da categoria'
-                            />
-                        </Form>
-                    </ModalBody>
+            <DataModal
+                isOpen={modal === "category"}
+                toggle={toggleModal}
+                centered
+            >
+                <ModalHeader
+                    toggle={() => toggleModal()}
+                >
+                    Adicionar categoria
+                </ModalHeader>
 
-                    <ModalFooter>
-                        <LoadingButton
-                            text="Adicionar categoria"
-                            isLoading={isLoading === "category"}
-                            type='button'
-                            onClick={() => categoryFormRef.current?.submitForm()}
+                <ModalBody>
+                    <Form
+                        ref={categoryFormRef}
+                        onSubmit={submitCategoryForm}
+                        className="form-modal"
+                        initialData={{
+                            name: _itemCategory.nomeCategoria
+                        }}
+                    >
+                        <FieldInput
+                            name='name'
+                            label='Nome da categoria'
+                            placeholder='Coloque o nome da categoria'
                         />
+                    </Form>
 
-                        <Button
-                            onClick={() => toggleModal()}
-                        >
-                            Cancelar
-                        </Button>
-                    </ModalFooter>
-                </DataModal>
+                    {modal === "category" && <Warning value={warning} />}
+                </ModalBody>
 
+                <ModalFooter>
+                    <LoadingButton
+                        text={isEdition ? "Editar" : "Adicionar"}
+                        isLoading={isLoading === "category"}
+                        type='button'
+                        onClick={() => categoryFormRef.current?.submitForm()}
+                    />
+
+                    <Button
+                        onClick={() => toggleModal()}
+                    >
+                        Cancelar
+                    </Button>
+                </ModalFooter>
+            </DataModal>
+
+            {!isEdition && <>
                 <h2>Adicionar fabricante</h2>
                 <p>Você pode adicionar uma novo fabricante caso não tenha encontrado a opção desejada.</p>
 
@@ -470,118 +560,119 @@ const RegisterMaterial = () => {
                 >
                     Adicionar fabricante
                 </Button>
+            </>}
 
-                <DataModal
-                    isOpen={modal === "manufacturer"}
-                    toggle={toggleModal}
-                    centered
-                    size="lg"
+            <DataModal
+                isOpen={modal === "manufacturer"}
+                toggle={toggleModal}
+                centered
+                size="lg"
+            >
+                <ModalHeader
+                    toggle={() => toggleModal()}
                 >
-                    <ModalHeader
-                        toggle={() => toggleModal()}
+                    {isEdition ? "Editar" : "Adicionar"} fabricante
+                </ModalHeader>
+
+                <ModalBody>
+                    <Form
+                        ref={manufacturerFormRef}
+                        onSubmit={submitManufacturerForm}
+                        className="form-modal"
+                        initialData={{
+                            cnpj: _itemManufacturer.cnpj,
+                            name: _itemManufacturer.nomeFabricante,
+                            contact: _itemManufacturer.contatoFabricante,
+                            cep: _itemAddress.cep,
+                            street: _itemAddress.street,
+                            number: _itemAddress.number,
+                            district: _itemAddress.district,
+                            city: _itemAddress.city,
+                            state: _itemAddress.state,
+                        }}
                     >
-                        Adicionar fabricante
-                    </ModalHeader>
-
-                    <ModalBody>
-                        <Form
-                            ref={manufacturerFormRef}
-                            onSubmit={submitManufacturerForm}
-                            className="form-modal"
-                            initialData={{
-                                cnpj: _itemManufacturer.cnpj,
-                                name: _itemManufacturer.nomeFabricante,
-                                contact: _itemManufacturer.contatoFabricante,
-                                cep: _itemAddress.cep,
-                                street: _itemAddress.street,
-                                number: _itemAddress.number,
-                                district: _itemAddress.district,
-                                city: _itemAddress.city,
-                                state: _itemAddress.state,
-                            }}
-                        >
-                            <MaskInput
-                                name='cnpj'
-                                label='CNPJ do fabricante'
-                                mask="99.999.999/9999-99"
-                                maskChar=""
-                                placeholder='00.000.000/0000-00'
-                            />
-
-                            <FieldInput
-                                name='name'
-                                label='Nome do fabricante'
-                                placeholder='Coloque o nome do fabricante'
-                            />
-
-                            <MaskInput
-                                name='contact'
-                                label='Contato (telefone)'
-                                mask="(99) 9999-9999"
-                                placeholder="(00) 0000-0000"
-                                maskChar=""
-                            />
-
-                            <MaskInput
-                                name='cep'
-                                label='CEP'
-                                mask="99999-999"
-                                placeholder="00000-000"
-                                maskChar=""
-                            />
-
-                            <FieldInput
-                                name='street'
-                                label='Rua'
-                                placeholder='Coloque a rua do endereço'
-                            />
-
-                            <FieldInput
-                                name='number'
-                                label='Número'
-                                placeholder='Coloque o número'
-                            />
-
-                            <FieldInput
-                                name='district'
-                                label='Bairro'
-                                placeholder='Coloque o bairro'
-                            />
-
-                            <FieldInput
-                                name='city'
-                                label='Cidade'
-                                placeholder='Coloque a cidade'
-                            />
-
-                            <MaskInput
-                                name='state'
-                                label='Estado (UF)'
-                                mask="aa"
-                                maskChar=""
-                                placeholder='SP'
-                            />
-
-                            {modal === "manufacturer" && <Warning value={warning} />}
-                        </Form>
-                    </ModalBody>
-
-                    <ModalFooter>
-                        <LoadingButton
-                            text="Adicionar fabricante"
-                            isLoading={isLoading === "manufacturer"}
-                            type='button'
-                            onClick={() => manufacturerFormRef.current?.submitForm()}
+                        <MaskInput
+                            name='cnpj'
+                            label='CNPJ do fabricante'
+                            mask="99.999.999/9999-99"
+                            maskChar=""
+                            placeholder='00.000.000/0000-00'
+                            disabled={isEdition}
                         />
 
-                        <Button
-                            onClick={() => toggleModal()}
-                        >
-                            Cancelar
-                        </Button>
-                    </ModalFooter>
-                </DataModal>
-            </>}
+                        <FieldInput
+                            name='name'
+                            label='Nome do fabricante'
+                            placeholder='Coloque o nome do fabricante'
+                        />
+
+                        <MaskInput
+                            name='contact'
+                            label='Contato (telefone)'
+                            mask="(99) 9999-9999"
+                            placeholder="(00) 0000-0000"
+                            maskChar=""
+                        />
+
+                        <MaskInput
+                            name='cep'
+                            label='CEP'
+                            mask="99999-999"
+                            placeholder="00000-000"
+                            maskChar=""
+                        />
+
+                        <FieldInput
+                            name='street'
+                            label='Rua'
+                            placeholder='Coloque a rua do endereço'
+                        />
+
+                        <FieldInput
+                            name='number'
+                            label='Número'
+                            placeholder='Coloque o número'
+                        />
+
+                        <FieldInput
+                            name='district'
+                            label='Bairro'
+                            placeholder='Coloque o bairro'
+                        />
+
+                        <FieldInput
+                            name='city'
+                            label='Cidade'
+                            placeholder='Coloque a cidade'
+                        />
+
+                        <MaskInput
+                            name='state'
+                            label='Estado (UF)'
+                            mask="aa"
+                            maskChar=""
+                            placeholder='SP'
+                        />
+
+                        {modal === "manufacturer" && <Warning value={warning} />}
+                    </Form>
+                </ModalBody>
+
+                <ModalFooter>
+                    <LoadingButton
+                        text={isEdition ? "Editar" : "Adicionar"}
+                        isLoading={isLoading === "manufacturer"}
+                        type='button'
+                        onClick={() => manufacturerFormRef.current?.submitForm()}
+                    />
+
+                    <Button
+                        onClick={() => toggleModal()}
+                    >
+                        Cancelar
+                    </Button>
+                </ModalFooter>
+            </DataModal>
         </>
     );
 }

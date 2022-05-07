@@ -9,7 +9,7 @@ import SpinnerBlock from "../../components/SpinnerBlock";
 import Warning from "../../components/Warning";
 import DataCard from "../../components/DataCard";
 import DataText from "../../components/DataText";
-import { getSchedulingByCpfHttp } from "../../services/http/attendance";
+import { listAttendanceByCpfHttp } from "../../services/http/attendance";
 import { hasValueString } from "../../util/stringFormat";
 
 const PatientAttendances = () => {
@@ -36,7 +36,7 @@ const PatientAttendances = () => {
         }
 
         setIsLoading("get");
-        getSchedulingByCpfHttp(cpf).then(response => {
+        listAttendanceByCpfHttp(cpf).then(response => {
             setAttendances([...response]);
 
             if (response.length === 0)

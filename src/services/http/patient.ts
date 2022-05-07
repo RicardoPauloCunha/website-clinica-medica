@@ -1,4 +1,4 @@
-import { getParams, post } from "../api";
+import { get, post } from "../api";
 import Paciente from "../entities/paciente";
 import GenderTypeEnum from "../enums/genderType";
 
@@ -39,12 +39,8 @@ export const _listPatient: Paciente[] = [
     },
 ];
 
-type SearchPatientParams = {
-    cpf: string;
-}
-
-export const getPatientByCpfHttp = async (paramsData: SearchPatientParams): Promise<Paciente[]> => {
-    let { data } = await getParams<SearchPatientParams, Paciente[]>(ROOT, paramsData);
+export const getPatientByCpfHttp = async (cpf: string): Promise<Paciente> => {
+    let { data } = await get<Paciente>(ROOT + cpf);
     return data;
 }
 

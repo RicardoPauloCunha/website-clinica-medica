@@ -7,7 +7,7 @@ import { useAuth } from "../../contexts/auth";
 import RecordTypeEnum, { listRecordType } from "../../services/enums/recordType";
 import Material from "../../services/entities/material";
 import CategoriaMaterial from "../../services/entities/categoriaMaterial";
-import { listMaterialByCategoryHttp, putMaterialHttp } from "../../services/http/material";
+import { listMaterialByParamsHttp, putMaterialHttp } from "../../services/http/material";
 import { listCategoryHttp } from "../../services/http/category";
 import { postRecordHttp } from "../../services/http/record";
 import getValidationErrors from "../../util/getValidationErrors";
@@ -63,7 +63,7 @@ const Materials = () => {
         setIsLoading("get");
         setWarning(["", ""]);
 
-        listMaterialByCategoryHttp({
+        listMaterialByParamsHttp({
             idCategoria: categoryId
         }).then(response => {
             setMaterials([...response]);

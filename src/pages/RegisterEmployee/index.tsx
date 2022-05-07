@@ -19,6 +19,8 @@ import { Form } from "../../styles/components";
 import SelectInput from "../../components/Input/select";
 import Warning from "../../components/Warning";
 import FieldInput from "../../components/Input";
+import ToggleTitle from "../../components/ToggleTitle";
+import { normalize } from "../../util/stringFormat";
 
 interface EmployeeFormData {
     name: string;
@@ -56,11 +58,14 @@ const RegisterEmployee = () => {
     useEffect(() => {
         setWarning(["", ""]);
 
-        let pathIsDoctor = location.pathname.split("/")[2] === "medicos";
-        setIsDoctor(pathIsDoctor);
-
-        if (routeParams.employeeId !== undefined || routeParams.doctorId !== undefined) {
+        if (routeParams.employeeId !== undefined) {
             setIsEdition(true);
+            getEmployee();
+
+        }
+        else if (routeParams.doctorId !== undefined) {
+            setIsEdition(true);
+            getDoctor();
         }
         else {
             setIsEdition(false);
@@ -69,15 +74,43 @@ const RegisterEmployee = () => {
             // TODO: Descomentar
         }
 
-        if (routeParams.employeeId !== undefined)
-            getEmployee();
-        else if (routeParams.doctorId !== undefined)
-            getDoctor();
-
-        if (pathIsDoctor)
+        if (location.pathname.split("/")[2] === "medicos") {
+            setIsDoctor(true);
             getSpecialties();
+        }
+        else {
+            setIsDoctor(false);
+        }
         // eslint-disable-next-line
     }, [routeParams]);
+
+    useEffect(() => {
+        if (!isDoctor && editedEmployee !== undefined) {
+            setTimeout(() => {
+                employeeFormRef.current?.setData({
+                    name: editedEmployee.nomeFuncionario,
+                    email: editedEmployee.email,
+                    password: editedEmployee.senha,
+                    confirmPassword: editedEmployee.senha,
+                    sector: editedEmployee.setor,
+                    employeeType: editedEmployee.tipoFuncionario.toString()
+                });
+            }, 100);
+        }
+        else if (isDoctor && specialties.length !== 0 && editedDoctor !== undefined) {
+            setTimeout(() => {
+                doctorFormRef.current?.setData({
+                    name: editedDoctor.nomeFuncionario,
+                    email: editedDoctor.email,
+                    password: editedDoctor.senha,
+                    confirmPassword: editedDoctor.senha,
+                    sector: editedDoctor.setor,
+                    crm: editedDoctor.crm,
+                    specialtyId: editedDoctor.especialidade?.idEspecialidade.toString()
+                });
+            }, 100);
+        }
+    }, [isDoctor, specialties, editedEmployee, editedDoctor])
 
     const getSpecialties = () => {
         listSpecialtyHttp().then(response => {
@@ -92,15 +125,6 @@ const RegisterEmployee = () => {
 
         setIsLoading("get");
         getEmployeeByIdHttp(id).then(response => {
-            employeeFormRef.current?.setData({
-                name: response.nomeFuncionario,
-                email: response.email,
-                password: response.senha,
-                confirmPassword: response.senha,
-                sector: response.setor,
-                employeeType: response.tipoFuncionario.toString()
-            });
-
             setEditedEmployee(response);
             setIsLoading("");
         });
@@ -113,16 +137,6 @@ const RegisterEmployee = () => {
 
         setIsLoading("get");
         getDoctorByEmployeeIdHttp(id).then(response => {
-            doctorFormRef.current?.setData({
-                name: response.nomeFuncionario,
-                email: response.email,
-                password: response.senha,
-                confirmPassword: response.senha,
-                sector: response.setor,
-                crm: response.crm,
-                specialtyId: response.especialidade?.idEspecialidade.toString()
-            });
-
             setEditedDoctor(response)
             setIsLoading("");
         });
@@ -164,7 +178,7 @@ const RegisterEmployee = () => {
                 statusFuncionario: EmployeeStatusEnum.Enabled
             };
 
-            if (editedEmployee === undefined) {
+            if (!isEdition) {
                 await postEmployeeHttp(employeeData).then(() => {
                     setWarning(["success", "Funcionário cadastrado com sucesso."]);
                     reset();
@@ -172,13 +186,11 @@ const RegisterEmployee = () => {
                     setWarning(["danger", "Não foi possível cadastrar o funcionário."]);
                 }).finally(() => { setIsLoading(""); });
             }
-            else {
-                employeeData.senha = editedEmployee.senha;
-                employeeData.statusFuncionario = editedEmployee.statusFuncionario;
-
+            else if (editedEmployee !== undefined) {
                 await putEmployeeHttp({
+                    ...employeeData,
                     idFuncionario: editedEmployee.idFuncionario,
-                    ...employeeData
+                    statusFuncionario: editedEmployee.statusFuncionario
                 }).then(() => {
                     setWarning(["success", "Funcionário editado com sucesso."]);
                 }).catch(() => {
@@ -228,13 +240,13 @@ const RegisterEmployee = () => {
                 setor: data.sector,
                 tipoFuncionario: EmployeeTypeEnum.Doctor,
                 statusFuncionario: EmployeeStatusEnum.Enabled,
-                crm: data.crm,
+                crm: normalize(data.crm),
                 especialidade: {
                     idEspecialidade: Number(data.specialtyId)
                 }
             };
 
-            if (editedDoctor === undefined) {
+            if (!isEdition) {
                 await postDoctorHttp(doctorData).then(() => {
                     setWarning(["success", "Médico cadastrado com sucesso."]);
                     reset();
@@ -242,13 +254,11 @@ const RegisterEmployee = () => {
                     setWarning(["danger", "Não foi possível cadastrar o médico."]);
                 }).finally(() => { setIsLoading(""); });
             }
-            else {
-                doctorData.senha = editedDoctor.senha;
-                doctorData.statusFuncionario = editedDoctor.statusFuncionario;
-
+            else if (editedDoctor !== undefined) {
                 await putDoctorHttp({
+                    ...doctorData,
                     idFuncionario: editedDoctor.idFuncionario,
-                    ...doctorData
+                    statusFuncionario: editedDoctor.statusFuncionario
                 }).then(() => {
                     setWarning(["success", "Médico editado com sucesso."]);
                 }).catch(() => {
@@ -266,20 +276,12 @@ const RegisterEmployee = () => {
 
     return (
         <>
-            {isEdition
-                ? <h1>
-                    Edição de {isDoctor ? "médico" : "funcionário"}
-
-                    {isLoading === "get" && <>
-                        {' '}
-                        <Spinner
-                            color="primary"
-                            type="grow"
-                        />
-                    </>}
-                </h1>
-                : <h1>Cadastro de {isDoctor ? "médico" : "funcionário"}</h1>
-            }
+            <ToggleTitle
+                toggle={isEdition}
+                isLoading={isLoading === "get"}
+                title={`Cadastro de ${isDoctor ? "médico" : "funcionário"}`}
+                alternateTitle={`Edição de ${isDoctor ? "médico" : "funcionário"}`}
+            />
 
             <Form
                 ref={isDoctor ? doctorFormRef : employeeFormRef}

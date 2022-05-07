@@ -1,7 +1,11 @@
+import { get, post, put } from "../api";
 import Pagamento from "../entities/pagamento";
 import PaymentMethodTypeEnum from "../enums/paymentMethodType";
 import PaymentStatusEnum from "../enums/paymentStatus";
+
 import { _listScheduling } from "./scheduling";
+
+const ROOT = "pagamentos/";
 
 export const _listPayment: Pagamento[] = [
     {
@@ -24,26 +28,33 @@ export const _listPayment: Pagamento[] = [
     }
 ];
 
-export const getPaymentByIdHttp = async (paymentId: number): Promise<Pagamento | undefined> => {
-    return _listPayment.find(x => x.idPagamento === paymentId);
+export const getPaymentByIdHttp = async (paymentId: number): Promise<Pagamento> => {
+    let { data } = await get<Pagamento>(ROOT + paymentId);
+    return data;
 }
 
-export const getPaymentBySchedulingIdHttp = async (schedulingId: number): Promise<Pagamento | undefined> => {
-    return _listPayment.find(x => x.agendamento?.idAgendamento === schedulingId);
+export const getPaymentBySchedulingIdHttp = async (schedulingId: number): Promise<Pagamento> => {
+    let { data } = await get<Pagamento>(ROOT + "buscar-por-id-agendamento/" + schedulingId);
+    return data;
 }
 
-type PostPaymentRequest = {
-    valor: number;
-    desconto: number;
-    formaDePagamento: number;
-    status: number;
+interface PostPaymentRequest {
     agendamentoId: number;
+    valor: number;
+    status: number;
+    formaDePagamento: number;
+    desconto: number;
 }
 
 export const postPaymentHttp = async (requestData: PostPaymentRequest): Promise<Pagamento> => {
-    return _listPayment[0];
+    let { data } = await post<PostPaymentRequest, Pagamento>(ROOT, requestData);
+    return data;
 }
 
-export const putPaymentHttp = async (requestData: Pagamento): Promise<void> => {
-    
+interface PutPaymentRequest extends PostPaymentRequest {
+    pagamentoId: number;
+}
+
+export const putPaymentHttp = async (requestData: PutPaymentRequest): Promise<void> => {
+    await put<PutPaymentRequest, void>(ROOT + requestData.pagamentoId, requestData);
 }
