@@ -2,20 +2,20 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FormHandles } from "@unform/core";
 
-import ScheduleStatusEnum, { getValueScheduleStatus, listScheduleStatus } from "../../services/enums/scheduleStatus";
-import PaymentStatusEnum, { } from "../../services/enums/paymentStatus";
-import { getValuePaymentMethodType } from "../../services/enums/paymentMethodType";
 import Agendamento from "../../services/entities/agendamento";
 import Pagamento from "../../services/entities/pagamento";
 import Ressarcimento from "../../services/entities/ressarcimento";
+import ScheduleStatusEnum, { defineColorScheduleStatus, getValueScheduleStatus, listScheduleStatus } from "../../services/enums/scheduleStatus";
+import PaymentStatusEnum from "../../services/enums/paymentStatus";
+import { getValuePaymentMethodType } from "../../services/enums/paymentMethodType";
 import { getRefundByPaymentIdHttp } from "../../services/http/refund";
 import { listReceptionistSchedulingByParamsHttp, putSchedulingHttp } from "../../services/http/scheduling";
 import { getPaymentBySchedulingIdHttp } from "../../services/http/payment";
-import { numberToCurrency } from "../../util/convertCurrency";
+import { formatCurrency } from "../../util/formatCurrency";
 import { WarningTuple } from "../../util/getHttpErrors";
-import { normalize } from "../../util/stringFormat";
+import { formatCellphone, formatCpf, normalize, normalizeDate } from "../../util/formatString";
 
-import { Button, Col, ModalBody, ModalFooter, ModalHeader, Row, Spinner } from "reactstrap";
+import { Button, Col, ModalBody, ModalFooter, ModalHeader, Row } from "reactstrap";
 import { ButtonGroupRow, DataModal, Form, TextGroupGrid } from "../../styles/components";
 import SelectInput from "../../components/Input/select";
 import SpinnerBlock from "../../components/SpinnerBlock";
@@ -23,8 +23,11 @@ import Warning from "../../components/Warning";
 import DataCard from "../../components/DataCard";
 import DataText from "../../components/DataText";
 import MaskInput from "../../components/Input/mask";
+import LoadingButton from "../../components/LoadingButton";
+import StatusBadge from "../../components/StatusBadge";
+import InvoiceModal from "../../components/InvoiceModal";
 
-type ModalString = "status" | "payment" | "";
+type ModalString = "status" | "payment" | "invoice" | "";
 
 const Schedules = () => {
     const navigate = useNavigate();
@@ -42,7 +45,7 @@ const Schedules = () => {
     const [refund, setRefund] = useState<Ressarcimento | undefined>(undefined);
 
     useEffect(() => {
-        getSchedules(null, null);
+        getSchedules(ScheduleStatusEnum.Progress, null);
         // eslint-disable-next-line
     }, []);
 
@@ -83,7 +86,6 @@ const Schedules = () => {
     const toggleModal = (modalName?: ModalString) => {
         setModal(modalName !== undefined ? modalName : "");
         setWarning(["", ""]);
-        setPayment(undefined);
     }
 
     const sendChangeStatus = () => {
@@ -134,13 +136,20 @@ const Schedules = () => {
     }
 
     const onClickOpenPayment = (index: number) => {
-        setIsLoading("payment");
         setScheduleIndex(index);
         toggleModal("payment");
-
+        
+        setIsLoading("payment");
         getPayment(index).then(() => {
             setIsLoading("");
         });
+    }
+
+    const onClickOpenInvoice = () => {
+        if (payment === undefined)
+            return;
+
+        toggleModal("invoice");
     }
 
     const onClickChangeStatus = (index: number) => {
@@ -148,18 +157,11 @@ const Schedules = () => {
         toggleModal("status");
     }
 
-    const onClickInvoice = () => {
-        if (payment === undefined)
-            return;
-
-        navigate("/pagamentos/" + payment.idPagamento + "/notas-fiscais");
-    }
-
     const onClickPaymentRefund = () => {
         if (payment === undefined)
             return;
 
-        navigate("agendamentos" + payment.agendamento?.idAgendamento + "/pagamento/" + payment.idPagamento + "/ressarcir");
+        navigate("/agendamentos/" + payment.agendamento?.idAgendamento + "/pagamento/" + payment.idPagamento + "/ressarcir");
     }
 
     return (
@@ -170,6 +172,9 @@ const Schedules = () => {
                 ref={filterFormRef}
                 onSubmit={() => { }}
                 className="form-search"
+                initialData={{
+                    scheduleStatus: `${ScheduleStatusEnum.Scheduled}`
+                }}
             >
                 <SelectInput
                     name='scheduleStatus'
@@ -195,7 +200,6 @@ const Schedules = () => {
 
                     <Col md={2}>
                         <Button
-                            outline
                             type="button"
                             onClick={() => handlerSearchScheduleByCpf()}
                         >
@@ -212,23 +216,13 @@ const Schedules = () => {
             {schedules.map((x, index) => (
                 <DataCard
                     key={x.idAgendamento}
-                    title={x.paciente?.nome as string}
-                    subtitle={x.paciente?.cpf}
+                    title={x.paciente?.nome}
+                    subtitle={formatCpf(x.paciente?.cpf)}
                 >
                     <TextGroupGrid>
                         <DataText
                             label="Contato"
-                            value={x.paciente?.contato as string}
-                        />
-
-                        <DataText
-                            label="Serviço"
-                            value={x.servico?.nomeServico as string}
-                        />
-
-                        <DataText
-                            label="Data"
-                            value={new Date(x.data).toLocaleDateString()}
+                            value={formatCellphone(x.paciente?.contato)}
                         />
 
                         <DataText
@@ -236,27 +230,39 @@ const Schedules = () => {
                             value={new Date(x.dataAgendada + "T" + x.horaAgendada).toLocaleString()}
                         />
 
-                        <DataText
-                            label="Status agendamento"
+                        <StatusBadge
+                            label="Status"
+                            status={x.status}
                             value={getValueScheduleStatus(x.status)}
+                            defineColor={defineColorScheduleStatus}
+                        />
+
+                        <DataText
+                            label="Serviço"
+                            value={x.servico?.nomeServico}
                         />
 
                         <DataText
                             label="Médico"
-                            value={x.medico?.nomeFuncionario as string}
+                            value={x.medico?.nomeFuncionario}
                         />
 
                         <DataText
                             label="Especialidade"
-                            value={x.medico?.especialidade?.nomeEspecialidade as string}
+                            value={x.medico?.especialidade?.nomeEspecialidade}
+                        />
+
+                        <DataText
+                            label="Data"
+                            value={new Date(normalizeDate(x.data)).toLocaleDateString()}
                         />
                     </TextGroupGrid>
 
                     <ButtonGroupRow>
                         {(x.status === ScheduleStatusEnum.Progress
                             || x.status === ScheduleStatusEnum.Concluded) && <Button
+                                color="primary"
                                 outline
-                                color="success"
                                 onClick={() => onClickOpenPayment(index)}
                             >
                                 Visualizar pagamento
@@ -264,17 +270,18 @@ const Schedules = () => {
 
                         {x.status === ScheduleStatusEnum.Scheduled && <>
                             <Button
+                                color="danger"
+                                outline
+                                onClick={() => onClickChangeStatus(index)}
+                            >
+                                Desmarcar
+                            </Button>
+
+                            <Button
                                 color="success"
                                 onClick={() => onClickConfirmPayment(index)}
                             >
                                 Confirmar pagamento
-                            </Button>
-
-                            <Button
-                                color="danger"
-                                onClick={() => onClickChangeStatus(index)}
-                            >
-                                Desmarcar
                             </Button>
                         </>}
                     </ButtonGroupRow>
@@ -297,20 +304,19 @@ const Schedules = () => {
                 </ModalBody>}
 
                 <ModalFooter>
-                    <Button
+                    <LoadingButton
+                        text="Desmarcar"
+                        isLoading={isLoading === "status"}
                         color="danger"
                         onClick={() => sendChangeStatus()}
-                    >
-                        {isLoading === "status"
-                            ? <Spinner size="sm" />
-                            : "Desmarcar"
-                        }
-                    </Button>
+                    />
 
                     <Button
+                        color="dark"
+                        outline
                         onClick={() => toggleModal()}
                     >
-                        Cancel
+                        Cancelar
                     </Button>
                 </ModalFooter>
             </DataModal>
@@ -332,12 +338,12 @@ const Schedules = () => {
                     >
                         <DataText
                             label="Preço"
-                            value={numberToCurrency(payment.valor)}
+                            value={formatCurrency(payment.valor)}
                         />
 
                         <DataText
                             label="Desconto"
-                            value={numberToCurrency(payment.desconto)}
+                            value={formatCurrency(payment.desconto)}
                         />
 
                         <DataText
@@ -347,7 +353,7 @@ const Schedules = () => {
 
                         <DataText
                             label="Data"
-                            value={new Date(payment.data).toLocaleDateString()}
+                            value={new Date(normalizeDate(payment.data)).toLocaleDateString()}
                         />
                     </TextGroupGrid>}
 
@@ -359,7 +365,7 @@ const Schedules = () => {
                         >
                             <DataText
                                 label="Preço"
-                                value={numberToCurrency(refund.valor)}
+                                value={formatCurrency(refund.valor)}
                                 isFullRow={true}
                             />
 
@@ -370,7 +376,7 @@ const Schedules = () => {
 
                             <DataText
                                 label="Data"
-                                value={new Date(refund.data).toLocaleDateString()}
+                                value={new Date(normalizeDate(refund.data)).toLocaleDateString()}
                             />
 
                             <DataText
@@ -386,15 +392,14 @@ const Schedules = () => {
 
                 <ModalFooter>
                     <Button
-                        outline
                         color="primary"
-                        onClick={() => onClickInvoice()}
+                        outline
+                        onClick={() => onClickOpenInvoice()}
                     >
-                        Nota fiscal
+                        Nota fiscal {refund === undefined ? "pagamento" : "ressarcimento"}
                     </Button>
 
                     {refund === undefined && <Button
-                        outline
                         color="danger"
                         onClick={() => onClickPaymentRefund()}
                     >
@@ -402,12 +407,21 @@ const Schedules = () => {
                     </Button>}
 
                     <Button
+                        color="dark"
+                        outline
                         onClick={() => toggleModal()}
                     >
-                        Cancel
+                        Cancelar
                     </Button>
                 </ModalFooter>
             </DataModal>
+
+            <InvoiceModal
+                showModal={modal === "invoice"}
+                toggleModal={toggleModal}
+                invoice={refund !== undefined ? refund.notaFiscal : payment?.notaFiscal}
+                patient={schedules[scheduleIndex]?.paciente}
+            />
         </>
     );
 }

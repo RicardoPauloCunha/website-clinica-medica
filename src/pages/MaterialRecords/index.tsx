@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import RecordTypeEnum from "../../services/enums/recordType";
 import EntradaSaidaMaterial from "../../services/entities/entradaSaidaMaterial";
+import RecordTypeEnum from "../../services/enums/recordType";
 import { listRecordByMaterialIdHttp } from "../../services/http/record";
 import { WarningTuple } from "../../util/getHttpErrors";
+import { formatQuantity, normalizeDate } from "../../util/formatString";
 
 import { TextGroupGrid } from "../../styles/components";
 import SpinnerBlock from "../../components/SpinnerBlock";
@@ -55,8 +56,19 @@ const MaterialRecords = () => {
 
             {records[0] !== undefined && <DataCard
                 title="Material"
-                subtitle={records[0].material?.nomeMaterial as string}
-            />}
+            >
+                <TextGroupGrid>
+                    <DataText
+                        label="Nome"
+                        value={records[0].material?.nomeMaterial}
+                    />
+
+                    <DataText
+                        label="Quantidade"
+                        value={formatQuantity(records[0].material?.quantidade)}
+                    />
+                </TextGroupGrid>
+            </DataCard>}
 
             {records.map(x => (
                 <DataCard
@@ -66,12 +78,12 @@ const MaterialRecords = () => {
                     <TextGroupGrid>
                         <DataText
                             label="Data"
-                            value={new Date(x.data).toLocaleDateString()}
+                            value={new Date(normalizeDate(x.data)).toLocaleDateString()}
                         />
 
                         <DataText
                             label="Quantidade"
-                            value={`${x.tipoEntradaSaida === RecordTypeEnum.Input ? "+" : "-"} ${x.quantidade}`}
+                            value={`${x.tipoEntradaSaida === RecordTypeEnum.Input ? "+" : "-"} ${formatQuantity(x.quantidade)}`}
                         />
 
                         <DataText

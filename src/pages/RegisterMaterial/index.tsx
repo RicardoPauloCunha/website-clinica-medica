@@ -3,16 +3,17 @@ import { FormHandles, SubmitHandler } from "@unform/core";
 import * as Yup from 'yup';
 import { useParams } from "react-router-dom";
 
-import MaterialStatusEnum from "../../services/enums/materialStatus";
 import CategoriaMaterial from "../../services/entities/categoriaMaterial";
 import Fabricante from "../../services/entities/fabricante";
 import Material from "../../services/entities/material";
+import MaterialStatusEnum from "../../services/enums/materialStatus";
 import { listManufacturerHttp, postManufacturerHttp, putManufacturerHttp, _listManufacturer } from "../../services/http/manufacturer";
 import { getMaterialByIdHttp, postMaterialHttp, putMaterialHttp, _listMaterial } from "../../services/http/material";
 import { listCategoryHttp, postCategoryHttp, putCategoryHttp, _listCategory } from "../../services/http/category";
 import { WarningTuple } from "../../util/getHttpErrors";
 import getValidationErrors from "../../util/getValidationErrors";
-import { concatenateAddressData, normalize, splitAddressData } from "../../util/stringFormat";
+import { formatCnpj, formatTelephone, normalize } from "../../util/formatString";
+import { concatenateAddress, splitAddress } from "../../util/formatAddress";
 
 import { Alert, Button, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import { ButtonGroupRow, DataModal, Form, TextGroupGrid } from "../../styles/components";
@@ -58,9 +59,9 @@ const RegisterMaterial = () => {
     const manufacturerFormRef = useRef<FormHandles>(null);
 
     const _itemMaterial = _listMaterial[0];
-    const _itemCategory = _listCategory[0];
-    const _itemManufacturer = _listManufacturer[0];
-    const _itemAddress = splitAddressData(_itemManufacturer.enderecoFabricante);
+    const _itemCategory = _listCategory[2];
+    const _itemManufacturer = _listManufacturer[1];
+    const _itemAddress = splitAddress(_itemManufacturer.enderecoFabricante);
 
     const [isLoading, setIsLoading] = useState<"material" | "category" | "manufacturer" | "get" | "">("");
     const [warning, setWarning] = useState<WarningTuple>(["", ""]);
@@ -225,9 +226,9 @@ const RegisterMaterial = () => {
 
             if (!editedMaterial) {
                 postCategoryHttp(categoryData).then(response => {
-                    toggleModal();
                     setWarning(["success", "Categoria cadastrada e selecionada com sucesso."]);
                     setCategories([...categories, response]);
+                    toggleModal();
                     reset();
 
                     setTimeout(() => {
@@ -285,7 +286,7 @@ const RegisterMaterial = () => {
                 city: Yup.string().trim()
                     .required("Coloque a cidade do endereço."),
                 state: Yup.string().trim()
-                    .required("Coloque o estado (UF) do endereço."),
+                    .required("Coloque o estado (UF) do endereço.")
             });
 
             await shema.validate(data, {
@@ -295,18 +296,18 @@ const RegisterMaterial = () => {
             let manufacturerData = {
                 cnpj: normalize(data.cnpj),
                 nomeFabricante: data.name,
-                enderecoFabricante: concatenateAddressData({ ...data }),
-                contatoFabricante: data.contact
+                enderecoFabricante: concatenateAddress({ ...data }),
+                contatoFabricante: normalize(data.contact)
             }
 
             if (!editedMaterial) {
                 postManufacturerHttp(manufacturerData).then(response => {
-                    toggleModal();
                     setWarning(["success", "Fabricante cadastrado e selecionado com sucesso."]);
                     setManufacturerIndex(manufacturers.length);
                     setManufacturers([...manufacturers, response]);
+                    toggleModal();
                     reset();
-    
+
                     setTimeout(() => {
                         materialFormRef.current?.setFieldValue("manufacturerCnpj", response.cnpj);
                     }, 100);
@@ -319,7 +320,7 @@ const RegisterMaterial = () => {
                     setWarning(["success", "Fabricante editado com sucesso."]);
 
                     let index = manufacturers.findIndex(x => x.cnpj === manufacturerData.cnpj);
-                    manufacturers[index] = {...manufacturerData};
+                    manufacturers[index] = { ...manufacturerData };
                 }).catch(() => {
                     setWarning(["danger", "Não foi possível editar o fabricante."]);
                 }).finally(() => { setIsLoading(""); });
@@ -362,7 +363,7 @@ const RegisterMaterial = () => {
             if (manufacturer === undefined)
                 return;
 
-            let address = splitAddressData(manufacturer.enderecoFabricante);
+            let address = splitAddress(manufacturer.enderecoFabricante);
 
             setTimeout(() => {
                 manufacturerFormRef.current?.setData({
@@ -419,7 +420,7 @@ const RegisterMaterial = () => {
                     label='Categoria'
                     placeholder='Selecione a categoria'
                     options={categories.map(x => ({
-                        value: x.idCategoria?.toString() as string,
+                        value: x.idCategoria?.toString(),
                         label: x.nomeCategoria
                     }))}
                 />
@@ -439,6 +440,7 @@ const RegisterMaterial = () => {
                     text={isEdition ? "Editar" : "Cadastrar"}
                     isLoading={isLoading === "material"}
                     type="submit"
+                    color={isEdition ? "warning" : "secondary"}
                 />
 
                 {modal === "" && <Warning value={warning} />}
@@ -449,12 +451,12 @@ const RegisterMaterial = () => {
             {manufacturers[manufacturerIndex]
                 ? <DataCard
                     title={manufacturers[manufacturerIndex].nomeFabricante}
-                    subtitle={manufacturers[manufacturerIndex].cnpj}
+                    subtitle={formatCnpj(manufacturers[manufacturerIndex].cnpj)}
                 >
                     <TextGroupGrid>
                         <DataText
                             label="Contato"
-                            value={manufacturers[manufacturerIndex].contatoFabricante}
+                            value={formatTelephone(manufacturers[manufacturerIndex].contatoFabricante)}
                         />
 
                         <DataText
@@ -466,7 +468,6 @@ const RegisterMaterial = () => {
                     {isEdition && <ButtonGroupRow>
                         <Button
                             color="warning"
-                            outline
                             onClick={() => onClickOpenManufacturer()}
                         >
                             Editar
@@ -484,9 +485,8 @@ const RegisterMaterial = () => {
                     <p>Você pode editar os dados da categoria escolhida.</p>
 
                     <Button
-                        onClick={() => onClickOpenCategory()}
-                        outline
                         color="warning"
+                        onClick={() => onClickOpenCategory()}
                     >
                         Editar categoria
                     </Button>
@@ -497,7 +497,6 @@ const RegisterMaterial = () => {
 
                     <Button
                         onClick={() => onClickOpenCategory()}
-                        outline
                     >
                         Adicionar categoria
                     </Button>
@@ -539,10 +538,13 @@ const RegisterMaterial = () => {
                         text={isEdition ? "Editar" : "Adicionar"}
                         isLoading={isLoading === "category"}
                         type='button'
+                        color={isEdition ? "warning" : "secondary"}
                         onClick={() => categoryFormRef.current?.submitForm()}
                     />
 
                     <Button
+                        color="dark"
+                        outline
                         onClick={() => toggleModal()}
                     >
                         Cancelar
@@ -556,7 +558,6 @@ const RegisterMaterial = () => {
 
                 <Button
                     onClick={() => toggleModal("manufacturer")}
-                    outline
                 >
                     Adicionar fabricante
                 </Button>
@@ -588,7 +589,7 @@ const RegisterMaterial = () => {
                             number: _itemAddress.number,
                             district: _itemAddress.district,
                             city: _itemAddress.city,
-                            state: _itemAddress.state,
+                            state: _itemAddress.state
                         }}
                     >
                         <MaskInput
@@ -663,10 +664,13 @@ const RegisterMaterial = () => {
                         text={isEdition ? "Editar" : "Adicionar"}
                         isLoading={isLoading === "manufacturer"}
                         type='button'
+                        color={isEdition ? "warning" : "secondary"}
                         onClick={() => manufacturerFormRef.current?.submitForm()}
                     />
 
                     <Button
+                        color="dark"
+                        outline
                         onClick={() => toggleModal()}
                     >
                         Cancelar

@@ -2,7 +2,7 @@ import { DataTextEl } from "./styles";
 
 type DataTextProps = {
     label: string;
-    value: string;
+    value: string | undefined;
     isFullRow?: boolean;
 }
 

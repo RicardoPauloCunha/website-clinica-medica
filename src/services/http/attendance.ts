@@ -24,7 +24,7 @@ export const listAttendanceByCpfHttp = async (cpf: string): Promise<Atendimento[
     return _listAttendance;
 }
 
-type PostAttendanceRequest = {
+interface PostAttendanceRequest {
     observacoes: string;
     diagnostico: string;
     agendamentoId: number;

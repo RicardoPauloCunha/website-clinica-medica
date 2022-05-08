@@ -1,10 +1,10 @@
-import React from "react"
+import React from "react";
 
-import { CardSubtitle, CardTitle } from "reactstrap"
-import { DataCardEl } from "./styles"
+import { CardSubtitle, CardTitle } from "reactstrap";
+import { DataCardEl } from "./styles";
 
 type DataCardProps = {
-    title: string;
+    title: string | undefined;
     subtitle?: string;
     children?: React.ReactNode;
 }

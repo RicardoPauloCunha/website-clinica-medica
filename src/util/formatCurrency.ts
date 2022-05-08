@@ -1,14 +1,14 @@
-export const numberToCurrency = (value: number | undefined) => {
-	if (value !== undefined) {
-		return value.toLocaleString('pt-br', {
-			style: 'currency',
-			currency: 'BRL',
-		});
-	}
-	return "0";
+export const formatCurrency = (value: number | undefined) => {
+	if (value === undefined)
+		value = 0;
+	
+	return value.toLocaleString('pt-br', {
+		style: 'currency',
+		currency: 'BRL',
+	});
 }
 
-export const currencyToNumber = (value: string | undefined) => {
+export const normalizeCurrency = (value: string | undefined) => {
 	if (value !== undefined) {
 		value = value.replace("R$", '')
 			.replace(",", '')

@@ -38,8 +38,12 @@ export const getPaymentBySchedulingIdHttp = async (schedulingId: number): Promis
     return data;
 }
 
+export const getPaymentByInvoiceIdHttp = async (invoiceId: number): Promise<Pagamento> => {
+    return _listPayment[0];
+}
+
 interface PostPaymentRequest {
-    agendamentoId: number;
+    idAgendamento: number;
     valor: number;
     status: number;
     formaDePagamento: number;
@@ -56,5 +60,6 @@ interface PutPaymentRequest extends PostPaymentRequest {
 }
 
 export const putPaymentHttp = async (requestData: PutPaymentRequest): Promise<void> => {
+    // TODO: integração API
     await put<PutPaymentRequest, void>(ROOT + requestData.pagamentoId, requestData);
 }

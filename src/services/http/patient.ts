@@ -1,4 +1,4 @@
-import { get, post } from "../api";
+import { get, post, put } from "../api";
 import Paciente from "../entities/paciente";
 import GenderTypeEnum from "../enums/genderType";
 
@@ -44,7 +44,7 @@ export const getPatientByCpfHttp = async (cpf: string): Promise<Paciente> => {
     return data;
 }
 
-type PostPatientRequest = {
+interface PostPatientRequest {
     cpf: string;
     nome: string;
     dataNascimento: string;
@@ -56,4 +56,12 @@ type PostPatientRequest = {
 export const postPatientHttp = async (requestData: PostPatientRequest): Promise<Paciente> => {
     let { data } = await post<PostPatientRequest, Paciente>(ROOT, requestData);
     return data;
+}
+
+interface PutPatientRequest extends PostPatientRequest {
+    
+}
+
+export const putPatientHttp = async (requestData: PutPatientRequest): Promise<void> => {
+    await put<PutPatientRequest, void>(ROOT + requestData.cpf, requestData);
 }

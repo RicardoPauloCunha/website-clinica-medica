@@ -3,22 +3,23 @@ import { FormHandles, SubmitHandler } from "@unform/core";
 import * as Yup from "yup";
 
 import { useAuth } from "../../contexts/auth";
-import ScheduleStatusEnum from "../../services/enums/scheduleStatus";
-import { getValueGenderType, listGenderType } from "../../services/enums/genderType";
 import Medico from "../../services/entities/medico";
 import Paciente from "../../services/entities/paciente";
 import Servico from "../../services/entities/servico";
+import ScheduleStatusEnum from "../../services/enums/scheduleStatus";
+import { getValueGenderType, listGenderType } from "../../services/enums/genderType";
 import { postSchedulingHttp } from "../../services/http/scheduling";
 import { listDoctorByParamsHttp } from "../../services/http/doctor";
-import { getPatientByCpfHttp, postPatientHttp, _listPatient } from "../../services/http/patient";
+import { getPatientByCpfHttp, postPatientHttp, putPatientHttp, _listPatient } from "../../services/http/patient";
 import { listServiceHttp } from "../../services/http/service";
 import { WarningTuple } from "../../util/getHttpErrors";
-import { concatenateAddressData, normalize, normalizeDate, splitAddressData } from "../../util/stringFormat";
+import { formatCellphone, formatCpf, normalize, normalizeDate } from "../../util/formatString";
 import getValidationErrors from "../../util/getValidationErrors";
-import { numberToCurrency } from "../../util/convertCurrency";
+import { formatCurrency } from "../../util/formatCurrency";
+import { concatenateAddress, splitAddress } from "../../util/formatAddress";
 
 import { Alert, Button, Col, ModalBody, ModalFooter, ModalHeader, Row } from "reactstrap";
-import { DataModal, Form, TextGroupGrid } from "../../styles/components";
+import { ButtonGroupRow, DataModal, Form, TextGroupGrid } from "../../styles/components";
 import Warning from "../../components/Warning";
 import LoadingButton from "../../components/LoadingButton";
 import FieldInput from "../../components/Input";
@@ -57,8 +58,8 @@ const RegisterScheduling = () => {
 
     const { loggedUser } = useAuth();
 
-    const _itemPatient = _listPatient[0];
-    const _itemAddress = splitAddressData(_itemPatient.endereco);
+    const _itemPatient = _listPatient[2];
+    const _itemAddress = splitAddress(_itemPatient.endereco);
     const _genderTypes = listGenderType();
 
     const [isLoading, setIsLoading] = useState<"scheduling" | "patient" | "getPatient" | "">("");
@@ -66,6 +67,7 @@ const RegisterScheduling = () => {
     const [modal, setModal] = useState<ModalString>("");
     const [serviceIndex, setServiceIndex] = useState(-1);
     const [doctorIndex, setDoctorIndex] = useState(-1);
+    const [isEditPatient, setIsEditPatient] = useState(false);
 
     const [services, setServices] = useState<Servico[]>([]);
     const [doctors, setDoctors] = useState<Medico[]>([]);
@@ -110,9 +112,6 @@ const RegisterScheduling = () => {
             setPatient(response);
 
             setWarning(["success", "Paciente encontrado."]);
-            setTimeout(() => {
-                setWarning(["", ""]);
-            }, 2000);
         }).catch(() => {
             setWarning(["danger", "Paciente não encontrado. Adicione o paciente para prosseguir o agendamento."]);
         }).finally(() => setIsLoading(""));
@@ -214,27 +213,38 @@ const RegisterScheduling = () => {
                 abortEarly: false
             });
 
-            data.gender = Number(data.gender);
-
-            postPatientHttp({
+            let patientData = {
                 cpf: normalize(data.cpf),
                 nome: data.name,
                 dataNascimento: normalizeDate(data.birthDate),
-                sexo: data.gender,
-                endereco: concatenateAddressData({ ...data }),
-                contato: data.contact
-            }).then(response => {
-                toggleModal();
-                setWarning(["success", "Paciente cadastrado e selecionado com sucesso."]);
-                setPatient(response);
-                reset();
+                sexo: Number(data.gender),
+                endereco: concatenateAddress({ ...data }),
+                contato: normalize(data.contact)
+            }
 
-                setTimeout(() => {
-                    schedulingFormRef.current?.setFieldValue("patientCpf", response.cpf);
-                }, 100);
-            }).catch(() => {
-                setWarning(["danger", "Não foi possível cadastrar o paciente."]);
-            }).finally(() => { setIsLoading(""); });
+            if (!isEditPatient) {
+                postPatientHttp(patientData).then(response => {
+                    setWarning(["success", "Paciente cadastrado e selecionado com sucesso."]);
+                    setPatient(response);
+                    toggleModal();
+                    reset();
+
+                    setTimeout(() => {
+                        schedulingFormRef.current?.setFieldValue("patientCpf", response.cpf);
+                    }, 100);
+                }).catch(() => {
+                    setWarning(["danger", "Não foi possível cadastrar o paciente."]);
+                }).finally(() => { setIsLoading(""); });
+            }
+            else if (patient) {
+                putPatientHttp(patientData).then(() => {
+                    setWarning(["success", "Paciente editado com sucesso."]);
+
+                    setPatient({ ...patientData });
+                }).catch(() => {
+                    setWarning(["danger", "Não foi possível editar o paciente."]);
+                }).finally(() => { setIsLoading(""); });
+            }
         }
         catch (err) {
             if (err instanceof Yup.ValidationError)
@@ -249,13 +259,40 @@ const RegisterScheduling = () => {
         let index = services.findIndex(x => x.idServico === serviceId);
         setServiceIndex(index);
 
-        getDoctors(serviceId);
+        getDoctors(services[serviceIndex].especialidade?.idEspecialidade as number);
     }
 
     const handlerChangeDoctor = (optionValue: string) => {
         let doctorId = Number(optionValue);
         let index = doctors.findIndex(x => x.idFuncionario === doctorId);
         setDoctorIndex(index);
+    }
+
+    const onClickOpenPatient = (editPatient: boolean) => {
+        setIsEditPatient(editPatient);
+
+        if (editPatient && patient !== undefined) {
+            let address = splitAddress(patient.endereco);
+
+            setTimeout(() => {
+                patientFormRef.current?.setData({
+                    cpf: patient.cpf,
+                    name: patient.nome,
+                    birthDate: new Date(normalizeDate(patient.dataNascimento)).toLocaleDateString(),
+                    gender: patient.sexo.toString(),
+                    contact: patient.contato,
+                    ...address
+                });
+            }, 100);
+        }
+        else if (!editPatient) {
+            setTimeout(() => {
+                // patientFormRef.current?.reset();
+                // TODO: descomentar
+            }, 100);
+        }
+
+        toggleModal("patient");
     }
 
     return (
@@ -351,7 +388,7 @@ const RegisterScheduling = () => {
             {services[serviceIndex]
                 ? <DataCard
                     title={services[serviceIndex].nomeServico}
-                    subtitle={numberToCurrency(services[serviceIndex].valor)}
+                    subtitle={formatCurrency(services[serviceIndex].valor)}
                 >
                     <TextGroupGrid>
                         <DataText
@@ -382,12 +419,12 @@ const RegisterScheduling = () => {
             {patient
                 ? <DataCard
                     title={patient.nome}
-                    subtitle={patient.cpf}
+                    subtitle={formatCpf(patient.cpf)}
                 >
                     <TextGroupGrid>
                         <DataText
                             label="Data de nascimento"
-                            value={new Date(patient.dataNascimento).toLocaleDateString()}
+                            value={new Date(normalizeDate(patient.dataNascimento)).toLocaleDateString()}
                         />
 
                         <DataText
@@ -397,7 +434,7 @@ const RegisterScheduling = () => {
 
                         <DataText
                             label="Contato"
-                            value={patient.contato}
+                            value={formatCellphone(patient.contato)}
                         />
 
                         <DataText
@@ -405,6 +442,15 @@ const RegisterScheduling = () => {
                             value={patient.endereco}
                         />
                     </TextGroupGrid>
+
+                    <ButtonGroupRow>
+                        <Button
+                            color="warning"
+                            onClick={() => onClickOpenPatient(true)}
+                        >
+                            Editar
+                        </Button>
+                    </ButtonGroupRow>
                 </DataCard>
                 : <Alert color="warning">
                     Nenhum paciente foi selecionado.
@@ -415,8 +461,7 @@ const RegisterScheduling = () => {
             <p>Você pode adicionar uma novo paciente caso a busca pelo CPF não tenha encontrado nada.</p>
 
             <Button
-                onClick={() => toggleModal("patient")}
-                outline
+                onClick={() => onClickOpenPatient(false)}
             >
                 Adicionar paciente
             </Button>
@@ -430,7 +475,7 @@ const RegisterScheduling = () => {
                 <ModalHeader
                     toggle={() => toggleModal()}
                 >
-                    Adicionar paciente
+                    {isEditPatient ? "Editar" : "Adicionar"} paciente
                 </ModalHeader>
 
                 <ModalBody>
@@ -441,7 +486,7 @@ const RegisterScheduling = () => {
                         initialData={{
                             cpf: _itemPatient.cpf,
                             name: _itemPatient.nome,
-                            birthDate: _itemPatient.dataNascimento,
+                            birthDate: new Date(normalizeDate(_itemPatient.dataNascimento)).toLocaleDateString(),
                             gender: _itemPatient.sexo,
                             contact: _itemPatient.contato,
                             cep: _itemAddress.cep,
@@ -458,6 +503,7 @@ const RegisterScheduling = () => {
                             mask="999.999.999-99"
                             maskChar=""
                             placeholder='000.000.000-00'
+                            disabled={isEditPatient}
                         />
 
                         <FieldInput
@@ -486,9 +532,9 @@ const RegisterScheduling = () => {
 
                         <MaskInput
                             name='contact'
-                            label='Contato (telefone)'
-                            mask="(99) 9999-9999"
-                            placeholder="(00) 0000-0000"
+                            label='Contato (celular)'
+                            mask="(99) 99999-9999"
+                            placeholder="(00) 00000-0000"
                             maskChar=""
                         />
 
@@ -538,13 +584,16 @@ const RegisterScheduling = () => {
 
                 <ModalFooter>
                     <LoadingButton
-                        text="Adicionar paciente"
+                        text={isEditPatient ? "Editar" : "Adicionar"}
                         isLoading={isLoading === "patient"}
                         type='button'
+                        color={isEditPatient ? "warning" : "secondary"}
                         onClick={() => patientFormRef.current?.submitForm()}
                     />
 
                     <Button
+                        color="dark"
+                        outline
                         onClick={() => toggleModal()}
                     >
                         Cancelar

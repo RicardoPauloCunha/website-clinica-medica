@@ -34,7 +34,7 @@ export const listServiceHttp = async (): Promise<Servico[]> => {
     return data;
 }
 
-type ListServiceByParams = {
+interface ListServiceByParams {
     especialidadeId: number | null;
 }
 

@@ -2,8 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useField } from '@unform/core';
 import ReactInputMask from 'react-input-mask';
 
-import { hasValueString } from '../../util/stringFormat';
-
 import { FormGroup, Input, Label, InputProps, FormFeedback } from 'reactstrap';
 
 interface MaskInputProps extends InputProps {
@@ -48,7 +46,7 @@ const MaskInput = ({ name, label, mask, maskChar, ...rest }: MaskInputProps) => 
                 mask={mask}
                 maskChar={maskChar}
                 onChange={e => setValue(e.target.value)}
-                invalid={hasValueString(error)}
+                invalid={error ? true : false}
                 onFocus={clearError}
                 {...rest}
             />

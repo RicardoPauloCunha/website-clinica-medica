@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 import { FormHandles, SubmitHandler } from "@unform/core";
 import * as Yup from 'yup';
 
 import Especialidade from "../../services/entities/especialidade";
+import Servico from "../../services/entities/servico";
 import { getServiceByIdHttp, postServiceHttp, putServiceHttp, _listService } from "../../services/http/service";
 import { listSpecialtyHttp, postSpecialtyHttp, putSpecialtyHttp, _listSpecialty } from "../../services/http/specialty";
 import { WarningTuple } from "../../util/getHttpErrors";
@@ -15,8 +17,6 @@ import CurrencyInput from "../../components/Input/currency";
 import SelectInput from "../../components/Input/select";
 import Warning from "../../components/Warning";
 import LoadingButton from "../../components/LoadingButton";
-import { useParams } from "react-router-dom";
-import Servico from "../../services/entities/servico";
 import ToggleTitle from "../../components/ToggleTitle";
 
 type ServiceFormData = {
@@ -180,9 +180,9 @@ const RegisterService = () => {
 
             if (!isEdition) {
                 postSpecialtyHttp(specialtyData).then(response => {
-                    toggleModal();
                     setWarning(["success", "Especialidade cadastrada e selecionada com sucesso."]);
                     setSpecialties([...specialties, response]);
+                    toggleModal();
                     reset();
 
                     setTimeout(() => {
@@ -222,7 +222,7 @@ const RegisterService = () => {
         if (isEdition) {
             let specialtyId = Number(serviceFormRef.current?.getFieldValue("specialtyId"));
             let specialty = specialties.find(x => x.idEspecialidade === specialtyId);
-            
+
             setTimeout(() => {
                 specialtyFormRef.current?.setFieldValue("name", specialty?.nomeEspecialidade);
             }, 100);
@@ -281,6 +281,7 @@ const RegisterService = () => {
                     text={isEdition ? "Editar" : "Cadastrar"}
                     isLoading={isLoading === "service"}
                     type="submit"
+                    color={isEdition ? "warning" : "secondary"}
                 />
 
                 {modal === "" && <Warning value={warning} />}
@@ -292,9 +293,8 @@ const RegisterService = () => {
                     <p>Você pode editar os dados da especialidade escolhida.</p>
 
                     <Button
-                        onClick={() => onClickOpenSpecialty()}
-                        outline
                         color="warning"
+                        onClick={() => onClickOpenSpecialty()}
                     >
                         Editar especialidade
                     </Button>
@@ -305,7 +305,6 @@ const RegisterService = () => {
 
                     <Button
                         onClick={() => onClickOpenSpecialty()}
-                        outline
                     >
                         Adicionar especialidade
                     </Button>
@@ -337,7 +336,7 @@ const RegisterService = () => {
                             placeholder='Coloque o nome da especialidade'
                         />
                     </Form>
-                    
+
                     {modal === "specialty" && <Warning value={warning} />}
                 </ModalBody>
 
@@ -346,10 +345,13 @@ const RegisterService = () => {
                         text={isEdition ? "Editar" : "Adicionar"}
                         isLoading={isLoading === "specialty"}
                         type='button'
+                        color={isEdition ? "warning" : "secondary"}
                         onClick={() => specialtyFormRef.current?.submitForm()}
                     />
 
                     <Button
+                        color="dark"
+                        outline
                         onClick={() => toggleModal()}
                     >
                         Cancelar

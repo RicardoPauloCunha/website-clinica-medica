@@ -116,9 +116,5 @@ export const DataModal = styled(Modal)`
     .modal-footer {
         border: none;
         padding-top: 0;
-
-        >button:last-of-type {
-            background-color: var(--color-gray-200);
-        }
     }
 `;

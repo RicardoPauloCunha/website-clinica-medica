@@ -1,8 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useField } from '@unform/core';
 
-import { hasValueString } from '../../util/stringFormat';
-
 import { FormGroup, Input, Label, InputProps, FormFeedback } from 'reactstrap';
 
 interface CheckboxInputProps extends InputProps {
@@ -60,7 +58,7 @@ const CheckboxInput = ({ name, label, options, ...rest }: CheckboxInputProps) =>
                         defaultChecked={defaultValue?.some((def: string) => def === opt.value)}
                         value={opt.value}
                         type="checkbox"
-                        invalid={hasValueString(error)}
+                        invalid={error ? true : false}
                         onFocus={clearError}
                         {...rest}
                     />

@@ -3,7 +3,7 @@ import { NavLink as Link, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../../contexts/auth';
 import { getLoggedUser, handlerLogout } from '../../localStorages/auth';
-import EmployeeTypeEnum, { } from '../../services/enums/employeeType';
+import EmployeeTypeEnum from '../../services/enums/employeeType';
 
 import { Button, Collapse, NavLink, Nav, Navbar, NavbarBrand, NavbarText, NavbarToggler, NavItem } from 'reactstrap';
 import { NavbarProfile } from './styles';
@@ -57,6 +57,15 @@ const Menu = () => {
                         navbar
                     >
                         {loggedUser?.employeeType === EmployeeTypeEnum.Admin && <>
+                            <NavItem>
+                                <NavLink
+                                    to="/clinica"
+                                    tag={Link}
+                                >
+                                    Clínica
+                                </NavLink>
+                            </NavItem>
+
                             <NavItem>
                                 <NavLink
                                     to="/servicos"
@@ -113,7 +122,7 @@ const Menu = () => {
                                     to="/consultas"
                                     tag={Link}
                                 >
-                                    Agendamentos médicos
+                                    Agendamentos
                                 </NavLink>
                             </NavItem>
                         </>}

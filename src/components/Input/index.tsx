@@ -1,8 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useField } from '@unform/core';
 
-import { hasValueString } from '../../util/stringFormat';
-
 import { FormGroup, Input, Label, InputProps, FormFeedback } from 'reactstrap';
 
 interface FieldInputProps extends InputProps {
@@ -40,7 +38,7 @@ const FieldInput = ({ name, label, ...rest }: FieldInputProps) => {
                 id={fieldName}
                 innerRef={inputRef}
                 defaultValue={defaultValue}
-                invalid={hasValueString(error)}
+                invalid={error ? true : false}
                 onFocus={clearError}
                 {...rest}
             />

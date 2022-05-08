@@ -6,7 +6,7 @@ import Servico from "../../services/entities/servico";
 import Especialidade from "../../services/entities/especialidade";
 import { listServiceByParamsHttp } from "../../services/http/service";
 import { listSpecialtyHttp } from "../../services/http/specialty";
-import { numberToCurrency } from "../../util/convertCurrency";
+import { formatCurrency } from "../../util/formatCurrency";
 import { WarningTuple } from "../../util/getHttpErrors";
 
 import { Button } from "reactstrap";
@@ -97,12 +97,12 @@ const Services = () => {
                     <TextGroupGrid>
                         <DataText
                             label="Valor"
-                            value={numberToCurrency(x.valor)}
+                            value={formatCurrency(x.valor)}
                         />
 
                         <DataText
                             label="Especialidade"
-                            value={x.especialidade?.nomeEspecialidade as string}
+                            value={x.especialidade?.nomeEspecialidade}
                         />
 
                         <DataText
@@ -115,7 +115,6 @@ const Services = () => {
                     <ButtonGroupRow>
                         <Button
                             color="warning"
-                            outline
                             onClick={() => onClickEditData(index)}
                         >
                             Editar

@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useField } from '@unform/core';
 
-import { convertCurrency, currencyToNumber } from '../../util/convertCurrency';
-import { hasValueString } from '../../util/stringFormat';
+import { convertCurrency, normalizeCurrency } from '../../util/formatCurrency';
 
 import { FormGroup, Input, Label, InputProps, FormFeedback } from 'reactstrap';
 
@@ -21,7 +20,7 @@ const CurrencyInput = ({ name, label, ...rest }: CurrencyInputProps) => {
             name: fieldName,
             ref: inputRef.current,
             getValue: (ref) => {
-                return currencyToNumber(ref.value);
+                return normalizeCurrency(ref.value);
             },
             setValue: (ref, value: number) => {
                 setValue(convertCurrency(value.toString()));
@@ -43,7 +42,7 @@ const CurrencyInput = ({ name, label, ...rest }: CurrencyInputProps) => {
                 innerRef={inputRef}
                 value={value}
                 onChange={e => setValue(convertCurrency(e.target.value))}
-                invalid={hasValueString(error)}
+                invalid={error ? true : false}
                 onFocus={clearError}
                 {...rest}
             />

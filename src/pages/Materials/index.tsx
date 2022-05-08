@@ -4,14 +4,15 @@ import { FormHandles, SubmitHandler } from "@unform/core";
 import * as Yup from 'yup';
 
 import { useAuth } from "../../contexts/auth";
-import RecordTypeEnum, { listRecordType } from "../../services/enums/recordType";
 import Material from "../../services/entities/material";
 import CategoriaMaterial from "../../services/entities/categoriaMaterial";
+import RecordTypeEnum, { listRecordType } from "../../services/enums/recordType";
 import { listMaterialByParamsHttp, putMaterialHttp } from "../../services/http/material";
 import { listCategoryHttp } from "../../services/http/category";
 import { postRecordHttp } from "../../services/http/record";
 import getValidationErrors from "../../util/getValidationErrors";
 import { WarningTuple } from "../../util/getHttpErrors";
+import { formatQuantity } from "../../util/formatString";
 
 import { Button, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import { ButtonGroupRow, DataModal, Form, TextGroupGrid } from "../../styles/components";
@@ -208,29 +209,21 @@ const Materials = () => {
 
                         <DataText
                             label="Quantidade"
-                            value={x.quantidade.toString()}
+                            value={formatQuantity(x.quantidade)}
                         />
 
                         <DataText
                             label="Categoria"
-                            value={x.categoriaMaterial?.nomeCategoria as string}
+                            value={x.categoriaMaterial?.nomeCategoria}
                         />
 
                         <DataText
                             label="Fabricante"
-                            value={x.fabricante?.nomeFabricante as string}
+                            value={x.fabricante?.nomeFabricante}
                         />
                     </TextGroupGrid>
 
                     <ButtonGroupRow>
-                        <Button
-                            color="warning"
-                            outline
-                            onClick={() => onClickEditData(index)}
-                        >
-                            Editar
-                        </Button>
-
                         <Button
                             color="primary"
                             outline
@@ -244,6 +237,13 @@ const Materials = () => {
                             onClick={() => onClickAddRecord(index)}
                         >
                             Entrada/Saída
+                        </Button>
+
+                        <Button
+                            color="warning"
+                            onClick={() => onClickEditData(index)}
+                        >
+                            Editar
                         </Button>
                     </ButtonGroupRow>
                 </DataCard>
@@ -308,9 +308,11 @@ const Materials = () => {
                     />
 
                     <Button
+                        color="dark"
+                        outline
                         onClick={() => toggleModal()}
                     >
-                        Cancel
+                        Cancelar
                     </Button>
                 </ModalFooter>
             </DataModal>

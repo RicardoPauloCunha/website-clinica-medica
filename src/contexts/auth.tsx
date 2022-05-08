@@ -1,5 +1,4 @@
 import { createContext, ReactNode, useContext, useState } from 'react';
-
 import { TokenData } from '../localStorages/auth';
 
 type AuthContextData = {

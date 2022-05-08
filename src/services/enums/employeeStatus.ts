@@ -23,4 +23,15 @@ export const listEmployeeStatus = () => {
     return list;
 }
 
+export const defineColorEmployeeStatus = (status: number) => {
+    switch (status) {
+        case EmployeeStatusEnum.Disabled:
+            return "danger";
+        case EmployeeStatusEnum.Enabled:
+            return "success";
+        default:
+            return "";
+    }
+}
+
 export default EmployeeStatusEnum;

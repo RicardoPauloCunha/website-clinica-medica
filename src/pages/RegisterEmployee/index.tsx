@@ -3,24 +3,24 @@ import { useLocation, useParams } from "react-router-dom";
 import { FormHandles, SubmitHandler } from "@unform/core";
 import * as Yup from 'yup';
 
-import EmployeeTypeEnum, { listToRegisterEmployeeType } from "../../services/enums/employeeType";
-import EmployeeStatusEnum from "../../services/enums/employeeStatus";
 import Especialidade from "../../services/entities/especialidade";
 import Medico from "../../services/entities/medico";
 import Funcionario from "../../services/entities/funcionario";
+import EmployeeTypeEnum, { listToRegisterEmployeeType } from "../../services/enums/employeeType";
+import EmployeeStatusEnum from "../../services/enums/employeeStatus";
 import { listSpecialtyHttp } from "../../services/http/specialty";
 import { getEmployeeByIdHttp, postEmployeeHttp, putEmployeeHttp, _listEmployee } from "../../services/http/employee";
 import { getDoctorByEmployeeIdHttp, postDoctorHttp, putDoctorHttp, _listDoctor } from "../../services/http/doctor";
 import { WarningTuple } from "../../util/getHttpErrors";
 import getValidationErrors from "../../util/getValidationErrors";
+import { normalize } from "../../util/formatString";
 
-import { Button, Spinner } from "reactstrap";
 import { Form } from "../../styles/components";
 import SelectInput from "../../components/Input/select";
 import Warning from "../../components/Warning";
 import FieldInput from "../../components/Input";
 import ToggleTitle from "../../components/ToggleTitle";
-import { normalize } from "../../util/stringFormat";
+import LoadingButton from "../../components/LoadingButton";
 
 interface EmployeeFormData {
     name: string;
@@ -42,7 +42,7 @@ const RegisterEmployee = () => {
     const employeeFormRef = useRef<FormHandles>(null);
     const doctorFormRef = useRef<FormHandles>(null);
 
-    const _itemEmployee = _listEmployee[1];
+    const _itemEmployee = _listEmployee[2];
     const _itemDoctor = _listDoctor[0];
     const _employeeTypes = listToRegisterEmployeeType();
 
@@ -358,14 +358,12 @@ const RegisterEmployee = () => {
                     />
                 }
 
-                <Button
+                <LoadingButton
+                    text={isEdition ? "Editar" : "Cadastrar"}
+                    isLoading={isLoading === "register"}
                     type='submit'
-                >
-                    {isLoading === "register"
-                        ? <Spinner size="sm" />
-                        : isEdition ? "Editar" : "Cadastrar"
-                    }
-                </Button>
+                    color={isEdition ? "warning" : "secondary"}
+                />
 
                 <Warning value={warning} />
             </Form>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import Atendimento from "../../services/entities/atendimento";
+import { listAttendanceByCpfHttp } from "../../services/http/attendance";
 import { WarningTuple } from "../../util/getHttpErrors";
 
 import { TextGroupGrid } from "../../styles/components";
@@ -9,8 +10,6 @@ import SpinnerBlock from "../../components/SpinnerBlock";
 import Warning from "../../components/Warning";
 import DataCard from "../../components/DataCard";
 import DataText from "../../components/DataText";
-import { listAttendanceByCpfHttp } from "../../services/http/attendance";
-import { hasValueString } from "../../util/stringFormat";
 
 const PatientAttendances = () => {
     const routeParams = useParams();
@@ -28,22 +27,21 @@ const PatientAttendances = () => {
     const getAttendances = () => {
         setWarning(["", ""]);
 
-        let cpf = routeParams.patientCpf;
+        if (routeParams.patientCpf) {
+            setIsLoading("get");
+            listAttendanceByCpfHttp(routeParams.patientCpf).then(response => {
+                setAttendances([...response]);
 
-        if (cpf === undefined || !hasValueString(routeParams.patientCpf)) {
+                if (response.length === 0)
+                    setWarning(["warning", "Nenhum atendimento do paciente foi encontrado."]);
+
+                setIsLoading("");
+            });
+        }
+        else {
             setWarning(["danger", "Paciente inválido."]);
             return;
         }
-
-        setIsLoading("get");
-        listAttendanceByCpfHttp(cpf).then(response => {
-            setAttendances([...response]);
-
-            if (response.length === 0)
-                setWarning(["warning", "Nenhum atendimento do paciente foi encontrado."]);
-
-            setIsLoading("");
-        });
     }
 
     return (
@@ -56,7 +54,7 @@ const PatientAttendances = () => {
 
             {attendances[0] !== undefined && <DataCard
                 title="Paciente"
-                subtitle={attendances[0].agendamento?.paciente?.nome as string}
+                subtitle={attendances[0].agendamento?.paciente?.nome}
             />}
 
             {attendances.map(x => (
@@ -82,7 +80,7 @@ const PatientAttendances = () => {
 
                         <DataText
                             label="Serviço"
-                            value={x.agendamento?.servico?.nomeServico as string}
+                            value={x.agendamento?.servico?.nomeServico}
                         />
 
                         <DataText
@@ -92,12 +90,12 @@ const PatientAttendances = () => {
 
                         <DataText
                             label="Médico"
-                            value={x.agendamento?.medico?.nomeFuncionario as string}
+                            value={x.agendamento?.medico?.nomeFuncionario}
                         />
 
                         <DataText
                             label="Especialidade"
-                            value={x.agendamento?.medico?.especialidade?.nomeEspecialidade as string}
+                            value={x.agendamento?.medico?.especialidade?.nomeEspecialidade}
                         />
                     </TextGroupGrid>
                 </DataCard>

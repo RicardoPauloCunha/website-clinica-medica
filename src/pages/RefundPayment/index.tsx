@@ -3,15 +3,17 @@ import { useNavigate, useParams } from "react-router-dom";
 import { FormHandles, SubmitHandler } from "@unform/core";
 import * as Yup from 'yup';
 
-import { getValuePaymentMethodType, listPaymentMethodType } from "../../services/enums/paymentMethodType";
-import PaymentStatusEnum from "../../services/enums/paymentStatus";
-import ScheduleStatusEnum, { getValueScheduleStatus } from "../../services/enums/scheduleStatus";
 import Pagamento from "../../services/entities/pagamento";
+import NotaFiscal from "../../services/entities/notaFiscal";
+import PaymentStatusEnum from "../../services/enums/paymentStatus";
+import { getValuePaymentMethodType, listPaymentMethodType } from "../../services/enums/paymentMethodType";
+import ScheduleStatusEnum, { defineColorScheduleStatus, getValueScheduleStatus } from "../../services/enums/scheduleStatus";
 import { getPaymentByIdHttp, putPaymentHttp } from "../../services/http/payment";
 import { postRefundHttp, _listRefund } from "../../services/http/refund";
 import { WarningTuple } from "../../util/getHttpErrors";
 import getValidationErrors from "../../util/getValidationErrors";
-import { numberToCurrency } from "../../util/convertCurrency";
+import { formatCurrency } from "../../util/formatCurrency";
+import { formatCellphone, formatCpf, normalizeDate } from "../../util/formatString";
 
 import { Spinner } from "reactstrap";
 import { Form, TextGroupGrid } from "../../styles/components";
@@ -22,6 +24,8 @@ import Warning from "../../components/Warning";
 import DataCard from "../../components/DataCard";
 import DataText from "../../components/DataText";
 import FieldInput from "../../components/Input";
+import StatusBadge from "../../components/StatusBadge";
+import InvoiceModal from "../../components/InvoiceModal";
 
 type RefundFormData = {
     price: number;
@@ -41,6 +45,7 @@ const RefundPayment = () => {
     const [warning, setWarning] = useState<WarningTuple>(["", ""]);
 
     const [payment, setPayment] = useState<Pagamento | undefined>(undefined);
+    const [invoice, setInvoice] = useState<NotaFiscal | undefined>(undefined);
 
     useEffect(() => {
         setWarning(["", ""]);
@@ -59,9 +64,18 @@ const RefundPayment = () => {
 
         setIsLoading("get");
         getPaymentByIdHttp(id).then(response => {
+            if (response.status !== PaymentStatusEnum.PaidOut
+                || (response?.agendamento?.status !== ScheduleStatusEnum.Progress
+                    && response?.agendamento?.status !== ScheduleStatusEnum.Concluded))
+                toggleModal();
+
             setPayment(response);
             setIsLoading("");
         });
+    }
+
+    const toggleModal = () => {
+        navigate("/agendamentos/listar");
     }
 
     const sendPaymentStatus = async () => {
@@ -70,7 +84,7 @@ const RefundPayment = () => {
 
         await putPaymentHttp({
             pagamentoId: payment.idPagamento,
-            agendamentoId: payment.agendamento?.idAgendamento as number,
+            idAgendamento: payment.agendamento?.idAgendamento as number,
             valor: payment.valor,
             status: PaymentStatusEnum.Reimbursed,
             formaDePagamento: payment.formaDePagamento,
@@ -107,16 +121,13 @@ const RefundPayment = () => {
 
             postRefundHttp({
                 valor: data.price,
-                pagamentoId: payment.idPagamento,
+                idPagamento: payment.idPagamento,
                 status: 1,
                 formaDeRessarcimento: data.paymentMethodType,
                 motivoRessarcimento: data.description,
-            }).then(() => {
-                sendPaymentStatus().then(() => {
-                    reset();
-                    setPayment(undefined);
-                    navigate("/pagamentos/" + payment.idPagamento + "/nota-fiscal");
-                });
+            }).then(respones => {
+                setInvoice(respones.notaFiscal);
+                sendPaymentStatus();
             }).catch(() => {
                 setWarning(["danger", "Não foi possível ressarcir o pagamento."]);
             }).finally(() => { setIsLoading(""); });
@@ -187,18 +198,18 @@ const RefundPayment = () => {
 
             {payment !== undefined && <>
                 <DataCard
-                    title={numberToCurrency(payment.valor)}
+                    title={formatCurrency(payment.valor)}
                     subtitle={getValuePaymentMethodType(payment.formaDePagamento)}
                 >
                     <TextGroupGrid>
                         <DataText
                             label="Desconto"
-                            value={numberToCurrency(payment.desconto)}
+                            value={formatCurrency(payment.desconto)}
                         />
 
                         <DataText
                             label="Data"
-                            value={new Date(payment.data).toLocaleDateString()}
+                            value={new Date(normalizeDate(payment.data)).toLocaleDateString()}
                         />
                     </TextGroupGrid>
                 </DataCard>
@@ -206,23 +217,13 @@ const RefundPayment = () => {
                 <h2>Dados do agendamento</h2>
 
                 <DataCard
-                    title={payment.agendamento?.paciente?.nome as string}
-                    subtitle={payment.agendamento?.paciente?.cpf}
+                    title={payment.agendamento?.paciente?.nome}
+                    subtitle={formatCpf(payment.agendamento?.paciente?.cpf)}
                 >
                     <TextGroupGrid>
                         <DataText
                             label="Contato"
-                            value={payment.agendamento?.paciente?.contato as string}
-                        />
-
-                        <DataText
-                            label="Serviço"
-                            value={payment.agendamento?.servico?.nomeServico as string}
-                        />
-
-                        <DataText
-                            label="Data"
-                            value={new Date(payment.agendamento?.data as string).toLocaleDateString()}
+                            value={formatCellphone(payment.agendamento?.paciente?.contato)}
                         />
 
                         <DataText
@@ -230,23 +231,43 @@ const RefundPayment = () => {
                             value={new Date(payment.agendamento?.dataAgendada + "T" + payment.agendamento?.horaAgendada).toLocaleString()}
                         />
 
-                        <DataText
-                            label="Status agendamento"
+                        <StatusBadge
+                            label="Status"
+                            status={payment.agendamento?.status}
                             value={getValueScheduleStatus(payment.agendamento?.status as ScheduleStatusEnum)}
+                            defineColor={defineColorScheduleStatus}
+                        />
+
+
+                        <DataText
+                            label="Serviço"
+                            value={payment.agendamento?.servico?.nomeServico}
                         />
 
                         <DataText
                             label="Médico"
-                            value={payment.agendamento?.medico?.nomeFuncionario as string}
+                            value={payment.agendamento?.medico?.nomeFuncionario}
                         />
 
                         <DataText
                             label="Especialidade"
-                            value={payment.agendamento?.medico?.especialidade?.nomeEspecialidade as string}
+                            value={payment.agendamento?.medico?.especialidade?.nomeEspecialidade}
+                        />
+
+                        <DataText
+                            label="Data"
+                            value={new Date(normalizeDate(payment.agendamento?.data)).toLocaleDateString()}
                         />
                     </TextGroupGrid>
                 </DataCard>
             </>}
+
+            <InvoiceModal
+                showModal={invoice !== undefined}
+                toggleModal={toggleModal}
+                invoice={invoice}
+                patient={payment?.agendamento?.paciente}
+            />
         </>
     );
 }

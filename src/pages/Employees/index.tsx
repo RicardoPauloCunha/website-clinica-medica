@@ -1,19 +1,21 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import EmployeeTypeEnum, { getValueEmployeeType, listEmployeeType } from "../../services/enums/employeeType";
-import EmployeeStatusEnum, { getValueEmployeeStatus } from "../../services/enums/employeeStatus";
 import Funcionario from "../../services/entities/funcionario";
+import EmployeeTypeEnum, { getValueEmployeeType, listEmployeeType } from "../../services/enums/employeeType";
+import EmployeeStatusEnum, { defineColorEmployeeStatus, getValueEmployeeStatus } from "../../services/enums/employeeStatus";
 import { listEmployeeByTypeHttp, putEmployeeHttp } from "../../services/http/employee";
 import { WarningTuple } from "../../util/getHttpErrors";
 
-import { Button, ModalBody, ModalFooter, ModalHeader, Spinner } from "reactstrap";
+import { Button, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import { ButtonGroupRow, DataModal, Form, TextGroupGrid } from "../../styles/components";
 import SelectInput from "../../components/Input/select";
 import SpinnerBlock from "../../components/SpinnerBlock";
 import Warning from "../../components/Warning";
 import DataCard from "../../components/DataCard";
 import DataText from "../../components/DataText";
+import LoadingButton from "../../components/LoadingButton";
+import StatusBadge from "../../components/StatusBadge";
 
 type ModalString = "status" | "";
 
@@ -31,10 +33,10 @@ const Employees = () => {
     const [employeeIsEnabled, setEmployeeIsEnabled] = useState(true);
 
     useEffect(() => {
-        getEmployees(null);
+        getEmployees(0);
     }, []);
 
-    const getEmployees = (employeeType: number | null) => {
+    const getEmployees = (employeeType: number) => {
         setWarning(["", ""]);
 
         setIsLoading("get");
@@ -135,26 +137,28 @@ const Employees = () => {
                             value={x.setor}
                         />
 
-                        <DataText
+                        <StatusBadge
                             label="Status"
+                            status={x.statusFuncionario}
                             value={getValueEmployeeStatus(x.statusFuncionario)}
+                            defineColor={defineColorEmployeeStatus}
                         />
                     </TextGroupGrid>
 
                     <ButtonGroupRow>
                         <Button
-                            color="warning"
+                            color={x.statusFuncionario === EmployeeStatusEnum.Enabled ? "danger" : "success"}
                             outline
-                            onClick={() => onClickEditData(index)}
+                            onClick={() => onClickChangeStatus(index)}
                         >
-                            Editar
+                            {x.statusFuncionario === EmployeeStatusEnum.Enabled ? "Desabilitar" : "Habilitar"}
                         </Button>
 
                         <Button
-                            color={x.statusFuncionario === EmployeeStatusEnum.Enabled ? "danger" : "success"}
-                            onClick={() => onClickChangeStatus(index)}
+                            color="warning"
+                            onClick={() => onClickEditData(index)}
                         >
-                            {x.statusFuncionario ? "Desabilitar" : "Habilitar"}
+                            Editar
                         </Button>
                     </ButtonGroupRow>
                 </DataCard>
@@ -176,20 +180,19 @@ const Employees = () => {
                 </ModalBody>}
 
                 <ModalFooter>
-                    <Button
+                    <LoadingButton
+                        text={employeeIsEnabled ? "Desabilitar" : "Habilitar"}
+                        isLoading={isLoading === "status"}
                         color={employeeIsEnabled ? "danger" : "success"}
                         onClick={() => sendChangeStatus()}
-                    >
-                        {isLoading === "status"
-                            ? <Spinner size="sm" />
-                            : employeeIsEnabled ? "Desabilitar" : "Habilitar"
-                        }
-                    </Button>
+                    />
 
                     <Button
+                        color="dark"
+                        outline
                         onClick={() => toggleModal()}
                     >
-                        Cancel
+                        Cancelar
                     </Button>
                 </ModalFooter>
             </DataModal>

@@ -29,4 +29,19 @@ export const listScheduleStatus = () => {
     return list;
 }
 
+export const defineColorScheduleStatus = (status: number) => {
+    switch (status) {
+        case ScheduleStatusEnum.Scheduled:
+            return "primary";
+        case ScheduleStatusEnum.Unchecked:
+            return "danger";
+        case ScheduleStatusEnum.Progress:
+            return "warning";
+        case ScheduleStatusEnum.Concluded:
+            return "success";
+        default:
+            return "";
+    }
+}
+
 export default ScheduleStatusEnum;

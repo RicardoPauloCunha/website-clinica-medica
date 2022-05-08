@@ -1,7 +1,5 @@
-import { get } from "../api";
+import { get, post, put } from "../api";
 import Clinica from "../entities/Clinica";
-
-import { _listPayment } from "./payment";
 
 const ROOT = "clinica/";
 
@@ -18,5 +16,27 @@ export const _listClinic: Clinica[] = [
 
 export const getCurrentClinicHttp = async (): Promise<Clinica> => {
     let { data } = await get<Clinica>(ROOT + 1);
+    return data;
+}
+
+interface PostClinicHttp {
+    nome: string;
+    cnpj: string;
+    endereco: string;
+    inscricaoMunicipal: string;
+    atividade: string;
+}
+
+export const postClinicHttp = async (requestData: PostClinicHttp): Promise<void> => {
+    let { data } = await post<PostClinicHttp, void>(ROOT, requestData);
+    return data;
+}
+
+interface PutClinicHttp extends PostClinicHttp {
+    idClinica: number;
+}
+
+export const putClinicHttp = async (requestData: PutClinicHttp): Promise<void> => {
+    let { data } = await put<PutClinicHttp, void>(ROOT, requestData);
     return data;
 }

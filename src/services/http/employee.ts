@@ -50,7 +50,7 @@ export const getEmployeeByIdHttp = async (employeeId: number): Promise<Funcionar
 }
 
 interface FilterEmployeeParams {
-    tipoFuncionario: number | null;
+    tipoFuncionario: number;
 }
 
 export const listEmployeeByTypeHttp = async (paramsData: FilterEmployeeParams): Promise<Funcionario[]> => {

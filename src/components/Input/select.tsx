@@ -1,8 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useField } from '@unform/core';
 
-import { hasValueString } from '../../util/stringFormat';
-
 import { FormGroup, Input, Label, InputProps, FormFeedback } from 'reactstrap';
 
 interface SelectInputProps extends InputProps {
@@ -50,9 +48,9 @@ const SelectInput = ({ name, label, placeholder, options, handlerChange, ...rest
             <Input
                 id={fieldName}
                 innerRef={inputRef}
-                defaultValue={hasValueString(defaultValue) ? defaultValue : ""}
+                defaultValue={defaultValue ? defaultValue : ""}
                 type="select"
-                invalid={hasValueString(error)}
+                invalid={error ? true : false}
                 onFocus={clearError}
                 onChange={e => changeOption(e.target.value)}
                 {...rest}

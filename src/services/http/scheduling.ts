@@ -1,4 +1,4 @@
-import { get, getParams, post, put } from "../api";
+import { getParams, post, put } from "../api";
 import Agendamento from "../entities/agendamento";
 import ScheduleStatusEnum from "../enums/scheduleStatus";
 
@@ -14,7 +14,7 @@ export const _listScheduling: Agendamento[] = [
         data: "2022-05-03",
         dataAgendada: "2022-05-03",
         horaAgendada: "13:00:00",
-        status: ScheduleStatusEnum.Progress,
+        status: ScheduleStatusEnum.Scheduled,
         medico: _listDoctor[0],
         paciente: _listPatient[0],
         servico: _listService[0]
@@ -24,7 +24,7 @@ export const _listScheduling: Agendamento[] = [
         data: "2022-05-03",
         dataAgendada: "2022-05-03",
         horaAgendada: "13:00:00",
-        status: ScheduleStatusEnum.Scheduled,
+        status: ScheduleStatusEnum.Unchecked,
         medico: _listDoctor[0],
         paciente: _listPatient[0],
         servico: _listService[0]
@@ -34,7 +34,7 @@ export const _listScheduling: Agendamento[] = [
         data: "2022-05-03",
         dataAgendada: "2022-05-03",
         horaAgendada: "13:00:00",
-        status: ScheduleStatusEnum.Scheduled,
+        status: ScheduleStatusEnum.Progress,
         medico: _listDoctor[0],
         paciente: _listPatient[0],
         servico: _listService[0]
@@ -44,7 +44,7 @@ export const _listScheduling: Agendamento[] = [
         data: "2022-05-03",
         dataAgendada: "2022-05-03",
         horaAgendada: "13:00:00",
-        status: ScheduleStatusEnum.Scheduled,
+        status: ScheduleStatusEnum.Concluded,
         medico: _listDoctor[0],
         paciente: _listPatient[0],
         servico: _listService[0]
@@ -53,10 +53,11 @@ export const _listScheduling: Agendamento[] = [
 
 export const getSchedulingByIdHttp = async (id: number): Promise<Agendamento | undefined> => {
     // TODO: integração API
+    _listScheduling[0].idAgendamento = id;
     return _listScheduling[0];
 }
 
-type ListReceptionistSchedulingByParams = {
+interface ListReceptionistSchedulingByParams {
     cpf: string | null;
     status: number | null;
 }
@@ -66,7 +67,7 @@ export const listReceptionistSchedulingByParamsHttp = async (paramsData: ListRec
     return data;
 }
 
-type ListDoctorSchedulingByParams = {
+interface ListDoctorSchedulingByParams {
     funcionarioId: number;
     periodo: number;
 }
@@ -76,7 +77,7 @@ export const listDoctorSchedulingByParamsHttp = async (paramsData: ListDoctorSch
     return _listScheduling;
 }
 
-type PostSchedulingRequest = {
+interface PostSchedulingRequest {
     recepcionistaId: number;
     pacienteCpf: string;
     medicoId: number;

@@ -1,8 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useField } from '@unform/core';
 
-import { hasValueString } from '../../util/stringFormat';
-
 import { FormGroup, Input, Label, InputProps, FormFeedback } from 'reactstrap';
 
 interface RadioInputProps extends InputProps {
@@ -57,7 +55,7 @@ const RadioInput = ({ name, label, options, ...rest }: RadioInputProps) => {
                         defaultChecked={defaultValue === opt.value}
                         value={opt.value}
                         type="radio"
-                        invalid={hasValueString(error)}
+                        invalid={error ? true : false}
                         onFocus={clearError}
                         {...rest}
                     />

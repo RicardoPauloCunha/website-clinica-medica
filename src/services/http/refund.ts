@@ -11,7 +11,7 @@ export const _listRefund: Ressarcimento[] = [
     {
         idRessarcimento: 1,
         pagamento: _listPayment[0],
-        notaFiscal: _listInvoice[0],
+        notaFiscal: _listInvoice[2],
         data: "2022-05-03",
         valor: 120,
         status: 1,
@@ -25,8 +25,8 @@ export const getRefundByPaymentIdHttp = async (paymentId: number): Promise<Ressa
     return _listRefund[0];
 }
 
-type PostRefundRequest = {
-    pagamentoId: number;
+interface PostRefundRequest {
+    idPagamento: number;
     valor: number;
     status: 1;
     formaDeRessarcimento: number;

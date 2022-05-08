@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { FormHandles, SubmitHandler } from "@unform/core";
 import * as Yup from "yup";
 
-import ScheduleStatusEnum, { getValueScheduleStatus } from "../../services/enums/scheduleStatus";
+import { useAuth } from "../../contexts/auth";
 import Agendamento from "../../services/entities/agendamento";
+import ScheduleStatusEnum, { defineColorScheduleStatus, getValueScheduleStatus } from "../../services/enums/scheduleStatus";
 import { listDoctorSchedulingByParamsHttp, putSchedulingHttp } from "../../services/http/scheduling";
 import { postAttendanceHttp, _listAttendance } from "../../services/http/attendance";
 import { WarningTuple } from "../../util/getHttpErrors";
 import getValidationErrors from "../../util/getValidationErrors";
-import { normalize } from "../../util/stringFormat";
+import { normalize } from "../../util/formatString";
 
 import { Button, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import { ButtonGroupRow, DataModal, Form, TextGroupGrid } from "../../styles/components";
@@ -18,9 +19,9 @@ import SpinnerBlock from "../../components/SpinnerBlock";
 import Warning from "../../components/Warning";
 import DataCard from "../../components/DataCard";
 import DataText from "../../components/DataText";
-import { useAuth } from "../../contexts/auth";
 import FieldInput from "../../components/Input";
 import LoadingButton from "../../components/LoadingButton";
+import StatusBadge from "../../components/StatusBadge";
 
 type AttendanceFormData = {
     comments: string;
@@ -61,18 +62,23 @@ const DoctorSchedules = () => {
     const getSchedules = (period: number) => {
         setWarning(["", ""]);
 
-        setIsLoading("get");
-        listDoctorSchedulingByParamsHttp({
-            funcionarioId: loggedUser?.employeeId as number,
-            periodo: period
-        }).then(response => {
-            setSchedules([...response]);
+        if (loggedUser) {
+            setIsLoading("get");
+            listDoctorSchedulingByParamsHttp({
+                funcionarioId: loggedUser.employeeId,
+                periodo: period
+            }).then(response => {
+                setSchedules([...response]);
 
-            if (response.length === 0)
-                setWarning(["warning", "Nenhum agendamento foi encontrado."]);
+                if (response.length === 0)
+                    setWarning(["warning", "Nenhum agendamento foi encontrado."]);
 
-            setIsLoading("");
-        });
+                setIsLoading("");
+            });
+        }
+        else {
+            setWarning(["warning", "Nenhum agendamento foi encontrado."]);
+        }
     }
 
     const toggleModal = (modalName?: ModalString) => {
@@ -176,12 +182,12 @@ const DoctorSchedules = () => {
             {schedules.map((x, index) => (
                 <DataCard
                     key={x.idAgendamento}
-                    title={x.paciente?.nome as string}
+                    title={x.paciente?.nome}
                 >
                     <TextGroupGrid>
                         <DataText
                             label="Serviço"
-                            value={x.servico?.nomeServico as string}
+                            value={x.servico?.nomeServico}
                         />
 
                         <DataText
@@ -189,23 +195,24 @@ const DoctorSchedules = () => {
                             value={new Date(x.dataAgendada + "T" + x.horaAgendada).toLocaleString()}
                         />
 
-                        <DataText
-                            label="Status agendamento"
+                        <StatusBadge
+                            label="Status"
+                            status={x.status}
                             value={getValueScheduleStatus(x.status)}
+                            defineColor={defineColorScheduleStatus}
                         />
                     </TextGroupGrid>
 
                     <ButtonGroupRow>
-                        <Button
-                            outline
+                        {x.status === ScheduleStatusEnum.Progress && <Button
                             color="primary"
+                            outline
                             onClick={() => onClickPatientAttendances(index)}
                         >
                             Histórico do paciente
-                        </Button>
+                        </Button>}
 
                         {x.status === ScheduleStatusEnum.Progress && <Button
-                            outline
                             color="success"
                             onClick={() => onClickFinalizeAttendance(index)}
                         >
@@ -265,9 +272,11 @@ const DoctorSchedules = () => {
                     />
 
                     <Button
+                        color="dark"
+                        outline
                         onClick={() => toggleModal()}
                     >
-                        Cancel
+                        Cancelar
                     </Button>
                 </ModalFooter>
             </DataModal>

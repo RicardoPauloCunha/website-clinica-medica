@@ -303,9 +303,11 @@ const Home = () => {
                         Confirmar
                     </Button>
                     <Button
+                        color="dark"
+                        outline
                         onClick={() => toggleModal()}
                     >
-                        Cancel
+                        Cancelar
                     </Button>
                 </ModalFooter>
             </DataModal>

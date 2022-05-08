@@ -2,7 +2,6 @@ import { get } from "../api";
 import NotaFiscal from "../entities/notaFiscal";
 
 import { _listClinic } from "./clinic";
-import { _listPayment } from "./payment";
 
 const ROOT = "notasfiscais/";
 
@@ -26,14 +25,14 @@ export const _listInvoice: NotaFiscal[] = [
     {
         idNotaFiscal: 2,
         clinica: _listClinic[0],
-        valorNota: 130,
+        valorNota: 100,
         dataEmissao: "2022-05-03",
         impostos: 0,
-        descricao: "Serviços de saúde, assistência médica e congêneres"
+        descricao: "Reembolso"
     }
 ];
 
-type listInvoiceByParamsRequest = {
+interface listInvoiceByParamsRequest {
     periodo?: number;
 }
 
