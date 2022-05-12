@@ -5,7 +5,7 @@ interface Atendimento {
     data: string;
     observacoes: string;
     diagnostico: string;
-    agendamento?: Agendamento;
+    agendamento: Agendamento;
 }
 
 export default Atendimento;

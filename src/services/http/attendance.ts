@@ -1,6 +1,10 @@
+import { get, post } from "../api";
+import Agendamento from "../entities/agendamento";
 import Atendimento from "../entities/atendimento";
 
 import { _listScheduling } from "./scheduling";
+
+const ROOT = "atendimentos/";
 
 export const _listAttendance: Atendimento[] = [
     {
@@ -20,16 +24,16 @@ export const _listAttendance: Atendimento[] = [
 ];
 
 export const listAttendanceByCpfHttp = async (cpf: string): Promise<Atendimento[]> => {
-    // TODO: integração API
-    return _listAttendance;
+    let { data } = await get<Atendimento[]>(ROOT + "listar-por-cpf-paciente/" + cpf);
+    return data;
 }
 
 interface PostAttendanceRequest {
     observacoes: string;
     diagnostico: string;
-    agendamentoId: number;
+    agendamento: Agendamento;
 }
 
 export const postAttendanceHttp = async (requestData: PostAttendanceRequest): Promise<void> => {
-    // TODO: integração API
+    await post<PostAttendanceRequest, void>(ROOT, requestData);
 }

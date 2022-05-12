@@ -67,6 +67,7 @@ const Invoices = () => {
         if (invoices[index] === undefined)
             return;
 
+        // TODO: Integração API
         getPaymentByInvoiceIdHttp(invoices[index].idNotaFiscal).then(response => {
             setPatient(response.agendamento?.paciente);
             setInvoiceIndex(index);
@@ -94,7 +95,7 @@ const Invoices = () => {
                     handlerChange={handlerChangePeriod}
                 />
 
-                <Warning value={warning} />
+                {modal === "" && <Warning value={warning} />}
             </Form>
 
             {isLoading === "get" && <SpinnerBlock />}

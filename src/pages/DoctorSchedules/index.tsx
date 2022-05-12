@@ -7,36 +7,34 @@ import { useAuth } from "../../contexts/auth";
 import Agendamento from "../../services/entities/agendamento";
 import ScheduleStatusEnum, { defineColorScheduleStatus, getValueScheduleStatus } from "../../services/enums/scheduleStatus";
 import { listDoctorSchedulingByParamsHttp, putSchedulingHttp } from "../../services/http/scheduling";
-import { postAttendanceHttp, _listAttendance } from "../../services/http/attendance";
+import { postAttendanceHttp } from "../../services/http/attendance";
 import { WarningTuple } from "../../util/getHttpErrors";
 import getValidationErrors from "../../util/getValidationErrors";
-import { normalize } from "../../util/formatString";
+import { normalize, normalizeDate } from "../../util/formatString";
 
 import { Button, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
-import { ButtonGroupRow, DataModal, Form, TextGroupGrid } from "../../styles/components";
+import { DataModal, Form, TextGroupGrid } from "../../styles/components";
 import SelectInput from "../../components/Input/select";
 import SpinnerBlock from "../../components/SpinnerBlock";
 import Warning from "../../components/Warning";
-import DataCard from "../../components/DataCard";
 import DataText from "../../components/DataText";
 import FieldInput from "../../components/Input";
 import LoadingButton from "../../components/LoadingButton";
 import StatusBadge from "../../components/StatusBadge";
+import SchedulingCard from "../../components/DataCard/scheduling";
 
 type AttendanceFormData = {
     comments: string;
     diagnosis: string;
 }
 
-type ModalString = "attendace" | "";
+type ModalString = "schedule" | "attendace" | "";
 
 const DoctorSchedules = () => {
     const navigate = useNavigate();
     const attendanceFormRef = useRef<FormHandles>(null);
 
     const { loggedUser } = useAuth();
-
-    const _itemAttendance = _listAttendance[0];
 
     const [isLoading, setIsLoading] = useState<"get" | "attendance" | "">("");
     const [warning, setWarning] = useState<WarningTuple>(["", ""]);
@@ -57,7 +55,7 @@ const DoctorSchedules = () => {
     useEffect(() => {
         getSchedules(0);
         // eslint-disable-next-line
-    }, []);
+    }, [loggedUser]);
 
     const getSchedules = (period: number) => {
         setWarning(["", ""]);
@@ -82,8 +80,13 @@ const DoctorSchedules = () => {
     }
 
     const toggleModal = (modalName?: ModalString) => {
-        setModal(modalName !== undefined ? modalName : "");
-        setWarning(["", ""]);
+        if (modalName !== undefined) {
+            setModal(modalName);
+            setWarning(["", ""]);
+        }
+        else {
+            setModal("");
+        }
     }
 
     const sendChangeSchedulingStatus = async (index: number) => {
@@ -118,10 +121,10 @@ const DoctorSchedules = () => {
             await postAttendanceHttp({
                 observacoes: data.comments,
                 diagnostico: data.diagnosis,
-                agendamentoId: schedules[scheduleIndex].idAgendamento
+                agendamento: schedules[scheduleIndex]
             }).then(() => {
                 sendChangeSchedulingStatus(scheduleIndex).then(() => {
-                    setWarning(["success", "Atendimetno cadastrado com sucesso."]);
+                    setWarning(["success", "Atendimento cadastrado com sucesso."]);
                     toggleModal();
                     reset();
                 });
@@ -142,16 +145,23 @@ const DoctorSchedules = () => {
         getSchedules(period);
     }
 
-    const onClickPatientAttendances = (index: number) => {
-        if (index === -1)
-            return;
+    const onClickOpenSchedule = (scheduleId: number) => {
+        let index = schedules.findIndex(x => x.idAgendamento === scheduleId);
+        setScheduleIndex(index);
+        toggleModal("schedule");
 
-        navigate("/pacientes/" + normalize(schedules[index].paciente?.cpf) + "/atendimentos");
+        // TODO: Busca atendimento do agendamento
     }
 
-    const onClickFinalizeAttendance = (index: number) => {
-        setScheduleIndex(index);
+    const onClickFinalizeAttendance = () => {
         toggleModal("attendace");
+    }
+
+    const onClickPatientAttendances = () => {
+        if (scheduleIndex === -1)
+            return;
+
+        navigate("/pacientes/" + normalize(schedules[scheduleIndex].paciente?.cpf) + "/atendimentos");
     }
 
     return (
@@ -174,53 +184,87 @@ const DoctorSchedules = () => {
                     handlerChange={handlerChangePeriod}
                 />
 
-                <Warning value={warning} />
+                {modal === "" && <Warning value={warning} />}
             </Form>
 
             {isLoading === "get" && <SpinnerBlock />}
 
-            {schedules.map((x, index) => (
-                <DataCard
+            {schedules.map(x => (
+                <SchedulingCard
                     key={x.idAgendamento}
-                    title={x.paciente?.nome}
+                    id={x.idAgendamento}
+                    patientName={x.paciente.nome}
+                    time={x.horaAgendada}
+                    date={x.dataAgendada}
+                    status={x.status}
+                    serviceName={x.servico.especialidade.nomeEspecialidade}
+                    onClickOpenSchedule={onClickOpenSchedule}
+                />
+            ))}
+
+            <DataModal
+                isOpen={modal === "schedule"}
+                toggle={toggleModal}
+                centered
+            >
+                <ModalHeader
+                    toggle={() => toggleModal()}
                 >
-                    <TextGroupGrid>
+                    Dados do agendamento
+                </ModalHeader>
+
+                <ModalBody>
+                    {schedules[scheduleIndex] && <TextGroupGrid
+                        className="text-group-grid-modal"
+                    >
                         <DataText
-                            label="Serviço"
-                            value={x.servico?.nomeServico}
+                            label="Paciente"
+                            value={schedules[scheduleIndex].paciente.nome}
+                            isFullRow={true}
                         />
 
                         <DataText
-                            label="Data agendamento"
-                            value={new Date(x.dataAgendada + "T" + x.horaAgendada).toLocaleString()}
+                            label="Data"
+                            value={new Date(normalizeDate(schedules[scheduleIndex].data)).toLocaleDateString()}
+                        />
+
+                        <DataText
+                            label="Data agendada"
+                            value={new Date(schedules[scheduleIndex].dataAgendada + "T" + schedules[scheduleIndex].horaAgendada).toLocaleString()}
                         />
 
                         <StatusBadge
                             label="Status"
-                            status={x.status}
-                            value={getValueScheduleStatus(x.status)}
+                            status={schedules[scheduleIndex].status}
+                            value={getValueScheduleStatus(schedules[scheduleIndex].status)}
                             defineColor={defineColorScheduleStatus}
                         />
-                    </TextGroupGrid>
 
-                    <ButtonGroupRow>
-                        {x.status === ScheduleStatusEnum.Progress && <Button
-                            color="primary"
-                            outline
-                            onClick={() => onClickPatientAttendances(index)}
-                        >
-                            Histórico do paciente
-                        </Button>}
+                        <DataText
+                            label="Serviço"
+                            value={schedules[scheduleIndex].servico.nomeServico}
+                            isFullRow={true}
+                        />
+                    </TextGroupGrid>}
+                </ModalBody>
 
-                        {x.status === ScheduleStatusEnum.Progress && <Button
-                            color="success"
-                            onClick={() => onClickFinalizeAttendance(index)}
-                        >
-                            Finalizar atendimento
-                        </Button>}
-                    </ButtonGroupRow>
-                </DataCard>
-            ))}
+                <ModalFooter>
+                    {schedules[scheduleIndex]?.status === ScheduleStatusEnum.Progress && <Button
+                        color="secondary"
+                        onClick={() => onClickFinalizeAttendance()}
+                    >
+                        Atendimento
+                    </Button>}
+
+                    {schedules[scheduleIndex]?.status === ScheduleStatusEnum.Progress && <Button
+                        color="info"
+                        outline
+                        onClick={() => onClickPatientAttendances()}
+                    >
+                        Histórico
+                    </Button>}
+                </ModalFooter>
+            </DataModal>
 
             <DataModal
                 isOpen={modal === "attendace"}
@@ -238,15 +282,11 @@ const DoctorSchedules = () => {
                         ref={attendanceFormRef}
                         onSubmit={submitAttendanceForm}
                         className="form-modal"
-                        initialData={{
-                            comments: _itemAttendance.observacoes,
-                            diagnosis: _itemAttendance.diagnostico
-                        }}
                     >
                         <FieldInput
                             name='comments'
                             label='Observações'
-                            placeholder='Coloque as observações do atendimento'
+                            placeholder='Coloque as observações'
                             type="textarea"
                             rows="4"
                         />
@@ -254,7 +294,7 @@ const DoctorSchedules = () => {
                         <FieldInput
                             name='diagnosis'
                             label='Diagnóstico'
-                            placeholder='Coloque o diagnóstico do atendimento'
+                            placeholder='Coloque o diagnóstico'
                             type="textarea"
                             rows="4"
                         />
@@ -268,16 +308,9 @@ const DoctorSchedules = () => {
                         text="Finalizar"
                         isLoading={isLoading === "attendance"}
                         type="button"
+                        color="secondary"
                         onClick={() => attendanceFormRef.current?.submitForm()}
                     />
-
-                    <Button
-                        color="dark"
-                        outline
-                        onClick={() => toggleModal()}
-                    >
-                        Cancelar
-                    </Button>
                 </ModalFooter>
             </DataModal>
         </>

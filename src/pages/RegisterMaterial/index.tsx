@@ -7,24 +7,22 @@ import CategoriaMaterial from "../../services/entities/categoriaMaterial";
 import Fabricante from "../../services/entities/fabricante";
 import Material from "../../services/entities/material";
 import MaterialStatusEnum from "../../services/enums/materialStatus";
-import { listManufacturerHttp, postManufacturerHttp, putManufacturerHttp, _listManufacturer } from "../../services/http/manufacturer";
-import { getMaterialByIdHttp, postMaterialHttp, putMaterialHttp, _listMaterial } from "../../services/http/material";
-import { listCategoryHttp, postCategoryHttp, putCategoryHttp, _listCategory } from "../../services/http/category";
+import { listManufacturerHttp, postManufacturerHttp, putManufacturerHttp } from "../../services/http/manufacturer";
+import { getMaterialByIdHttp, postMaterialHttp, putMaterialHttp } from "../../services/http/material";
+import { listCategoryHttp, postCategoryHttp, putCategoryHttp } from "../../services/http/category";
 import { WarningTuple } from "../../util/getHttpErrors";
 import getValidationErrors from "../../util/getValidationErrors";
-import { formatCnpj, formatTelephone, normalize } from "../../util/formatString";
+import { normalize } from "../../util/formatString";
 import { concatenateAddress, splitAddress } from "../../util/formatAddress";
 
-import { Alert, Button, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
-import { ButtonGroupRow, DataModal, Form, TextGroupGrid } from "../../styles/components";
+import { Button, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
+import { DataModal, Form } from "../../styles/components";
 import FieldInput from "../../components/Input";
 import SelectInput from "../../components/Input/select";
 import MaskInput from "../../components/Input/mask";
 import Warning from "../../components/Warning";
-import DataCard from "../../components/DataCard";
-import DataText from "../../components/DataText";
 import LoadingButton from "../../components/LoadingButton";
-import ToggleTitle from "../../components/ToggleTitle";
+import ManufacturerCollapseCard from "../../components/CollapseCard/manufacturer";
 
 type MaterialFormData = {
     name: string;
@@ -58,11 +56,6 @@ const RegisterMaterial = () => {
     const categoryFormRef = useRef<FormHandles>(null);
     const manufacturerFormRef = useRef<FormHandles>(null);
 
-    const _itemMaterial = _listMaterial[0];
-    const _itemCategory = _listCategory[2];
-    const _itemManufacturer = _listManufacturer[1];
-    const _itemAddress = splitAddress(_itemManufacturer.enderecoFabricante);
-
     const [isLoading, setIsLoading] = useState<"material" | "category" | "manufacturer" | "get" | "">("");
     const [warning, setWarning] = useState<WarningTuple>(["", ""]);
     const [modal, setModal] = useState<ModalString>("");
@@ -74,7 +67,11 @@ const RegisterMaterial = () => {
     const [editedMaterial, setEditedMaterial] = useState<Material | undefined>(undefined);
 
     useEffect(() => {
+        setIsLoading("");
         setWarning(["", ""]);
+        setModal("");
+        setManufacturerIndex(-1);
+        setEditedMaterial(undefined);
 
         if (routeParams.materialId !== undefined) {
             setIsEdition(true);
@@ -82,10 +79,9 @@ const RegisterMaterial = () => {
         }
         else {
             setIsEdition(false);
-            // materialFormRef.current?.reset();
-            // categoryFormRef.current?.reset();
-            // manufacturerFormRef.current?.reset();
-            // TODO: Descomentar
+            materialFormRef.current?.reset();
+            categoryFormRef.current?.reset();
+            manufacturerFormRef.current?.reset();
         }
 
         getCategories();
@@ -135,8 +131,13 @@ const RegisterMaterial = () => {
     }
 
     const toggleModal = (modalName?: ModalString) => {
-        setModal(modalName !== undefined ? modalName : "");
-        setWarning(["", ""]);
+        if (modalName !== undefined) {
+            setModal(modalName);
+            setWarning(["", ""]);
+        }
+        else {
+            setModal("");
+        }
     }
 
     const submitMaterialForm: SubmitHandler<MaterialFormData> = async (data, { reset }) => {
@@ -188,6 +189,7 @@ const RegisterMaterial = () => {
             else if (editedMaterial !== undefined) {
                 putMaterialHttp({
                     ...materialData,
+                    quantidade: editedMaterial.quantidade,
                     statusMaterial: editedMaterial.statusMaterial,
                     idMaterial: editedMaterial.idMaterial,
                 }).then(() => {
@@ -378,33 +380,23 @@ const RegisterMaterial = () => {
 
     return (
         <>
-            <ToggleTitle
-                toggle={isEdition}
-                isLoading={isLoading === "get"}
-                title="Cadastro de material"
-                alternateTitle="Edição de material"
-            />
+            <h1>{isEdition ? "Edição de material" : "Cadastro de material"}</h1>
 
             <Form
                 ref={materialFormRef}
                 onSubmit={submitMaterialForm}
                 className="form-data"
-                initialData={{
-                    name: _itemMaterial.nomeMaterial,
-                    description: _itemMaterial.descricao,
-                    unitMeasurement: _itemMaterial.unidadeDeMedida
-                }}
             >
                 <FieldInput
                     name='name'
                     label='Nome'
-                    placeholder='Coloque o nome do material'
+                    placeholder='Coloque o nome'
                 />
 
                 <FieldInput
                     name='description'
                     label='Descrição'
-                    placeholder='Coloque a descrição do serviço'
+                    placeholder='Coloque a descrição'
                     type="textarea"
                     rows="4"
                 />
@@ -423,6 +415,7 @@ const RegisterMaterial = () => {
                         value: x.idCategoria?.toString(),
                         label: x.nomeCategoria
                     }))}
+                    disabled={isEdition}
                 />
 
                 <SelectInput
@@ -434,55 +427,30 @@ const RegisterMaterial = () => {
                         label: x.nomeFabricante
                     }))}
                     handlerChange={handlerChangeManufacturer}
+                    disabled={isEdition}
                 />
+
+                {manufacturers[manufacturerIndex] && <ManufacturerCollapseCard
+                    cnpj={manufacturers[manufacturerIndex].cnpj}
+                    name={manufacturers[manufacturerIndex].nomeFabricante}
+                    contact={manufacturers[manufacturerIndex].contatoFabricante}
+                    address={manufacturers[manufacturerIndex].enderecoFabricante}
+                />}
+
+                {modal === "" && <Warning value={warning} />}
 
                 <LoadingButton
                     text={isEdition ? "Editar" : "Cadastrar"}
-                    isLoading={isLoading === "material"}
+                    isLoading={isLoading === "material" || isLoading === "get"}
                     type="submit"
                     color={isEdition ? "warning" : "secondary"}
                 />
-
-                {modal === "" && <Warning value={warning} />}
             </Form>
-
-            <h2>Dados do fabricante</h2>
-
-            {manufacturers[manufacturerIndex]
-                ? <DataCard
-                    title={manufacturers[manufacturerIndex].nomeFabricante}
-                    subtitle={formatCnpj(manufacturers[manufacturerIndex].cnpj)}
-                >
-                    <TextGroupGrid>
-                        <DataText
-                            label="Contato"
-                            value={formatTelephone(manufacturers[manufacturerIndex].contatoFabricante)}
-                        />
-
-                        <DataText
-                            label="Endereço"
-                            value={manufacturers[manufacturerIndex].enderecoFabricante}
-                        />
-                    </TextGroupGrid>
-
-                    {isEdition && <ButtonGroupRow>
-                        <Button
-                            color="warning"
-                            onClick={() => onClickOpenManufacturer()}
-                        >
-                            Editar
-                        </Button>
-                    </ButtonGroupRow>}
-                </DataCard>
-                : <Alert color="warning">
-                    Nenhum fabricante foi selecionado.
-                </Alert>
-            }
 
             {isEdition
                 ? <>
                     <h2>Editar categoria</h2>
-                    <p>Você pode editar os dados da categoria escolhida.</p>
+                    <p>Você pode editar os dados da categoria selecionada.</p>
 
                     <Button
                         color="warning"
@@ -496,6 +464,7 @@ const RegisterMaterial = () => {
                     <p>Você pode adicionar uma nova categoria de material caso não tenha encontrado a opção desejada.</p>
 
                     <Button
+                        color="secondary"
                         onClick={() => onClickOpenCategory()}
                     >
                         Adicionar categoria
@@ -519,18 +488,15 @@ const RegisterMaterial = () => {
                         ref={categoryFormRef}
                         onSubmit={submitCategoryForm}
                         className="form-modal"
-                        initialData={{
-                            name: _itemCategory.nomeCategoria
-                        }}
                     >
                         <FieldInput
                             name='name'
-                            label='Nome da categoria'
-                            placeholder='Coloque o nome da categoria'
+                            label='Nome'
+                            placeholder='Coloque o nome'
                         />
-                    </Form>
 
-                    {modal === "category" && <Warning value={warning} />}
+                        <Warning value={warning} />
+                    </Form>
                 </ModalBody>
 
                 <ModalFooter>
@@ -541,27 +507,33 @@ const RegisterMaterial = () => {
                         color={isEdition ? "warning" : "secondary"}
                         onClick={() => categoryFormRef.current?.submitForm()}
                     />
-
-                    <Button
-                        color="dark"
-                        outline
-                        onClick={() => toggleModal()}
-                    >
-                        Cancelar
-                    </Button>
                 </ModalFooter>
             </DataModal>
 
-            {!isEdition && <>
-                <h2>Adicionar fabricante</h2>
-                <p>Você pode adicionar uma novo fabricante caso não tenha encontrado a opção desejada.</p>
+            {isEdition
+                ? <>
+                    <h2>Editar fabricante</h2>
+                    <p>Você pode editar os dados do fabricante selecionado.</p>
 
-                <Button
-                    onClick={() => toggleModal("manufacturer")}
-                >
-                    Adicionar fabricante
-                </Button>
-            </>}
+                    <Button
+                        color="warning"
+                        onClick={() => onClickOpenManufacturer()}
+                    >
+                        Editar fabricante
+                    </Button>
+                </>
+                : <>
+                    <h2>Adicionar fabricante</h2>
+                    <p>Você pode adicionar uma novo fabricante caso não tenha encontrado a opção desejada.</p>
+
+                    <Button
+                        color="secondary"
+                        onClick={() => onClickOpenManufacturer()}
+                    >
+                        Adicionar fabricante
+                    </Button>
+                </>
+            }
 
             <DataModal
                 isOpen={modal === "manufacturer"}
@@ -580,21 +552,10 @@ const RegisterMaterial = () => {
                         ref={manufacturerFormRef}
                         onSubmit={submitManufacturerForm}
                         className="form-modal"
-                        initialData={{
-                            cnpj: _itemManufacturer.cnpj,
-                            name: _itemManufacturer.nomeFabricante,
-                            contact: _itemManufacturer.contatoFabricante,
-                            cep: _itemAddress.cep,
-                            street: _itemAddress.street,
-                            number: _itemAddress.number,
-                            district: _itemAddress.district,
-                            city: _itemAddress.city,
-                            state: _itemAddress.state
-                        }}
                     >
                         <MaskInput
                             name='cnpj'
-                            label='CNPJ do fabricante'
+                            label='CNPJ'
                             mask="99.999.999/9999-99"
                             maskChar=""
                             placeholder='00.000.000/0000-00'
@@ -603,8 +564,8 @@ const RegisterMaterial = () => {
 
                         <FieldInput
                             name='name'
-                            label='Nome do fabricante'
-                            placeholder='Coloque o nome do fabricante'
+                            label='Nome'
+                            placeholder='Coloque o nome'
                         />
 
                         <MaskInput
@@ -626,7 +587,7 @@ const RegisterMaterial = () => {
                         <FieldInput
                             name='street'
                             label='Rua'
-                            placeholder='Coloque a rua do endereço'
+                            placeholder='Coloque a rua'
                         />
 
                         <FieldInput
@@ -655,7 +616,7 @@ const RegisterMaterial = () => {
                             placeholder='SP'
                         />
 
-                        {modal === "manufacturer" && <Warning value={warning} />}
+                        <Warning value={warning} />
                     </Form>
                 </ModalBody>
 
@@ -667,14 +628,6 @@ const RegisterMaterial = () => {
                         color={isEdition ? "warning" : "secondary"}
                         onClick={() => manufacturerFormRef.current?.submitForm()}
                     />
-
-                    <Button
-                        color="dark"
-                        outline
-                        onClick={() => toggleModal()}
-                    >
-                        Cancelar
-                    </Button>
                 </ModalFooter>
             </DataModal>
         </>

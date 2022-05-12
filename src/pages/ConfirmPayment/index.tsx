@@ -6,24 +6,20 @@ import * as Yup from 'yup';
 import Agendamento from "../../services/entities/agendamento";
 import NotaFiscal from "../../services/entities/notaFiscal";
 import { listPaymentMethodType } from "../../services/enums/paymentMethodType";
-import ScheduleStatusEnum, { defineColorScheduleStatus, getValueScheduleStatus } from "../../services/enums/scheduleStatus";
+import ScheduleStatusEnum from "../../services/enums/scheduleStatus";
 import PaymentStatusEnum from "../../services/enums/paymentStatus";
 import { getSchedulingByIdHttp, putSchedulingHttp } from "../../services/http/scheduling";
-import { postPaymentHttp, _listPayment } from "../../services/http/payment";
+import { postPaymentHttp } from "../../services/http/payment";
 import { WarningTuple } from "../../util/getHttpErrors";
 import getValidationErrors from "../../util/getValidationErrors";
-import { formatCellphone, formatCpf, normalizeDate } from "../../util/formatString";
 
-import { Spinner } from "reactstrap";
-import { Form, TextGroupGrid } from "../../styles/components";
+import { Form } from "../../styles/components";
 import CurrencyInput from "../../components/Input/currency";
 import SelectInput from "../../components/Input/select";
 import LoadingButton from "../../components/LoadingButton";
 import Warning from "../../components/Warning";
-import DataCard from "../../components/DataCard";
-import DataText from "../../components/DataText";
-import StatusBadge from "../../components/StatusBadge";
 import InvoiceModal from "../../components/InvoiceModal";
+import SchedulingCollapseCard from "../../components/CollapseCard/scheduling";
 
 type PaymentFormData = {
     price: number;
@@ -36,7 +32,6 @@ const ConfirmPayment = () => {
     const routeParams = useParams();
     const paymentFormRef = useRef<FormHandles>(null);
 
-    const _itemPayment = _listPayment[0];
     const _paymentMethodTypes = listPaymentMethodType();
 
     const [isLoading, setIsLoading] = useState<"payment" | "get" | "">("");
@@ -49,8 +44,7 @@ const ConfirmPayment = () => {
         setWarning(["", ""]);
         setInvoice(undefined);
         setScheduling(undefined);
-        // paymentFormRef.current?.reset();
-        // TODO: Descomentar
+        paymentFormRef.current?.reset();
 
         if (routeParams.schedulingId !== undefined)
             getScheduling();
@@ -69,6 +63,10 @@ const ConfirmPayment = () => {
 
             setScheduling(response);
             setIsLoading("");
+
+            setTimeout(() => {
+                paymentFormRef.current?.setFieldValue("price", response?.servico?.valor.toFixed(2));
+            }, 100);
         });
     }
 
@@ -141,11 +139,21 @@ const ConfirmPayment = () => {
                 ref={paymentFormRef}
                 onSubmit={submitPaymentForm}
                 className="form-data"
-                initialData={{
-                    price: _itemPayment.valor.toFixed(2),
-                    discount: _itemPayment.desconto.toFixed(2),
-                }}
             >
+                {scheduling !== undefined && <SchedulingCollapseCard
+                    id={scheduling.idAgendamento}
+                    patientName={scheduling.paciente.nome}
+                    patientCpf={scheduling.paciente.cpf}
+                    patientContact={scheduling.paciente.contato}
+                    time={scheduling.horaAgendada}
+                    date={scheduling.dataAgendada}
+                    creationDate={scheduling.data}
+                    status={scheduling.status}
+                    serviceName={scheduling.servico.nomeServico}
+                    doctorName={scheduling.medico.nomeFuncionario}
+                    specialtyName={scheduling.medico.especialidade.nomeEspecialidade}
+                />}
+
                 <CurrencyInput
                     name='price'
                     label='Preço'
@@ -166,70 +174,15 @@ const ConfirmPayment = () => {
                     }))}
                 />
 
+                <Warning value={warning} />
+
                 <LoadingButton
                     text="Confirmar"
-                    isLoading={isLoading === "payment"}
+                    isLoading={isLoading === "payment" || isLoading === "get"}
                     type='submit'
+                    color="secondary"
                 />
-
-                <Warning value={warning} />
             </Form>
-
-            <h2>
-                Dados do agendamento
-
-                {isLoading === "get" && <>
-                    {' '}
-                    <Spinner
-                        color="primary"
-                        type="grow"
-                    />
-                </>}
-            </h2>
-
-            {scheduling !== undefined && <DataCard
-                title={scheduling.paciente?.nome}
-                subtitle={formatCpf(scheduling.paciente?.cpf)}
-            >
-                <TextGroupGrid>
-                    <DataText
-                        label="Contato"
-                        value={formatCellphone(scheduling.paciente?.contato)}
-                    />
-
-                    <DataText
-                        label="Data agendamento"
-                        value={new Date(scheduling.dataAgendada + "T" + scheduling.horaAgendada).toLocaleString()}
-                    />
-
-                    <StatusBadge
-                        label="Status"
-                        status={scheduling.status}
-                        value={getValueScheduleStatus(scheduling.status)}
-                        defineColor={defineColorScheduleStatus}
-                    />
-
-                    <DataText
-                        label="Serviço"
-                        value={scheduling.servico?.nomeServico}
-                    />
-
-                    <DataText
-                        label="Médico"
-                        value={scheduling.medico?.nomeFuncionario}
-                    />
-
-                    <DataText
-                        label="Especialidade"
-                        value={scheduling.medico?.especialidade?.nomeEspecialidade}
-                    />
-
-                    <DataText
-                        label="Data"
-                        value={new Date(normalizeDate(scheduling.data)).toLocaleDateString()}
-                    />
-                </TextGroupGrid>
-            </DataCard>}
 
             <InvoiceModal
                 showModal={invoice !== undefined}

@@ -3,8 +3,8 @@ import Pagamento from "./pagamento";
 
 interface Ressarcimento {
     idRessarcimento: number;
-    pagamento?: Pagamento;
-    notaFiscal?: NotaFiscal
+    pagamento: Pagamento;
+    notaFiscal: NotaFiscal
     data: string;
     valor: number;
     status: number;

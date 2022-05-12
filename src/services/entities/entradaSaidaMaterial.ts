@@ -6,8 +6,8 @@ interface EntradaSaidaMaterial {
     data: string;
     quantidade: number;
     descricao: string;
-    material?: Material;
-    funcionario?: Funcionario;
+    material: Material;
+    funcionario: Funcionario;
     tipoEntradaSaida: number;
 }
 

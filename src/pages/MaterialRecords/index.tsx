@@ -2,16 +2,13 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import EntradaSaidaMaterial from "../../services/entities/entradaSaidaMaterial";
-import RecordTypeEnum from "../../services/enums/recordType";
 import { listRecordByMaterialIdHttp } from "../../services/http/record";
 import { WarningTuple } from "../../util/getHttpErrors";
-import { formatQuantity, normalizeDate } from "../../util/formatString";
 
-import { TextGroupGrid } from "../../styles/components";
 import SpinnerBlock from "../../components/SpinnerBlock";
 import Warning from "../../components/Warning";
-import DataCard from "../../components/DataCard";
-import DataText from "../../components/DataText";
+import MaterialRecordCard from "../../components/DataCard/materialRecord";
+import MaterialCollapseCard from "../../components/CollapseCard/material";
 
 const MaterialRecords = () => {
     const routeParams = useParams();
@@ -54,44 +51,25 @@ const MaterialRecords = () => {
 
             <Warning value={warning} />
 
-            {records[0] !== undefined && <DataCard
-                title="Material"
-            >
-                <TextGroupGrid>
-                    <DataText
-                        label="Nome"
-                        value={records[0].material?.nomeMaterial}
-                    />
-
-                    <DataText
-                        label="Quantidade"
-                        value={formatQuantity(records[0].material?.quantidade)}
-                    />
-                </TextGroupGrid>
-            </DataCard>}
+            {records[0] !== undefined && <MaterialCollapseCard
+                key={records[0].material.idMaterial}
+                id={records[0].material.idMaterial}
+                name={records[0].material.nomeMaterial}
+                description={records[0].material.descricao}
+                unitMeasurement={records[0].material.unidadeDeMedida}
+                quantity={records[0].material.quantidade}
+                categoryName={records[0].material.categoriaMaterial.nomeCategoria}
+                manufacturerName={records[0].material.fabricante.nomeFabricante}
+            />}
 
             {records.map(x => (
-                <DataCard
+                <MaterialRecordCard
                     key={x.idEntradaSaidaMaterial}
-                    title={`Registro de ${x.tipoEntradaSaida === RecordTypeEnum.Input ? "entrada" : "saída"}`}
-                >
-                    <TextGroupGrid>
-                        <DataText
-                            label="Data"
-                            value={new Date(normalizeDate(x.data)).toLocaleDateString()}
-                        />
-
-                        <DataText
-                            label="Quantidade"
-                            value={`${x.tipoEntradaSaida === RecordTypeEnum.Input ? "+" : "-"} ${formatQuantity(x.quantidade)}`}
-                        />
-
-                        <DataText
-                            label="Descrição"
-                            value={x.descricao}
-                        />
-                    </TextGroupGrid>
-                </DataCard>
+                    recordType={x.tipoEntradaSaida}
+                    quantity={x.quantidade}
+                    date={x.data}
+                    description={x.descricao}
+                />
             ))}
         </>
     );

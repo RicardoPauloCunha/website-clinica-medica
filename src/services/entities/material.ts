@@ -7,8 +7,8 @@ interface Material {
     unidadeDeMedida: string;
     quantidade: number;
     descricao: string;
-    categoriaMaterial?: CategoriaMaterial;
-    fabricante?: Fabricante;
+    categoriaMaterial: CategoriaMaterial;
+    fabricante: Fabricante;
     statusMaterial: number;
 }
 

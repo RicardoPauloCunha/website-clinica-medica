@@ -19,10 +19,10 @@ export default createGlobalStyle`
         --color-gray-200: #6C757D;
         --color-gray-300: #374558;
 
-        --color-blue-200: #4198F7;
-        --color-blue-300: #0D53FC;
+        --color-blue-100: #E5F6FF;
+        --color-blue-300: #2C43C3;
 
-        --color-green-200: #49C496;
+        --color-green-100: #83DAA3;
     }
 
     body {
@@ -37,9 +37,18 @@ export default createGlobalStyle`
         text-align: center;
     }
 
-    h2, h3 {
+    h2 {
         color: var(--color-gray-300);
-        margin: 2.5rem 0 1rem;
+        margin: 3rem 0 1rem;
+
+        form + & {
+            margin-top: 5rem;
+        }
+    }
+
+    h3 {
+        color: var(--color-gray-300);
+        margin: 2rem 0 1rem;
     }
 
     h4, h5, h6 {
@@ -48,8 +57,10 @@ export default createGlobalStyle`
     }
 
     button {
-        font-weight: 500 !important;
-        padding: 0.5rem 2rem 0.5rem 2rem !important;
+        &.btn {
+            font-weight: 500;
+            padding: 0.5rem 2rem 0.5rem 2rem;
+        }
         
         & + button {
             margin-left: 1rem;
@@ -62,26 +73,36 @@ export default createGlobalStyle`
 
     .alert {
         margin: 2rem 0 0 0;
+
+        p + & {
+            margin: 1rem 0 0 0;
+        }
     }
 
     small {
         &.text-link-action {
-            color: var(--color-blue-200);
+            color: var(--color-blue-300);
             font-weight: 500;
             padding-bottom: 0rem;
-            border-bottom: solid 2px var(--color-blue-200);
+            border-bottom: solid 2px var(--color-blue-300);
             cursor: pointer;
             transition: font-weight 0.3s, border-bottom 0.3s;
 
             &:hover {
                 font-weight: 400;
-                border-bottom: solid 1px var(--color-blue-200);
+                border-bottom: solid 1px var(--color-blue-300);
             }
 
             &:active {
                 font-weight: 500;
                 border-bottom: none;
             }
+        }
+    }
+
+    nav {
+        &.navbar.fixed-top {
+            min-height: 3rem;
         }
     }
 `;

@@ -2,6 +2,7 @@ import { get, post, put } from "../api";
 import Pagamento from "../entities/pagamento";
 import PaymentMethodTypeEnum from "../enums/paymentMethodType";
 import PaymentStatusEnum from "../enums/paymentStatus";
+import { _listInvoice } from "./invoice";
 
 import { _listScheduling } from "./scheduling";
 
@@ -15,7 +16,8 @@ export const _listPayment: Pagamento[] = [
         desconto: 0,
         formaDePagamento: PaymentMethodTypeEnum.Cash,
         status: PaymentStatusEnum.Reimbursed,
-        agendamento: _listScheduling[0]
+        agendamento: _listScheduling[0],
+        notaFiscal: _listInvoice[0]
     },
     {
         idPagamento: 2,
@@ -24,7 +26,8 @@ export const _listPayment: Pagamento[] = [
         desconto: 0,
         formaDePagamento: PaymentMethodTypeEnum.Card,
         status: PaymentStatusEnum.PaidOut,
-        agendamento: _listScheduling[1]
+        agendamento: _listScheduling[1],
+        notaFiscal: _listInvoice[0]
     }
 ];
 
@@ -55,11 +58,6 @@ export const postPaymentHttp = async (requestData: PostPaymentRequest): Promise<
     return data;
 }
 
-interface PutPaymentRequest extends PostPaymentRequest {
-    pagamentoId: number;
-}
-
-export const putPaymentHttp = async (requestData: PutPaymentRequest): Promise<void> => {
-    // TODO: integração API
-    await put<PutPaymentRequest, void>(ROOT + requestData.pagamentoId, requestData);
+export const putPaymentHttp = async (requestData: Pagamento): Promise<void> => {
+    await put<Pagamento, void>(ROOT, requestData);
 }

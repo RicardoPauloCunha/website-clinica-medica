@@ -44,5 +44,5 @@ interface PutDoctorRequest extends PostDoctorRequest {
 }
 
 export const putDoctorHttp = async (requestData: PutDoctorRequest): Promise<void> => {
-    await put<PostEmployeeRequest, void>(ROOT + "alterar-medico", requestData);
+    await put<PutDoctorRequest, void>(ROOT + "alterar-medico", requestData);
 }

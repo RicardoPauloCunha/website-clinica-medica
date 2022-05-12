@@ -3,7 +3,7 @@ import { FormHandles, SubmitHandler } from "@unform/core";
 import * as Yup from 'yup';
 
 import Clinica from "../../services/entities/Clinica";
-import { getCurrentClinicHttp, postClinicHttp, putClinicHttp, _listClinic } from "../../services/http/clinic";
+import { getCurrentClinicHttp, postClinicHttp, putClinicHttp } from "../../services/http/clinic";
 import { WarningTuple } from "../../util/getHttpErrors";
 import getValidationErrors from "../../util/getValidationErrors";
 import { concatenateAddress, splitAddress } from "../../util/formatAddress";
@@ -12,7 +12,6 @@ import { normalize } from "../../util/formatString";
 import { Form } from "../../styles/components";
 import Warning from "../../components/Warning";
 import FieldInput from "../../components/Input";
-import ToggleTitle from "../../components/ToggleTitle";
 import MaskInput from "../../components/Input/mask";
 import LoadingButton from "../../components/LoadingButton";
 
@@ -31,9 +30,6 @@ interface ClinicFormData {
 
 const RegisterClinic = () => {
     const clinicFormRef = useRef<FormHandles>(null);
-
-    const _itemClinic = _listClinic[0];
-    const _itemAddress = splitAddress(_itemClinic.endereco);
 
     const [isLoading, setIsLoading] = useState<"register" | "get" | "">("");
     const [warning, setWarning] = useState<WarningTuple>(["", ""]);
@@ -113,7 +109,6 @@ const RegisterClinic = () => {
             if (!isEdition) {
                 await postClinicHttp(clinicData).then(() => {
                     setWarning(["success", "Clínica médica cadastrada com sucesso."]);
-                    reset();
                 }).catch(() => {
                     setWarning(["danger", "Não foi possível cadastrar a clínica médica."]);
                 }).finally(() => { setIsLoading(""); });
@@ -139,33 +134,16 @@ const RegisterClinic = () => {
 
     return (
         <>
-            <ToggleTitle
-                toggle={isEdition}
-                isLoading={isLoading === "get"}
-                title="Cadastro da clínica médica"
-                alternateTitle="Edição de clínica médica"
-            />
+            <h1>Dados da Clínica Médica</h1>
 
             <Form
                 ref={clinicFormRef}
                 onSubmit={submitClinicForm}
                 className="form-data"
-                initialData={{
-                    cnpj: _itemClinic.cnpj,
-                    name: _itemClinic.nome,
-                    municipalInscription: _itemClinic.inscricaoMunicipal,
-                    business: _itemClinic.atividade,
-                    cep: _itemAddress.cep,
-                    street: _itemAddress.street,
-                    number: _itemAddress.number,
-                    district: _itemAddress.district,
-                    city: _itemAddress.city,
-                    state: _itemAddress.state
-                }}
             >
                 <MaskInput
                     name='cnpj'
-                    label='CNPJ da clínica médica'
+                    label='CNPJ'
                     mask="99.999.999/9999-99"
                     maskChar=""
                     placeholder='00.000.000/0000-00'
@@ -174,7 +152,7 @@ const RegisterClinic = () => {
                 <FieldInput
                     name='name'
                     label='Nome'
-                    placeholder='Coloque o nome da clínica médica'
+                    placeholder='Coloque o nome'
                 />
 
                 <FieldInput
@@ -186,7 +164,7 @@ const RegisterClinic = () => {
                 <FieldInput
                     name='business'
                     label='Atividade'
-                    placeholder='Coloque a atividade da clínica médica'
+                    placeholder='Coloque a atividade'
                 />
 
                 <MaskInput
@@ -200,7 +178,7 @@ const RegisterClinic = () => {
                 <FieldInput
                     name='street'
                     label='Rua'
-                    placeholder='Coloque a rua do endereço'
+                    placeholder='Coloque a rua'
                 />
 
                 <FieldInput
@@ -229,14 +207,14 @@ const RegisterClinic = () => {
                     placeholder='SP'
                 />
 
+                <Warning value={warning} />
+
                 <LoadingButton
                     text={isEdition ? "Editar" : "Cadastrar"}
-                    isLoading={isLoading === "register"}
+                    isLoading={isLoading === "register" || isLoading === "get"}
                     type='submit'
                     color={isEdition ? "warning" : "secondary"}
                 />
-
-                <Warning value={warning} />
             </Form>
         </>
     );

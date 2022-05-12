@@ -5,8 +5,8 @@ import * as Yup from 'yup';
 
 import Especialidade from "../../services/entities/especialidade";
 import Servico from "../../services/entities/servico";
-import { getServiceByIdHttp, postServiceHttp, putServiceHttp, _listService } from "../../services/http/service";
-import { listSpecialtyHttp, postSpecialtyHttp, putSpecialtyHttp, _listSpecialty } from "../../services/http/specialty";
+import { getServiceByIdHttp, postServiceHttp, putServiceHttp } from "../../services/http/service";
+import { listSpecialtyHttp, postSpecialtyHttp, putSpecialtyHttp } from "../../services/http/specialty";
 import { WarningTuple } from "../../util/getHttpErrors";
 import getValidationErrors from "../../util/getValidationErrors";
 
@@ -17,7 +17,6 @@ import CurrencyInput from "../../components/Input/currency";
 import SelectInput from "../../components/Input/select";
 import Warning from "../../components/Warning";
 import LoadingButton from "../../components/LoadingButton";
-import ToggleTitle from "../../components/ToggleTitle";
 
 type ServiceFormData = {
     name: string;
@@ -37,9 +36,6 @@ const RegisterService = () => {
     const serviceFormRef = useRef<FormHandles>(null);
     const specialtyFormRef = useRef<FormHandles>(null);
 
-    const _itemService = _listService[0];
-    const _itemSpecialty = _listSpecialty[0];
-
     const [isLoading, setIsLoading] = useState<"service" | "specialty" | "get" | "">("");
     const [warning, setWarning] = useState<WarningTuple>(["", ""]);
     const [modal, setModal] = useState<ModalString>("");
@@ -49,7 +45,10 @@ const RegisterService = () => {
     const [editedService, setEditedService] = useState<Servico | undefined>(undefined);
 
     useEffect(() => {
+        setIsLoading("");
         setWarning(["", ""]);
+        setModal("");
+        setEditedService(undefined);
 
         if (routeParams.serviceId !== undefined) {
             setIsEdition(true);
@@ -57,14 +56,13 @@ const RegisterService = () => {
         }
         else {
             setIsEdition(false);
-            // serviceFormRef.current?.reset();
-            // specialtyFormRef.current?.reset();
-            // TODO: Descomentar
+            serviceFormRef.current?.reset();
+            specialtyFormRef.current?.reset();
         }
 
         getSpecialties();
         // eslint-disable-next-line
-    }, []);
+    }, [routeParams]);
 
     useEffect(() => {
         if (specialties.length !== 0 && editedService !== undefined) {
@@ -98,8 +96,13 @@ const RegisterService = () => {
     }
 
     const toggleModal = (modalName?: ModalString) => {
-        setModal(modalName !== undefined ? modalName : "");
-        setWarning(["", ""]);
+        if (modalName !== undefined) {
+            setModal(modalName);
+            setWarning(["", ""]);
+        }
+        else {
+            setModal("");
+        }
     }
 
     const submitServiceForm: SubmitHandler<ServiceFormData> = async (data, { reset }) => {
@@ -231,27 +234,17 @@ const RegisterService = () => {
 
     return (
         <>
-            <ToggleTitle
-                toggle={isEdition}
-                isLoading={isLoading === "get"}
-                title="Cadastro de serviço"
-                alternateTitle="Edição de serviço"
-            />
+            <h1>{isEdition ? "Edição de serviço" : "Cadastro de serviço"}</h1>
 
             <Form
                 ref={serviceFormRef}
                 onSubmit={submitServiceForm}
                 className="form-data"
-                initialData={{
-                    name: _itemService.nomeServico,
-                    price: _itemService.valor.toFixed(2),
-                    description: _itemService.descricaoServico
-                }}
             >
                 <FieldInput
                     name='name'
                     label='Nome'
-                    placeholder='Coloque o nome do serviço'
+                    placeholder='Coloque o nome'
                 />
 
                 <CurrencyInput
@@ -262,7 +255,7 @@ const RegisterService = () => {
                 <FieldInput
                     name='description'
                     label='Descrição'
-                    placeholder='Coloque a descrição do serviço'
+                    placeholder='Coloque a descrição'
                     type="textarea"
                     rows="4"
                 />
@@ -277,14 +270,14 @@ const RegisterService = () => {
                     }))}
                 />
 
+                {modal === "" && <Warning value={warning} />}
+
                 <LoadingButton
                     text={isEdition ? "Editar" : "Cadastrar"}
-                    isLoading={isLoading === "service"}
+                    isLoading={isLoading === "service" || isLoading === "get"}
                     type="submit"
                     color={isEdition ? "warning" : "secondary"}
                 />
-
-                {modal === "" && <Warning value={warning} />}
             </Form>
 
             {isEdition
@@ -304,6 +297,7 @@ const RegisterService = () => {
                     <p>Você pode adicionar uma nova especialidade caso não tenha encontrado a opção desejada.</p>
 
                     <Button
+                        color="secondary"
                         onClick={() => onClickOpenSpecialty()}
                     >
                         Adicionar especialidade
@@ -326,18 +320,15 @@ const RegisterService = () => {
                         ref={specialtyFormRef}
                         onSubmit={submitSpecialtyForm}
                         className="form-modal"
-                        initialData={{
-                            name: _itemSpecialty.nomeEspecialidade
-                        }}
                     >
                         <FieldInput
                             name='name'
-                            label='Nome da especialidade'
-                            placeholder='Coloque o nome da especialidade'
+                            label='Nome'
+                            placeholder='Coloque o nome'
                         />
-                    </Form>
 
-                    {modal === "specialty" && <Warning value={warning} />}
+                        <Warning value={warning} />
+                    </Form>
                 </ModalBody>
 
                 <ModalFooter>
@@ -348,14 +339,6 @@ const RegisterService = () => {
                         color={isEdition ? "warning" : "secondary"}
                         onClick={() => specialtyFormRef.current?.submitForm()}
                     />
-
-                    <Button
-                        color="dark"
-                        outline
-                        onClick={() => toggleModal()}
-                    >
-                        Cancelar
-                    </Button>
                 </ModalFooter>
             </DataModal>
         </>

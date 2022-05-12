@@ -5,13 +5,13 @@ import Servico from "./servico";
 
 interface Agendamento {
     idAgendamento: number;
-    recepcionista?: Funcionario;
-    paciente?: Paciente;
-    medico?: Medico;
+    recepcionista: Funcionario;
+    paciente: Paciente;
+    medico: Medico;
     data: string;
     dataAgendada: string;
     horaAgendada: string;
-    servico?: Servico;
+    servico: Servico;
     status: number;
 }
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NavLink as Link, useNavigate } from 'react-router-dom';
+import { FaUser } from 'react-icons/fa';
 
 import { useAuth } from '../../contexts/auth';
 import { getLoggedUser, handlerLogout } from '../../localStorages/auth';
@@ -30,23 +31,33 @@ const Menu = () => {
     }
 
     return (
-        <div>
+        <>
             <Navbar
                 color="primary"
                 dark
                 expand="md"
                 fixed="top"
             >
-                <NavbarBrand
-                    to="/"
-                    tag={Link}
-                >
-                    Clínica Médica
-                </NavbarBrand>
+                {loggedUser
+                    ? <>
+                        <NavbarBrand
+                            to="/home"
+                            tag={Link}
+                        >
+                            Clínica Médica
+                        </NavbarBrand>
 
-                <NavbarToggler
-                    onClick={() => toggleIsOpen()}
-                />
+                        <NavbarToggler
+                            onClick={() => toggleIsOpen()}
+                        />
+                    </>
+                    : <NavbarBrand
+                        to="/login"
+                        tag={Link}
+                    >
+                        Clínica Médica
+                    </NavbarBrand>
+                }
 
                 <Collapse
                     navbar
@@ -68,7 +79,7 @@ const Menu = () => {
 
                             <NavItem>
                                 <NavLink
-                                    to="/servicos"
+                                    to="/servicos/listar"
                                     tag={Link}
                                 >
                                     Serviços
@@ -77,7 +88,7 @@ const Menu = () => {
 
                             <NavItem>
                                 <NavLink
-                                    to="/funcionarios"
+                                    to="/funcionarios/listar"
                                     tag={Link}
                                 >
                                     Funcionários
@@ -88,7 +99,7 @@ const Menu = () => {
                         {loggedUser?.employeeType === EmployeeTypeEnum.Receptionist && <>
                             <NavItem>
                                 <NavLink
-                                    to="/agendamentos"
+                                    to="/agendamentos/listar"
                                     tag={Link}
                                 >
                                     Agendamentos
@@ -97,10 +108,10 @@ const Menu = () => {
 
                             <NavItem>
                                 <NavLink
-                                    to="/pagamentos"
+                                    to="/notas-fiscais/listar"
                                     tag={Link}
                                 >
-                                    Pagamentos
+                                    Notas fiscais
                                 </NavLink>
                             </NavItem>
                         </>}
@@ -108,7 +119,7 @@ const Menu = () => {
                         {loggedUser?.employeeType === EmployeeTypeEnum.Stockist && <>
                             <NavItem>
                                 <NavLink
-                                    to="/materiais"
+                                    to="/materiais/listar"
                                     tag={Link}
                                 >
                                     Materiais
@@ -119,7 +130,7 @@ const Menu = () => {
                         {loggedUser?.employeeType === EmployeeTypeEnum.Doctor && <>
                             <NavItem>
                                 <NavLink
-                                    to="/consultas"
+                                    to="/consultas/listar"
                                     tag={Link}
                                 >
                                     Agendamentos
@@ -129,28 +140,28 @@ const Menu = () => {
                     </Nav>
 
                     <NavbarProfile>
-                        {loggedUser
-                            ? <>
-                                <NavbarText>
+                        {loggedUser && <>
+                            <div>
+                                <span>
+                                    <FaUser />
+                                </span>
+                                <span>
                                     {loggedUser.name}
-                                </NavbarText>
+                                </span>
+                            </div>
 
-                                <Button
-                                    onClick={() => logout()}
-                                >
-                                    Sair
-                                </Button>
-                            </>
-                            : <Button
-                                onClick={() => navigate("/login")}
+                            <Button
+                                color="secondary"
+                                outline
+                                onClick={() => logout()}
                             >
-                                Login
+                                Sair
                             </Button>
-                        }
+                        </>}
                     </NavbarProfile>
                 </Collapse>
             </Navbar>
-        </div>
+        </>
     );
 }
 

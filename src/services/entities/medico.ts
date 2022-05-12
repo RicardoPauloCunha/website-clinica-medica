@@ -3,7 +3,7 @@ import Funcionario from "./funcionario";
 
 interface Medico extends Funcionario {
     crm: string;
-    especialidade?: Especialidade;
+    especialidade: Especialidade;
 }
 
 export default Medico;

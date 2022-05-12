@@ -11,7 +11,7 @@ const PaymentMenu = () => {
             >
                 <NavItem>
                     <NavLink
-                        to="/pagamentos/notas-fiscais"
+                        to="/notas-fiscais/listar"
                         tag={Link}
                     >
                         Notas fiscais

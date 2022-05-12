@@ -6,7 +6,7 @@ import * as Yup from 'yup';
 import { useAuth } from '../../contexts/auth';
 import { getLoggedUser, handlerSignIn } from '../../localStorages/auth';
 import Funcionario from '../../services/entities/funcionario';
-import { getEmployeeByIdHttp, postLoginEmployeeHttp, _listEmployee } from '../../services/http/employee';
+import { getEmployeeByIdHttp, postLoginEmployeeHttp } from '../../services/http/employee';
 import { WarningTuple } from '../../util/getHttpErrors';
 import getValidationErrors from '../../util/getValidationErrors';
 
@@ -31,10 +31,8 @@ const Login = () => {
 
     const { defineLoggedUser } = useAuth();
 
-    const _itemEmployee = _listEmployee[3];
-
     const location = useLocation()?.state as LocationData;
-    const from = location?.from?.pathname || "/";
+    const from = location?.from?.pathname || "/home";
     const message = location?.message || "";
 
     const [isLoading, setIsLoading] = useState<"form" | "">("");
@@ -110,8 +108,8 @@ const Login = () => {
                 onSubmit={submitLoginForm}
                 className="form-data"
                 initialData={{
-                    email: _itemEmployee.email,
-                    password: _itemEmployee.senha
+                    email: "admin@cm.com",
+                    password: "147852369"
                 }}
             >
                 <FieldInput
@@ -128,13 +126,14 @@ const Login = () => {
                     type="password"
                 />
 
+                <Warning value={warning} />
+
                 <LoadingButton
                     text="Entrar"
                     isLoading={isLoading === "form"}
                     type="submit"
+                    color="secondary"
                 />
-
-                <Warning value={warning} />
             </Form>
         </>
     );

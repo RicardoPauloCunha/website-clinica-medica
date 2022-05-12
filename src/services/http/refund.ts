@@ -1,4 +1,4 @@
-import { post } from "../api";
+import { get, post } from "../api";
 import Ressarcimento from "../entities/ressarcimento";
 import PaymentMethodTypeEnum from "../enums/paymentMethodType";
 
@@ -20,9 +20,9 @@ export const _listRefund: Ressarcimento[] = [
     }
 ];
 
-export const getRefundByPaymentIdHttp = async (paymentId: number): Promise<Ressarcimento | undefined> => {
-    // TODO: integração API
-    return _listRefund[0];
+export const getRefundByPaymentIdHttp = async (paymentId: number): Promise<Ressarcimento> => {
+    let { data } = await get<Ressarcimento>(ROOT + "buscar-por-id-pagamento/" + paymentId);
+    return data;
 }
 
 interface PostRefundRequest {

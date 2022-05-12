@@ -6,7 +6,7 @@ import { formatCurrency } from "../../util/formatCurrency";
 import { AddressData, splitAddress } from "../../util/formatAddress";
 import { formatCnpj, formatCpf, normalizeDate } from "../../util/formatString";
 
-import { Button, ModalBody, ModalFooter, ModalHeader, Table } from "reactstrap";
+import { ModalBody, ModalHeader, Table } from "reactstrap";
 import { DataModal } from "../../styles/components";
 
 type InvoiceModalProps = {
@@ -129,16 +129,6 @@ const InvoiceModal = ({showModal, invoice, patient, toggleModal}: InvoiceModalPr
                     </tbody>
                 </Table>
             </ModalBody>
-
-            <ModalFooter>
-                <Button
-                    color="dark"
-                    outline
-                    onClick={() => toggleModal()}
-                >
-                    Cancelar
-                </Button>
-            </ModalFooter>
         </DataModal>
     );
 }

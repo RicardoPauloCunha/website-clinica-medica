@@ -32,7 +32,7 @@ export const listScheduleStatus = () => {
 export const defineColorScheduleStatus = (status: number) => {
     switch (status) {
         case ScheduleStatusEnum.Scheduled:
-            return "primary";
+            return "info";
         case ScheduleStatusEnum.Unchecked:
             return "danger";
         case ScheduleStatusEnum.Progress:

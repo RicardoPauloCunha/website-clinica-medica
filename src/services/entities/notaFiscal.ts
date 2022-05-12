@@ -2,7 +2,7 @@ import Clinica from "./Clinica";
 
 interface NotaFiscal {
     idNotaFiscal: number;
-    clinica?: Clinica;
+    clinica: Clinica;
     valorNota: number;
     dataEmissao: string;
     impostos: number;

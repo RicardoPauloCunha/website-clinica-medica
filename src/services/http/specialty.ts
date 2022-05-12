@@ -65,6 +65,5 @@ interface PutSpecialtyRequest extends PostSpecialtyRequest {
 }
 
 export const putSpecialtyHttp = async (requestData: PutSpecialtyRequest): Promise<void> => {
-    // TODO: integração API
     await put<PutSpecialtyRequest, void>(ROOT, requestData);
 }

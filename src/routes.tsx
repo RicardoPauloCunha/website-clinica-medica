@@ -60,20 +60,20 @@ const PagesRoutes = () => {
         <ScrollToTop>
             <Routes>
                 <Route path="/" element={<Layout />}>
-                    <Route path="" element={<Home />} />
+                    <Route path="" element={<Login />} />
                     <Route path="login" element={<Login />} />
+
+                    <Route path="home" element={<Home />} />
 
                     <Route path="clinica" element={<RequireAuth employeeType={EmployeeTypeEnum.Admin} children={<RegisterClinic />} />} />
 
                     <Route path="servicos" element={<ServiceMenu />}>
-                        <Route path="" element={<RequireAuth employeeType={EmployeeTypeEnum.Admin} children={<Services />} />} />
                         <Route path="listar" element={<RequireAuth employeeType={EmployeeTypeEnum.Admin} children={<Services />} />} />
                         <Route path="cadastrar" element={<RequireAuth employeeType={EmployeeTypeEnum.Admin} children={<RegisterService />} />} />
                         <Route path=":serviceId/editar" element={<RequireAuth employeeType={EmployeeTypeEnum.Admin} children={<RegisterService />} />} />
                     </Route>
 
                     <Route path="funcionarios" element={<EmployeeMenu />}>
-                        <Route path="" element={<RequireAuth employeeType={EmployeeTypeEnum.Admin} children={<Employees />} />} />
                         <Route path="listar" element={<RequireAuth employeeType={EmployeeTypeEnum.Admin} children={<Employees />} />} />
                         <Route path="cadastrar" element={<RequireAuth employeeType={EmployeeTypeEnum.Admin} children={<RegisterEmployee />} />} />
                         <Route path=":employeeId/editar" element={<RequireAuth employeeType={EmployeeTypeEnum.Admin} children={<RegisterEmployee />} />} />
@@ -85,7 +85,6 @@ const PagesRoutes = () => {
                     </Route>
 
                     <Route path="materiais" element={<MaterialMenu />}>
-                        <Route path="" element={<RequireAuth employeeType={EmployeeTypeEnum.Stockist} children={<Materials />} />} />
                         <Route path="listar" element={<RequireAuth employeeType={EmployeeTypeEnum.Stockist} children={<Materials />} />} />
                         <Route path="cadastrar" element={<RequireAuth employeeType={EmployeeTypeEnum.Stockist} children={<RegisterMaterial />} />} />
                         <Route path=":materialId/editar" element={<RequireAuth employeeType={EmployeeTypeEnum.Stockist} children={<RegisterMaterial />} />} />
@@ -93,7 +92,6 @@ const PagesRoutes = () => {
                     </Route>
 
                     <Route path="agendamentos" element={<SchedulingMenu />}>
-                        <Route path="" element={<RequireAuth employeeType={EmployeeTypeEnum.Receptionist} children={<Schedules />} />} />
                         <Route path="listar" element={<RequireAuth employeeType={EmployeeTypeEnum.Receptionist} children={<Schedules />} />} />
                         <Route path="cadastrar" element={<RequireAuth employeeType={EmployeeTypeEnum.Receptionist} children={<RegisterScheduling />} />} />
                         <Route path=":schedulingId/pagamento/confirmar" element={<RequireAuth employeeType={EmployeeTypeEnum.Receptionist} children={<ConfirmPayment />} />} />
@@ -101,7 +99,6 @@ const PagesRoutes = () => {
                     </Route>
 
                     <Route path="consultas" element={<DoctorSchedulesMenu />}>
-                        <Route path="" element={<RequireAuth employeeType={EmployeeTypeEnum.Doctor} children={<DoctorSchedules />} />} />
                         <Route path="listar" element={<RequireAuth employeeType={EmployeeTypeEnum.Doctor} children={<DoctorSchedules />} />} />
                     </Route>
 
@@ -109,9 +106,8 @@ const PagesRoutes = () => {
                         <Route path=":patientCpf/atendimentos" element={<RequireAuth employeeType={EmployeeTypeEnum.Doctor} children={<PatientAttendances />} />} />
                     </Route>
 
-                    <Route path="pagamentos" element={<PaymentMenu />}>
-                        <Route path="" element={<RequireAuth employeeType={EmployeeTypeEnum.Receptionist} children={<Invoices />} />} />
-                        <Route path="notas-fiscais" element={<RequireAuth employeeType={EmployeeTypeEnum.Receptionist} children={<Invoices />} />} />
+                    <Route path="notas-fiscais" element={<PaymentMenu />}>
+                        <Route path="listar" element={<RequireAuth employeeType={EmployeeTypeEnum.Receptionist} children={<Invoices />} />} />
                     </Route>
 
                     <Route path="*" element={<NotFound />} />

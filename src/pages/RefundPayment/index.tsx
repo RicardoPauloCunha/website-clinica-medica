@@ -6,26 +6,22 @@ import * as Yup from 'yup';
 import Pagamento from "../../services/entities/pagamento";
 import NotaFiscal from "../../services/entities/notaFiscal";
 import PaymentStatusEnum from "../../services/enums/paymentStatus";
-import { getValuePaymentMethodType, listPaymentMethodType } from "../../services/enums/paymentMethodType";
-import ScheduleStatusEnum, { defineColorScheduleStatus, getValueScheduleStatus } from "../../services/enums/scheduleStatus";
+import { listPaymentMethodType } from "../../services/enums/paymentMethodType";
+import ScheduleStatusEnum from "../../services/enums/scheduleStatus";
 import { getPaymentByIdHttp, putPaymentHttp } from "../../services/http/payment";
-import { postRefundHttp, _listRefund } from "../../services/http/refund";
+import { postRefundHttp } from "../../services/http/refund";
 import { WarningTuple } from "../../util/getHttpErrors";
 import getValidationErrors from "../../util/getValidationErrors";
-import { formatCurrency } from "../../util/formatCurrency";
-import { formatCellphone, formatCpf, normalizeDate } from "../../util/formatString";
 
-import { Spinner } from "reactstrap";
-import { Form, TextGroupGrid } from "../../styles/components";
+import { Form } from "../../styles/components";
 import CurrencyInput from "../../components/Input/currency";
 import SelectInput from "../../components/Input/select";
 import LoadingButton from "../../components/LoadingButton";
 import Warning from "../../components/Warning";
-import DataCard from "../../components/DataCard";
-import DataText from "../../components/DataText";
 import FieldInput from "../../components/Input";
-import StatusBadge from "../../components/StatusBadge";
 import InvoiceModal from "../../components/InvoiceModal";
+import SchedulingCollapseCard from "../../components/CollapseCard/scheduling";
+import PaymentCollapseCard from "../../components/CollapseCard/payment";
 
 type RefundFormData = {
     price: number;
@@ -38,7 +34,6 @@ const RefundPayment = () => {
     const routeParams = useParams();
     const refundFormRef = useRef<FormHandles>(null);
 
-    const _itemRefund = _listRefund[0];
     const _paymentMethodTypes = listPaymentMethodType();
 
     const [isLoading, setIsLoading] = useState<"refund" | "get" | "">("");
@@ -49,8 +44,7 @@ const RefundPayment = () => {
 
     useEffect(() => {
         setWarning(["", ""]);
-        // refundFormRef.current?.reset();
-        // TODO: Descomentar
+        refundFormRef.current?.reset();
 
         if (routeParams.paymentId !== undefined)
             getPayment();
@@ -71,6 +65,10 @@ const RefundPayment = () => {
 
             setPayment(response);
             setIsLoading("");
+
+            setTimeout(() => {
+                refundFormRef.current?.setFieldValue("price", response.valor.toFixed(2));
+            }, 100);
         });
     }
 
@@ -82,14 +80,9 @@ const RefundPayment = () => {
         if (payment === undefined)
             return;
 
-        await putPaymentHttp({
-            pagamentoId: payment.idPagamento,
-            idAgendamento: payment.agendamento?.idAgendamento as number,
-            valor: payment.valor,
-            status: PaymentStatusEnum.Reimbursed,
-            formaDePagamento: payment.formaDePagamento,
-            desconto: payment.desconto
-        }).catch(() => {
+        payment.status = PaymentStatusEnum.Reimbursed;
+
+        await putPaymentHttp(payment).catch(() => {
             setWarning(["danger", "Não foi possível atualizar o pagamento."]);
             setIsLoading("");
         });
@@ -148,11 +141,31 @@ const RefundPayment = () => {
                 ref={refundFormRef}
                 onSubmit={submitPaymentForm}
                 className="form-data"
-                initialData={{
-                    price: _itemRefund.valor.toFixed(2),
-                    description: _itemRefund.motivoRessarcimento,
-                }}
             >
+                {payment !== undefined && <>
+                    <SchedulingCollapseCard
+                        id={payment.agendamento.idAgendamento}
+                        patientName={payment.agendamento.paciente.nome}
+                        patientCpf={payment.agendamento.paciente.cpf}
+                        patientContact={payment.agendamento.paciente.contato}
+                        time={payment.agendamento.horaAgendada}
+                        date={payment.agendamento.dataAgendada}
+                        creationDate={payment.agendamento.data}
+                        status={payment.agendamento.status}
+                        serviceName={payment.agendamento.servico.nomeServico}
+                        doctorName={payment.agendamento.medico.nomeFuncionario}
+                        specialtyName={payment.agendamento.medico.especialidade.nomeEspecialidade}
+                    />
+
+                    <PaymentCollapseCard
+                        id={payment.idPagamento}
+                        price={payment.valor}
+                        discount={payment.desconto}
+                        paymentMethodType={payment.formaDePagamento}
+                        date={payment.data}
+                    />
+                </>}
+
                 <CurrencyInput
                     name='price'
                     label='Preço'
@@ -175,92 +188,15 @@ const RefundPayment = () => {
                     rows="4"
                 />
 
+                <Warning value={warning} />
+
                 <LoadingButton
                     text="Ressarcir"
-                    isLoading={isLoading === "refund"}
+                    isLoading={isLoading === "refund" || isLoading === "get"}
                     type='submit'
+                    color="secondary"
                 />
-
-                <Warning value={warning} />
             </Form>
-
-            <h2>
-                Dados do pagamento
-
-                {isLoading === "get" && <>
-                    {' '}
-                    <Spinner
-                        color="primary"
-                        type="grow"
-                    />
-                </>}
-            </h2>
-
-            {payment !== undefined && <>
-                <DataCard
-                    title={formatCurrency(payment.valor)}
-                    subtitle={getValuePaymentMethodType(payment.formaDePagamento)}
-                >
-                    <TextGroupGrid>
-                        <DataText
-                            label="Desconto"
-                            value={formatCurrency(payment.desconto)}
-                        />
-
-                        <DataText
-                            label="Data"
-                            value={new Date(normalizeDate(payment.data)).toLocaleDateString()}
-                        />
-                    </TextGroupGrid>
-                </DataCard>
-
-                <h2>Dados do agendamento</h2>
-
-                <DataCard
-                    title={payment.agendamento?.paciente?.nome}
-                    subtitle={formatCpf(payment.agendamento?.paciente?.cpf)}
-                >
-                    <TextGroupGrid>
-                        <DataText
-                            label="Contato"
-                            value={formatCellphone(payment.agendamento?.paciente?.contato)}
-                        />
-
-                        <DataText
-                            label="Data agendamento"
-                            value={new Date(payment.agendamento?.dataAgendada + "T" + payment.agendamento?.horaAgendada).toLocaleString()}
-                        />
-
-                        <StatusBadge
-                            label="Status"
-                            status={payment.agendamento?.status}
-                            value={getValueScheduleStatus(payment.agendamento?.status as ScheduleStatusEnum)}
-                            defineColor={defineColorScheduleStatus}
-                        />
-
-
-                        <DataText
-                            label="Serviço"
-                            value={payment.agendamento?.servico?.nomeServico}
-                        />
-
-                        <DataText
-                            label="Médico"
-                            value={payment.agendamento?.medico?.nomeFuncionario}
-                        />
-
-                        <DataText
-                            label="Especialidade"
-                            value={payment.agendamento?.medico?.especialidade?.nomeEspecialidade}
-                        />
-
-                        <DataText
-                            label="Data"
-                            value={new Date(normalizeDate(payment.agendamento?.data)).toLocaleDateString()}
-                        />
-                    </TextGroupGrid>
-                </DataCard>
-            </>}
 
             <InvoiceModal
                 showModal={invoice !== undefined}

@@ -12,20 +12,18 @@ import { listCategoryHttp } from "../../services/http/category";
 import { postRecordHttp } from "../../services/http/record";
 import getValidationErrors from "../../util/getValidationErrors";
 import { WarningTuple } from "../../util/getHttpErrors";
-import { formatQuantity } from "../../util/formatString";
 
 import { Button, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
-import { ButtonGroupRow, DataModal, Form, TextGroupGrid } from "../../styles/components";
+import { DataModal, Form } from "../../styles/components";
 import SelectInput from "../../components/Input/select";
 import SpinnerBlock from "../../components/SpinnerBlock";
 import Warning from "../../components/Warning";
-import DataCard from "../../components/DataCard";
-import DataText from "../../components/DataText";
 import FieldInput from "../../components/Input";
 import LoadingButton from "../../components/LoadingButton";
+import MaterialCard from "../../components/DataCard/material";
 
 type RecordFormData = {
-    recordTypeIndex: number;
+    recordType: number;
     quantity: number;
     description: string;
 }
@@ -77,8 +75,13 @@ const Materials = () => {
     }
 
     const toggleModal = (modalName?: ModalString) => {
-        setModal(modalName !== undefined ? modalName : "");
-        setWarning(["", ""]);
+        if (modalName !== undefined) {
+            setModal(modalName);
+            setWarning(["", ""]);
+        }
+        else {
+            setModal("");
+        }
     }
 
     const submitRecordForm: SubmitHandler<RecordFormData> = async (data, { reset }) => {
@@ -88,8 +91,8 @@ const Materials = () => {
             recordFormRef.current?.setErrors({});
 
             const shema = Yup.object().shape({
-                recordTypeIndex: Yup.string()
-                    .required("Coloque o tipo do registro."),
+                recordType: Yup.string()
+                    .required("Coloque o tipo de registro."),
                 quantity: Yup.string()
                     .required("Coloque a quantidade do material."),
                 description: Yup.string().trim()
@@ -100,10 +103,10 @@ const Materials = () => {
                 abortEarly: false
             });
 
-            data.recordTypeIndex = Number(data.recordTypeIndex);
+            data.recordType = Number(data.recordType);
             data.quantity = Number(data.quantity);
 
-            if (data.recordTypeIndex === RecordTypeEnum.Input)
+            if (data.recordType === RecordTypeEnum.Input)
                 materials[materialIndex].quantidade += data.quantity;
             else
                 materials[materialIndex].quantidade -= data.quantity;
@@ -117,11 +120,11 @@ const Materials = () => {
                 funcionario: {
                     idFuncionario: loggedUser?.employeeId as number
                 },
-                tipoEntradaSaida: data.recordTypeIndex
+                tipoEntradaSaida: data.recordType
             }).then(() => {
                 setWarning(["success", "Registro de material cadastrado com sucesso."]);
                 reset();
-                
+
                 sendChangeQuantity();
             }).catch(() => {
                 setWarning(["danger", "Não foi possível cadastrar o registro de material."]);
@@ -157,17 +160,14 @@ const Materials = () => {
         getMaterials(categoryId);
     }
 
-    const onClickEditData = (index: number) => {
-        navigate("/materiais/" + materials[index].idMaterial + "/editar");
-    }
-
-    const onClickViewRecords = (index: number) => {
-        navigate("/materiais/" + materials[index].idMaterial + "/registros");
-    }
-
-    const onClickAddRecord = (index: number) => {
+    const onClickAddRecord = (materialId: number) => {
+        let index = materials.findIndex(x => x.idMaterial === materialId);
         setMaterialIndex(index);
         toggleModal("record");
+    }
+
+    const onClickViewRecords = () => {
+        navigate("/materiais/" + materials[materialIndex].idMaterial + "/registros");
     }
 
     return (
@@ -195,58 +195,18 @@ const Materials = () => {
 
             {isLoading === "get" && <SpinnerBlock />}
 
-            {materials.map((x, index) => (
-                <DataCard
+            {materials.map(x => (
+                <MaterialCard
                     key={x.idMaterial}
-                    title={x.nomeMaterial}
-                    subtitle={x.descricao}
-                >
-                    <TextGroupGrid>
-                        <DataText
-                            label="Unidade de medida"
-                            value={x.unidadeDeMedida}
-                        />
-
-                        <DataText
-                            label="Quantidade"
-                            value={formatQuantity(x.quantidade)}
-                        />
-
-                        <DataText
-                            label="Categoria"
-                            value={x.categoriaMaterial?.nomeCategoria}
-                        />
-
-                        <DataText
-                            label="Fabricante"
-                            value={x.fabricante?.nomeFabricante}
-                        />
-                    </TextGroupGrid>
-
-                    <ButtonGroupRow>
-                        <Button
-                            color="primary"
-                            outline
-                            onClick={() => onClickViewRecords(index)}
-                        >
-                            Registros
-                        </Button>
-
-                        <Button
-                            color="success"
-                            onClick={() => onClickAddRecord(index)}
-                        >
-                            Entrada/Saída
-                        </Button>
-
-                        <Button
-                            color="warning"
-                            onClick={() => onClickEditData(index)}
-                        >
-                            Editar
-                        </Button>
-                    </ButtonGroupRow>
-                </DataCard>
+                    id={x.idMaterial}
+                    name={x.nomeMaterial}
+                    description={x.descricao}
+                    unitMeasurement={x.unidadeDeMedida}
+                    quantity={x.quantidade}
+                    categoryName={x.categoriaMaterial.nomeCategoria}
+                    manufacturerName={x.fabricante.nomeFabricante}
+                    onClickAddRecord={onClickAddRecord}
+                />
             ))}
 
             <DataModal
@@ -265,15 +225,11 @@ const Materials = () => {
                         ref={recordFormRef}
                         onSubmit={submitRecordForm}
                         className="form-modal"
-                        initialData={{
-                            quantity: 100,
-                            description: "Teste do teste"
-                        }}
                     >
                         <SelectInput
-                            name='recordTypeIndex'
-                            label='Tipo do registro'
-                            placeholder='Selecione o tipo do registro'
+                            name='recordType'
+                            label='Tipo de registro'
+                            placeholder='Selecione o tipo de registro'
                             options={_recordTypes.map((x, index) => ({
                                 value: `${index + 1}`,
                                 label: x
@@ -304,15 +260,16 @@ const Materials = () => {
                         text="Registrar"
                         isLoading={isLoading === "record"}
                         type="button"
+                        color="secondary"
                         onClick={() => recordFormRef.current?.submitForm()}
                     />
 
                     <Button
-                        color="dark"
+                        color="info"
                         outline
-                        onClick={() => toggleModal()}
+                        onClick={() => onClickViewRecords()}
                     >
-                        Cancelar
+                        Registros
                     </Button>
                 </ModalFooter>
             </DataModal>

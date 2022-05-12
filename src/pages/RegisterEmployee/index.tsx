@@ -9,17 +9,16 @@ import Funcionario from "../../services/entities/funcionario";
 import EmployeeTypeEnum, { listToRegisterEmployeeType } from "../../services/enums/employeeType";
 import EmployeeStatusEnum from "../../services/enums/employeeStatus";
 import { listSpecialtyHttp } from "../../services/http/specialty";
-import { getEmployeeByIdHttp, postEmployeeHttp, putEmployeeHttp, _listEmployee } from "../../services/http/employee";
-import { getDoctorByEmployeeIdHttp, postDoctorHttp, putDoctorHttp, _listDoctor } from "../../services/http/doctor";
+import { getEmployeeByIdHttp, postEmployeeHttp, putEmployeeHttp } from "../../services/http/employee";
+import { getDoctorByEmployeeIdHttp, postDoctorHttp, putDoctorHttp } from "../../services/http/doctor";
 import { WarningTuple } from "../../util/getHttpErrors";
 import getValidationErrors from "../../util/getValidationErrors";
-import { normalize } from "../../util/formatString";
 
-import { Form } from "../../styles/components";
+import { Button, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
+import { DataModal, Form } from "../../styles/components";
 import SelectInput from "../../components/Input/select";
 import Warning from "../../components/Warning";
 import FieldInput from "../../components/Input";
-import ToggleTitle from "../../components/ToggleTitle";
 import LoadingButton from "../../components/LoadingButton";
 
 interface EmployeeFormData {
@@ -36,32 +35,38 @@ interface DoctorFormData extends EmployeeFormData {
     specialtyId: number;
 }
 
+type ModalString = "status" | "";
+
 const RegisterEmployee = () => {
     const location = useLocation();
     const routeParams = useParams();
     const employeeFormRef = useRef<FormHandles>(null);
     const doctorFormRef = useRef<FormHandles>(null);
 
-    const _itemEmployee = _listEmployee[2];
-    const _itemDoctor = _listDoctor[0];
     const _employeeTypes = listToRegisterEmployeeType();
 
-    const [isLoading, setIsLoading] = useState<"register" | "get" | "">("");
+    const [isLoading, setIsLoading] = useState<"register" | "get" | "status" | "">("");
     const [warning, setWarning] = useState<WarningTuple>(["", ""]);
+    const [modal, setModal] = useState<ModalString>("");
     const [isDoctor, setIsDoctor] = useState(location.pathname.split("/")[1] === "medicos");
     const [isEdition, setIsEdition] = useState(routeParams.employeeId !== undefined || routeParams.doctorId !== undefined);
+    const [isEnabled, setIsEnabled] = useState(false);
 
     const [specialties, setSpecialties] = useState<Especialidade[]>([]);
     const [editedEmployee, setEditedEmployee] = useState<Funcionario | undefined>(undefined);
     const [editedDoctor, setEditedDoctor] = useState<Medico | undefined>(undefined);
 
     useEffect(() => {
+        setIsLoading("");
         setWarning(["", ""]);
+        setModal("");
+        setIsEnabled(false);
+        setEditedDoctor(undefined);
+        setEditedEmployee(undefined);
 
         if (routeParams.employeeId !== undefined) {
             setIsEdition(true);
             getEmployee();
-
         }
         else if (routeParams.doctorId !== undefined) {
             setIsEdition(true);
@@ -69,9 +74,8 @@ const RegisterEmployee = () => {
         }
         else {
             setIsEdition(false);
-            // employeeFormRef.current?.reset();
-            // doctorFormRef.current?.reset();
-            // TODO: Descomentar
+            employeeFormRef.current?.reset();
+            doctorFormRef.current?.reset();
         }
 
         if (location.pathname.split("/")[2] === "medicos") {
@@ -126,6 +130,7 @@ const RegisterEmployee = () => {
         setIsLoading("get");
         getEmployeeByIdHttp(id).then(response => {
             setEditedEmployee(response);
+            setIsEnabled(response.statusFuncionario === EmployeeStatusEnum.Enabled);
             setIsLoading("");
         });
     }
@@ -138,8 +143,49 @@ const RegisterEmployee = () => {
         setIsLoading("get");
         getDoctorByEmployeeIdHttp(id).then(response => {
             setEditedDoctor(response)
+            setIsEnabled(response.statusFuncionario === EmployeeStatusEnum.Enabled);
             setIsLoading("");
         });
+    }
+
+    const toggleModal = (modalName?: ModalString) => {
+        if (modalName !== undefined) {
+            setModal(modalName);
+            setWarning(["", ""]);
+        }
+        else {
+            setModal("");
+        }
+    }
+
+    const sendChangeStatus = () => {
+        setIsLoading("status");
+        if (!isDoctor && editedEmployee) {
+            editedEmployee.statusFuncionario = editedEmployee.statusFuncionario === EmployeeStatusEnum.Enabled
+                ? EmployeeStatusEnum.Disabled
+                : EmployeeStatusEnum.Enabled;
+
+            putEmployeeHttp(editedEmployee).then(() => {
+                setWarning(["success", "Funcionário editado com sucesso."]);
+                setIsEnabled(editedEmployee.statusFuncionario === EmployeeStatusEnum.Enabled);
+                toggleModal();
+            }).catch(() => {
+                setWarning(["danger", "Não foi possível editar o funcionário."]);
+            }).finally(() => { setIsLoading(""); });
+        }
+        else if (editedDoctor) {
+            editedDoctor.statusFuncionario = editedDoctor.statusFuncionario === EmployeeStatusEnum.Enabled
+                ? EmployeeStatusEnum.Disabled
+                : EmployeeStatusEnum.Enabled;
+
+            putDoctorHttp(editedDoctor).then(() => {
+                setWarning(["success", "Médico editado com sucesso."]);
+                setIsEnabled(editedDoctor.statusFuncionario === EmployeeStatusEnum.Enabled);
+                toggleModal();
+            }).catch(() => {
+                setWarning(["danger", "Não foi possível editar o médico."]);
+            }).finally(() => { setIsLoading(""); });
+        }
     }
 
     const submitEmployeeForm: SubmitHandler<EmployeeFormData> = async (data, { reset }) => {
@@ -160,7 +206,7 @@ const RegisterEmployee = () => {
                 sector: Yup.string().trim()
                     .required("Coloque o setor do funcionário."),
                 employeeType: Yup.string()
-                    .required("Selecione o tipo do funcionário.")
+                    .required("Selecione o tipo de funcionário.")
             });
 
             await shema.validate(data, {
@@ -240,7 +286,7 @@ const RegisterEmployee = () => {
                 setor: data.sector,
                 tipoFuncionario: EmployeeTypeEnum.Doctor,
                 statusFuncionario: EmployeeStatusEnum.Enabled,
-                crm: normalize(data.crm),
+                crm: data.crm,
                 especialidade: {
                     idEspecialidade: Number(data.specialtyId)
                 }
@@ -276,25 +322,12 @@ const RegisterEmployee = () => {
 
     return (
         <>
-            <ToggleTitle
-                toggle={isEdition}
-                isLoading={isLoading === "get"}
-                title={`Cadastro de ${isDoctor ? "médico" : "funcionário"}`}
-                alternateTitle={`Edição de ${isDoctor ? "médico" : "funcionário"}`}
-            />
+            <h1>{isEdition ? `Edição de ${isDoctor ? "médico" : "funcionário"}` : `Cadastro de ${isDoctor ? "médico" : "funcionário"}`}</h1>
 
             <Form
                 ref={isDoctor ? doctorFormRef : employeeFormRef}
                 onSubmit={isDoctor ? submitDoctorForm : submitEmployeeForm}
                 className="form-data"
-                initialData={{
-                    name: _itemEmployee.nomeFuncionario,
-                    email: _itemEmployee.email,
-                    password: _itemEmployee.senha,
-                    confirmPassword: _itemEmployee.senha,
-                    sector: _itemEmployee.setor,
-                    crm: _itemDoctor.crm
-                }}
             >
                 <FieldInput
                     name='name'
@@ -339,8 +372,8 @@ const RegisterEmployee = () => {
 
                         <SelectInput
                             name='specialtyId'
-                            label='Especialidade do médico'
-                            placeholder='Selecione a especialidade do médico'
+                            label='Especialidade'
+                            placeholder='Selecione a especialidade'
                             options={specialties.map(x => ({
                                 value: x.idEspecialidade?.toString(),
                                 label: x.nomeEspecialidade
@@ -349,8 +382,8 @@ const RegisterEmployee = () => {
                     </>
                     : <SelectInput
                         name='employeeType'
-                        label='Tipo do funcionário'
-                        placeholder='Selecione o tipo do funcionário'
+                        label='Tipo de funcionário'
+                        placeholder='Selecione o tipo de funcionário'
                         options={_employeeTypes.map((x, index) => ({
                             value: `${index + 1}`,
                             label: x
@@ -358,15 +391,57 @@ const RegisterEmployee = () => {
                     />
                 }
 
+                <Warning value={warning} />
+
                 <LoadingButton
                     text={isEdition ? "Editar" : "Cadastrar"}
-                    isLoading={isLoading === "register"}
+                    isLoading={isLoading === "register" || isLoading === "get"}
                     type='submit'
                     color={isEdition ? "warning" : "secondary"}
                 />
-
-                <Warning value={warning} />
             </Form>
+
+            {isEdition && <>
+                <h2>{isEnabled ? "Desabilitar" : "Habilitar"} {isDoctor ? "médico" : "funcionário"}</h2>
+                <p>Você pode {isEnabled ? "desabilitar" : "habilitar"} a conta do {isDoctor ? "médico" : "funcionário"} dentro do sistema.</p>
+
+                <Button
+                    color={isEnabled ? "danger" : "secondary"}
+                    onClick={() => toggleModal("status")}
+                >
+                    {isEnabled ? "Desabilitar" : "Habilitar"} {isDoctor ? "médico" : "funcionário"}
+                </Button>
+            </>}
+
+            <DataModal
+                isOpen={modal === "status"}
+                toggle={toggleModal}
+                centered
+            >
+                <ModalHeader
+                    toggle={() => toggleModal()}
+                >
+                    {isEnabled ? "Desabilitar" : "Habilitar"} {isDoctor ? "médico" : "funcionário"}
+                </ModalHeader>
+
+                <ModalBody>
+                    <p>
+                        Tem certeza que deseja {isEnabled ? "desabilitar" : "habilitar"} o {isDoctor ? "médico " : "funcionário "}
+                        <b>{isDoctor ? editedDoctor?.nomeFuncionario : editedEmployee?.nomeFuncionario}</b>?
+                    </p>
+
+                    <Warning value={warning} />
+                </ModalBody>
+
+                <ModalFooter>
+                    <LoadingButton
+                        text={isEnabled ? "Desabilitar" : "Habilitar"}
+                        isLoading={isLoading === "status"}
+                        color={isEnabled ? "danger" : "secondary"}
+                        onClick={() => sendChangeStatus()}
+                    />
+                </ModalFooter>
+            </DataModal>
         </>
     );
 }

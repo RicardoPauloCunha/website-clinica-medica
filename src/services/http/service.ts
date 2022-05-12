@@ -1,5 +1,6 @@
-import { get, post, put } from "../api";
+import { get, getParams, post, put } from "../api";
 import Servico from "../entities/servico";
+import { _listSpecialty } from "./specialty";
 
 const ROOT = "servicos/";
 
@@ -8,19 +9,22 @@ export const _listService: Servico[] = [
         idServico: 1,
         nomeServico: "Consulta especializada",
         valor: 100,
-        descricaoServico: "Consultas especializadas por área, como cardiologia, neurologia, pediatria, ortopedia, ginecologia e outros"
+        descricaoServico: "Consultas especializadas por área, como cardiologia, neurologia, pediatria, ortopedia, ginecologia e outros",
+        especialidade: _listSpecialty[0]
     },
     {
         idServico: 2,
         nomeServico: "Exame básico",
         valor: 110,
-        descricaoServico: "Exames realizados internamente, permitindo que o paciente tenha mais facilidade e agilidade na realização das solicitações médicas."
+        descricaoServico: "Exames realizados internamente, permitindo que o paciente tenha mais facilidade e agilidade na realização das solicitações médicas.",
+        especialidade: _listSpecialty[0]
     },
     {
         idServico: 3,
         nomeServico: "Procedimentos simples com ou sem anestesia local",
         valor: 120,
-        descricaoServico: "Procedimentos básicos internos para dar agilidade e eficiência ao atendimento médico."
+        descricaoServico: "Procedimentos básicos internos para dar agilidade e eficiência ao atendimento médico.",
+        especialidade: _listSpecialty[0]
     }
 ];
 
@@ -35,11 +39,11 @@ export const listServiceHttp = async (): Promise<Servico[]> => {
 }
 
 interface ListServiceByParams {
-    especialidadeId: number | null;
+    id: number | null;
 }
 
 export const listServiceByParamsHttp = async (paramsData: ListServiceByParams): Promise<Servico[]> => {
-    let { data } = await get<Servico[]>(ROOT);
+    let { data } = await getParams<ListServiceByParams, Servico[]>(ROOT + "listar-por-id-especialidade", paramsData);
     return data;
 }
 

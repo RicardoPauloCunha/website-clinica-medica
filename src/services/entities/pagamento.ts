@@ -3,8 +3,8 @@ import NotaFiscal from "./notaFiscal";
 
 interface Pagamento {
     idPagamento: number;
-    agendamento?: Agendamento;
-    notaFiscal?: NotaFiscal;
+    agendamento: Agendamento;
+    notaFiscal: NotaFiscal;
     data: string;
     valor: number;
     status: number;

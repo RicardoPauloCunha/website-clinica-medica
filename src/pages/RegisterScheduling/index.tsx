@@ -7,26 +7,26 @@ import Medico from "../../services/entities/medico";
 import Paciente from "../../services/entities/paciente";
 import Servico from "../../services/entities/servico";
 import ScheduleStatusEnum from "../../services/enums/scheduleStatus";
-import { getValueGenderType, listGenderType } from "../../services/enums/genderType";
+import { listGenderType } from "../../services/enums/genderType";
 import { postSchedulingHttp } from "../../services/http/scheduling";
 import { listDoctorByParamsHttp } from "../../services/http/doctor";
-import { getPatientByCpfHttp, postPatientHttp, putPatientHttp, _listPatient } from "../../services/http/patient";
+import { getPatientByCpfHttp, postPatientHttp, putPatientHttp } from "../../services/http/patient";
 import { listServiceHttp } from "../../services/http/service";
 import { WarningTuple } from "../../util/getHttpErrors";
-import { formatCellphone, formatCpf, normalize, normalizeDate } from "../../util/formatString";
+import { normalize, normalizeDate } from "../../util/formatString";
 import getValidationErrors from "../../util/getValidationErrors";
-import { formatCurrency } from "../../util/formatCurrency";
 import { concatenateAddress, splitAddress } from "../../util/formatAddress";
 
-import { Alert, Button, Col, ModalBody, ModalFooter, ModalHeader, Row } from "reactstrap";
-import { ButtonGroupRow, DataModal, Form, TextGroupGrid } from "../../styles/components";
+import { Button, Col, ModalBody, ModalFooter, ModalHeader, Row } from "reactstrap";
+import { DataModal, Form } from "../../styles/components";
 import Warning from "../../components/Warning";
 import LoadingButton from "../../components/LoadingButton";
 import FieldInput from "../../components/Input";
 import SelectInput from "../../components/Input/select";
 import MaskInput from "../../components/Input/mask";
-import DataCard from "../../components/DataCard";
-import DataText from "../../components/DataText";
+import ServiceCollapseCard from "../../components/CollapseCard/service";
+import DoctorCollapseCard from "../../components/CollapseCard/doctor";
+import PatientCollapseCard from "../../components/CollapseCard/patient";
 
 type SchedulingFormData = {
     serviceId: number;
@@ -58,8 +58,6 @@ const RegisterScheduling = () => {
 
     const { loggedUser } = useAuth();
 
-    const _itemPatient = _listPatient[2];
-    const _itemAddress = splitAddress(_itemPatient.endereco);
     const _genderTypes = listGenderType();
 
     const [isLoading, setIsLoading] = useState<"scheduling" | "patient" | "getPatient" | "">("");
@@ -93,8 +91,13 @@ const RegisterScheduling = () => {
     }
 
     const toggleModal = (modalName?: ModalString) => {
-        setModal(modalName !== undefined ? modalName : "");
-        setWarning(["", ""]);
+        if (modalName !== undefined) {
+            setModal(modalName);
+            setWarning(["", ""]);
+        }
+        else {
+            setModal("");
+        }
     }
 
     const searchPatient = () => {
@@ -110,7 +113,6 @@ const RegisterScheduling = () => {
         setIsLoading("getPatient");
         getPatientByCpfHttp(cpf).then(response => {
             setPatient(response);
-
             setWarning(["success", "Paciente encontrado."]);
         }).catch(() => {
             setWarning(["danger", "Paciente não encontrado. Adicione o paciente para prosseguir o agendamento."]);
@@ -259,7 +261,7 @@ const RegisterScheduling = () => {
         let index = services.findIndex(x => x.idServico === serviceId);
         setServiceIndex(index);
 
-        getDoctors(services[serviceIndex].especialidade?.idEspecialidade as number);
+        getDoctors(services[index].especialidade?.idEspecialidade as number);
     }
 
     const handlerChangeDoctor = (optionValue: string) => {
@@ -287,8 +289,7 @@ const RegisterScheduling = () => {
         }
         else if (!editPatient) {
             setTimeout(() => {
-                // patientFormRef.current?.reset();
-                // TODO: descomentar
+                patientFormRef.current?.reset();
             }, 100);
         }
 
@@ -303,34 +304,7 @@ const RegisterScheduling = () => {
                 ref={schedulingFormRef}
                 onSubmit={submitSchedulingForm}
                 className="form-data"
-                initialData={{
-                    time: "13:00",
-                    date: "2022-05-30",
-                    patientCpf: "411.716.944-07"
-                }}
             >
-                <SelectInput
-                    name='serviceId'
-                    label='Serviço'
-                    placeholder='Selecione o serviço'
-                    options={services.map(x => ({
-                        value: x.idServico.toString(),
-                        label: x.nomeServico
-                    }))}
-                    handlerChange={handlerChangeService}
-                />
-
-                <SelectInput
-                    name='doctorId'
-                    label='Médico'
-                    placeholder='Selecione o médico'
-                    options={doctors.map(x => ({
-                        value: x.idFuncionario.toString(),
-                        label: x.nomeFuncionario
-                    }))}
-                    handlerChange={handlerChangeDoctor}
-                />
-
                 <Row>
                     <Col md={6}>
                         <FieldInput
@@ -352,6 +326,42 @@ const RegisterScheduling = () => {
                     </Col>
                 </Row>
 
+                <SelectInput
+                    name='serviceId'
+                    label='Serviço'
+                    placeholder='Selecione o serviço'
+                    options={services.map(x => ({
+                        value: x.idServico.toString(),
+                        label: x.nomeServico
+                    }))}
+                    handlerChange={handlerChangeService}
+                />
+
+                {services[serviceIndex] && <ServiceCollapseCard
+                    id={services[serviceIndex].idServico}
+                    name={services[serviceIndex].nomeServico}
+                    price={services[serviceIndex].valor}
+                    description={services[serviceIndex].descricaoServico}
+                />}
+
+                <SelectInput
+                    name='doctorId'
+                    label='Médico'
+                    placeholder='Selecione o médico'
+                    options={doctors.map(x => ({
+                        value: x.idFuncionario.toString(),
+                        label: x.nomeFuncionario
+                    }))}
+                    handlerChange={handlerChangeDoctor}
+                />
+
+                {doctors[doctorIndex] && <DoctorCollapseCard
+                    id={doctors[doctorIndex].idFuncionario}
+                    name={doctors[doctorIndex].nomeFuncionario}
+                    email={doctors[doctorIndex].email}
+                    specialtyName={doctors[doctorIndex].especialidade.nomeEspecialidade}
+                />}
+
                 <Row>
                     <Col md={10}>
                         <MaskInput
@@ -368,99 +378,36 @@ const RegisterScheduling = () => {
                             text="Buscar"
                             isLoading={isLoading === "getPatient"}
                             type="button"
+                            color="secondary"
                             outline
                             onClick={() => searchPatient()}
                         />
                     </Col>
                 </Row>
 
+                {patient && <PatientCollapseCard
+                    cpf={patient.cpf}
+                    name={patient.nome}
+                    contact={patient.contato}
+                    address={patient.endereco}
+                    onClickOpenPatient={onClickOpenPatient}
+                />}
+
+                {modal === "" && <Warning value={warning} />}
+
                 <LoadingButton
                     text="Cadastrar"
                     isLoading={isLoading === "scheduling"}
                     type="submit"
+                    color="secondary"
                 />
-
-                {modal === "" && <Warning value={warning} />}
             </Form>
-
-            <h2>Dados do fabricante</h2>
-
-            {services[serviceIndex]
-                ? <DataCard
-                    title={services[serviceIndex].nomeServico}
-                    subtitle={formatCurrency(services[serviceIndex].valor)}
-                >
-                    <TextGroupGrid>
-                        <DataText
-                            label="Descrição"
-                            value={services[serviceIndex].descricaoServico}
-                        />
-                    </TextGroupGrid>
-                </DataCard>
-                : <Alert color="warning">
-                    Nenhum serviço foi selecionado.
-                </Alert>
-            }
-
-            <h2>Dados do médico</h2>
-
-            {doctors[doctorIndex]
-                ? <DataCard
-                    title={doctors[doctorIndex].nomeFuncionario}
-                    subtitle={doctors[doctorIndex].especialidade?.nomeEspecialidade}
-                />
-                : <Alert color="warning">
-                    Nenhum médico foi selecionado.
-                </Alert>
-            }
-
-            <h2>Dados do paciente</h2>
-
-            {patient
-                ? <DataCard
-                    title={patient.nome}
-                    subtitle={formatCpf(patient.cpf)}
-                >
-                    <TextGroupGrid>
-                        <DataText
-                            label="Data de nascimento"
-                            value={new Date(normalizeDate(patient.dataNascimento)).toLocaleDateString()}
-                        />
-
-                        <DataText
-                            label="Gênero"
-                            value={getValueGenderType(patient.sexo)}
-                        />
-
-                        <DataText
-                            label="Contato"
-                            value={formatCellphone(patient.contato)}
-                        />
-
-                        <DataText
-                            label="Endereço"
-                            value={patient.endereco}
-                        />
-                    </TextGroupGrid>
-
-                    <ButtonGroupRow>
-                        <Button
-                            color="warning"
-                            onClick={() => onClickOpenPatient(true)}
-                        >
-                            Editar
-                        </Button>
-                    </ButtonGroupRow>
-                </DataCard>
-                : <Alert color="warning">
-                    Nenhum paciente foi selecionado.
-                </Alert>
-            }
 
             <h2>Adicionar paciente</h2>
             <p>Você pode adicionar uma novo paciente caso a busca pelo CPF não tenha encontrado nada.</p>
 
             <Button
+                color="secondary"
                 onClick={() => onClickOpenPatient(false)}
             >
                 Adicionar paciente
@@ -483,19 +430,6 @@ const RegisterScheduling = () => {
                         ref={patientFormRef}
                         onSubmit={submitPatientForm}
                         className="form-modal"
-                        initialData={{
-                            cpf: _itemPatient.cpf,
-                            name: _itemPatient.nome,
-                            birthDate: new Date(normalizeDate(_itemPatient.dataNascimento)).toLocaleDateString(),
-                            gender: _itemPatient.sexo,
-                            contact: _itemPatient.contato,
-                            cep: _itemAddress.cep,
-                            street: _itemAddress.street,
-                            number: _itemAddress.number,
-                            district: _itemAddress.district,
-                            city: _itemAddress.city,
-                            state: _itemAddress.state,
-                        }}
                     >
                         <MaskInput
                             name='cpf'
@@ -508,8 +442,8 @@ const RegisterScheduling = () => {
 
                         <FieldInput
                             name='name'
-                            label='Nome do paciente'
-                            placeholder='Coloque o nome do paciente'
+                            label='Nome'
+                            placeholder='Coloque o nome'
                         />
 
                         <MaskInput
@@ -549,7 +483,7 @@ const RegisterScheduling = () => {
                         <FieldInput
                             name='street'
                             label='Rua'
-                            placeholder='Coloque a rua do endereço'
+                            placeholder='Coloque a rua'
                         />
 
                         <FieldInput
@@ -578,7 +512,7 @@ const RegisterScheduling = () => {
                             placeholder='SP'
                         />
 
-                        {modal === "patient" && <Warning value={warning} />}
+                        <Warning value={warning} />
                     </Form>
                 </ModalBody>
 
@@ -590,14 +524,6 @@ const RegisterScheduling = () => {
                         color={isEditPatient ? "warning" : "secondary"}
                         onClick={() => patientFormRef.current?.submitForm()}
                     />
-
-                    <Button
-                        color="dark"
-                        outline
-                        onClick={() => toggleModal()}
-                    >
-                        Cancelar
-                    </Button>
                 </ModalFooter>
             </DataModal>
         </>

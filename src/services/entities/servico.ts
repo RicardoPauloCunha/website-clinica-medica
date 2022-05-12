@@ -5,7 +5,7 @@ interface Servico {
     nomeServico: string;
     valor: number;
     descricaoServico: string;
-    especialidade?: Especialidade;
+    especialidade: Especialidade;
 }
 
 export default Servico;

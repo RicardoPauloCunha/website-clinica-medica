@@ -7,13 +7,24 @@ export const Form = styled(Unform)`
 
     &.form-data {
         margin: 2rem 0;
-        padding: 2rem;
+        padding: 2rem 2rem 0 2rem;
         background-color: var(--color-white-100);
         border: 1px solid rgba(0,0,0,.125);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
 
         >button {
-            margin-top: 1rem;
-            width: 100%;
+            border: solid 1px var(--color-gray-200);
+            padding: 0.5rem 15%;
+            position: relative;
+            top: 1rem;
+            width: auto;
+            margin: 0 auto;
+        }
+
+        .alert {
+            margin: 0 0 1rem 0;
         }
     }
 
@@ -114,7 +125,11 @@ export const DataModal = styled(Modal)`
     }
 
     .modal-footer {
-        border: none;
         padding-top: 0;
+        border: none;
+    }
+
+    .text-group-grid-modal:last-of-type {
+        margin-bottom: 1rem;
     }
 `;

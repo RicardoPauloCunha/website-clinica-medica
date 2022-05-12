@@ -3,6 +3,7 @@ import Agendamento from "../entities/agendamento";
 import ScheduleStatusEnum from "../enums/scheduleStatus";
 
 import { _listDoctor } from "./doctor";
+import { _listEmployee } from "./employee";
 import { _listPatient } from "./patient";
 import { _listService } from "./service";
 
@@ -13,41 +14,45 @@ export const _listScheduling: Agendamento[] = [
         idAgendamento: 1,
         data: "2022-05-03",
         dataAgendada: "2022-05-03",
-        horaAgendada: "13:00:00",
+        horaAgendada: "10:00:00",
         status: ScheduleStatusEnum.Scheduled,
         medico: _listDoctor[0],
         paciente: _listPatient[0],
-        servico: _listService[0]
+        servico: _listService[0],
+        recepcionista: _listEmployee[1]
     },
     {
         idAgendamento: 2,
-        data: "2022-05-03",
-        dataAgendada: "2022-05-03",
-        horaAgendada: "13:00:00",
-        status: ScheduleStatusEnum.Unchecked,
+        data: "2022-05-09",
+        dataAgendada: "2022-05-13",
+        horaAgendada: "14:00:00",
+        status: ScheduleStatusEnum.Scheduled,
         medico: _listDoctor[0],
         paciente: _listPatient[0],
-        servico: _listService[0]
+        servico: _listService[2],
+        recepcionista: _listEmployee[1]
     },
     {
         idAgendamento: 3,
         data: "2022-05-03",
         dataAgendada: "2022-05-03",
-        horaAgendada: "13:00:00",
+        horaAgendada: "10:00:00",
         status: ScheduleStatusEnum.Progress,
         medico: _listDoctor[0],
         paciente: _listPatient[0],
-        servico: _listService[0]
+        servico: _listService[0],
+        recepcionista: _listEmployee[1]
     },
     {
         idAgendamento: 4,
         data: "2022-05-03",
         dataAgendada: "2022-05-03",
-        horaAgendada: "13:00:00",
+        horaAgendada: "10:00:00",
         status: ScheduleStatusEnum.Concluded,
         medico: _listDoctor[0],
         paciente: _listPatient[0],
-        servico: _listService[0]
+        servico: _listService[0],
+        recepcionista: _listEmployee[1]
     },
 ];
 
@@ -73,8 +78,8 @@ interface ListDoctorSchedulingByParams {
 }
 
 export const listDoctorSchedulingByParamsHttp = async (paramsData: ListDoctorSchedulingByParams): Promise<Agendamento[]> => {
-    // TODO: integração API
-    return _listScheduling;
+    // TODO: Integração API
+    return await listReceptionistSchedulingByParamsHttp({status: 3, cpf: ""});
 }
 
 interface PostSchedulingRequest {

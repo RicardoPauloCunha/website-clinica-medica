@@ -7,7 +7,7 @@ export const _listClinic: Clinica[] = [
     {
         idClinica: 1,
         nome: "Clínica Médica",
-        cnpj: "01234573000164",
+        cnpj: "12345678901234",
         endereco: "Avenida Guarani, 303, Vila Coqueiro - Valinhos/SP - 13276-040",
         inscricaoMunicipal: "0123456789",
         atividade: "4.03 - Hospitais, clínicas, laboratórios, sanatórios, manicômios, casas de saúde, prontos-socorros, ambulatórios e congêneres."
