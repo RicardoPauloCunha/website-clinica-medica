@@ -1,3 +1,4 @@
+import PaymentMethodTypeEnum from "../enums/paymentMethodType";
 import NotaFiscal from "./notaFiscal";
 import Pagamento from "./pagamento";
 
@@ -8,7 +9,7 @@ interface Ressarcimento {
     data: string;
     valor: number;
     status: number;
-    formaDeRessarcimento: number;
+    formaDeRessarcimento: PaymentMethodTypeEnum;
     motivoRessarcimento: string;
 }
 

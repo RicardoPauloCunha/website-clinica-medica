@@ -59,8 +59,8 @@ const RefundPayment = () => {
         setIsLoading("get");
         getPaymentByIdHttp(id).then(response => {
             if (response.status !== PaymentStatusEnum.PaidOut
-                || (response?.agendamento?.status !== ScheduleStatusEnum.Progress
-                    && response?.agendamento?.status !== ScheduleStatusEnum.Concluded))
+                || (response.agendamento.status !== ScheduleStatusEnum.Progress
+                    && response.agendamento.status !== ScheduleStatusEnum.Concluded))
                 toggleModal();
 
             setPayment(response);

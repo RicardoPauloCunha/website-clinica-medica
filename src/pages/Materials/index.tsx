@@ -75,7 +75,7 @@ const Materials = () => {
     }
 
     const toggleModal = (modalName?: ModalString) => {
-        if (modalName !== undefined) {
+        if (typeof(modalName) === "string") {
             setModal(modalName);
             setWarning(["", ""]);
         }
@@ -86,6 +86,9 @@ const Materials = () => {
 
     const submitRecordForm: SubmitHandler<RecordFormData> = async (data, { reset }) => {
         try {
+            if (loggedUser === undefined)
+                return;
+
             setIsLoading("record");
             setWarning(["", ""]);
             recordFormRef.current?.setErrors({});
@@ -118,7 +121,7 @@ const Materials = () => {
                     idMaterial: materials[materialIndex].idMaterial
                 },
                 funcionario: {
-                    idFuncionario: loggedUser?.employeeId as number
+                    idFuncionario: loggedUser.employeeId
                 },
                 tipoEntradaSaida: data.recordType
             }).then(() => {
@@ -146,10 +149,10 @@ const Materials = () => {
             quantidade: materials[materialIndex].quantidade,
             descricao: materials[materialIndex].descricao,
             categoriaMaterial: {
-                idCategoria: materials[materialIndex].categoriaMaterial?.idCategoria as number,
+                idCategoria: materials[materialIndex].categoriaMaterial.idCategoria,
             },
             fabricante: {
-                cnpj: materials[materialIndex].fabricante?.cnpj as string,
+                cnpj: materials[materialIndex].fabricante.cnpj,
             },
             statusMaterial: materials[materialIndex].statusMaterial
         });
@@ -181,7 +184,7 @@ const Materials = () => {
             >
                 <SelectInput
                     name='categoryId'
-                    label='Categoria do material'
+                    label='Categoria'
                     placeholder='Filtrar pela categoria do material'
                     options={categories.map(x => ({
                         value: x.idCategoria.toString(),

@@ -53,17 +53,17 @@ const DoctorSchedules = () => {
     const [scheduleIndex, setScheduleIndex] = useState(-1);
 
     useEffect(() => {
-        getSchedules(0);
+        getSchedules(undefined);
         // eslint-disable-next-line
     }, [loggedUser]);
 
-    const getSchedules = (period: number) => {
+    const getSchedules = (period: number | undefined) => {
         setWarning(["", ""]);
 
         if (loggedUser) {
             setIsLoading("get");
             listDoctorSchedulingByParamsHttp({
-                funcionarioId: loggedUser.employeeId,
+                idMedico: loggedUser.employeeId,
                 periodo: period
             }).then(response => {
                 setSchedules([...response]);
@@ -80,7 +80,7 @@ const DoctorSchedules = () => {
     }
 
     const toggleModal = (modalName?: ModalString) => {
-        if (modalName !== undefined) {
+        if (typeof (modalName) === "string") {
             setModal(modalName);
             setWarning(["", ""]);
         }
@@ -90,9 +90,6 @@ const DoctorSchedules = () => {
     }
 
     const sendChangeSchedulingStatus = async (index: number) => {
-        if (schedules[index] === undefined)
-            return;
-
         schedules[index].status = ScheduleStatusEnum.Concluded;
 
         await putSchedulingHttp(schedules[index]).catch(() => {
@@ -150,7 +147,7 @@ const DoctorSchedules = () => {
         setScheduleIndex(index);
         toggleModal("schedule");
 
-        // TODO: Busca atendimento do agendamento
+        // TODO: Busca atendimento do agendamento para consulta já concluidas
     }
 
     const onClickFinalizeAttendance = () => {
@@ -158,10 +155,7 @@ const DoctorSchedules = () => {
     }
 
     const onClickPatientAttendances = () => {
-        if (scheduleIndex === -1)
-            return;
-
-        navigate("/pacientes/" + normalize(schedules[scheduleIndex].paciente?.cpf) + "/atendimentos");
+        navigate("/pacientes/" + normalize(schedules[scheduleIndex].paciente.cpf) + "/atendimentos");
     }
 
     return (
@@ -256,13 +250,14 @@ const DoctorSchedules = () => {
                         Atendimento
                     </Button>}
 
-                    {schedules[scheduleIndex]?.status === ScheduleStatusEnum.Progress && <Button
-                        color="info"
-                        outline
-                        onClick={() => onClickPatientAttendances()}
-                    >
-                        Histórico
-                    </Button>}
+                    {(schedules[scheduleIndex]?.status === ScheduleStatusEnum.Progress
+                        || schedules[scheduleIndex]?.status === ScheduleStatusEnum.Concluded) && <Button
+                            color="info"
+                            outline
+                            onClick={() => onClickPatientAttendances()}
+                        >
+                            Histórico
+                        </Button>}
                 </ModalFooter>
             </DataModal>
 

@@ -46,7 +46,7 @@ const Login = () => {
     const getEmployee = async () => {
         let user = getLoggedUser();
 
-        if (user !== null) {
+        if (user !== undefined) {
             await getEmployeeByIdHttp(user.employeeId).then(response => {
                 handlerLogin(response);
             });

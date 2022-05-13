@@ -45,14 +45,14 @@ const Schedules = () => {
     const [refund, setRefund] = useState<Ressarcimento | undefined>(undefined);
 
     useEffect(() => {
-        getSchedules(ScheduleStatusEnum.Scheduled, null);
+        getSchedules(undefined, undefined);
         // eslint-disable-next-line
     }, []);
 
-    const getSchedules = (scheduleStatus: number | null, cpf: string | null) => {
+    const getSchedules = (scheduleStatus: number | undefined, cpf: string | undefined) => {
         setWarning(["", ""]);
 
-        scheduleStatus = scheduleStatus === 0 ? null : scheduleStatus;
+        scheduleStatus = scheduleStatus === 0 ? undefined : scheduleStatus;
 
         setIsLoading("get");
         listReceptionistSchedulingByParamsHttp({
@@ -72,7 +72,7 @@ const Schedules = () => {
         getPaymentBySchedulingIdHttp(scheduleId).then(response => {
             setPayment(response);
 
-            if (response?.status === PaymentStatusEnum.Reimbursed)
+            if (response.status === PaymentStatusEnum.Reimbursed)
                 getRefund(response.idPagamento);
             else
                 setRefund(undefined);
@@ -86,7 +86,7 @@ const Schedules = () => {
     }
 
     const toggleModal = (modalName?: ModalString) => {
-        if (modalName !== undefined) {
+        if (typeof (modalName) === "string") {
             setModal(modalName);
             setWarning(["", ""]);
         }
@@ -96,28 +96,25 @@ const Schedules = () => {
     }
 
     const sendChangeStatus = () => {
-        if (scheduleIndex === -1)
-            return;
-
         setIsLoading("status");
 
         schedules[scheduleIndex].status = ScheduleStatusEnum.Unchecked
 
         putSchedulingHttp(schedules[scheduleIndex]).then(() => {
-            setWarning(["success", "Agendamento editado com sucesso."]);
+            setWarning(["success", "Status do agendamento editado com sucesso."]);
             toggleModal();
         }).catch(() => {
-            setWarning(["danger", "Não foi possível editar o Agendamento."]);
+            setWarning(["danger", "Não foi possível editar o status do agendamento."]);
         }).finally(() => { setIsLoading(""); })
     }
 
     const handlerChangeScheduleStatus = (optionValue: string) => {
         let scheduleStatus = Number(optionValue);
 
-        let cpf: string | null = normalize(filterFormRef.current?.getFieldValue("patientCpf"));
+        let cpf: string | undefined = normalize(filterFormRef.current?.getFieldValue("patientCpf"));
 
         if (cpf.length !== 11)
-            cpf = null
+            cpf = undefined;
 
         getSchedules(scheduleStatus, cpf);
     }
@@ -143,8 +140,11 @@ const Schedules = () => {
         toggleModal("schedule");
 
         if (schedules[index].status === ScheduleStatusEnum.Scheduled
-            || schedules[index].status === ScheduleStatusEnum.Unchecked)
+            || schedules[index].status === ScheduleStatusEnum.Unchecked) {
+            setPayment(undefined);
+            setRefund(undefined);
             return;
+        }
 
         setIsLoading("payment");
         getPayment(scheduleId).then(() => {
@@ -164,9 +164,6 @@ const Schedules = () => {
     }
 
     const onClickConfirmPayment = () => {
-        if (scheduleIndex === -1)
-            return;
-
         navigate("/agendamentos/" + schedules[scheduleIndex].idAgendamento + "/pagamento/confirmar");
     }
 
@@ -174,7 +171,7 @@ const Schedules = () => {
         if (payment === undefined)
             return;
 
-        navigate("/agendamentos/" + payment.agendamento?.idAgendamento + "/pagamento/" + payment.idPagamento + "/ressarcir");
+        navigate("/agendamentos/" + payment.agendamento.idAgendamento + "/pagamento/" + payment.idPagamento + "/ressarcir");
     }
 
     return (
@@ -409,7 +406,7 @@ const Schedules = () => {
 
                 {schedules[scheduleIndex] && <ModalBody>
                     <p>
-                        Tem certeza que deseja desmarcar o agendamento do paciente <b>{schedules[scheduleIndex].paciente?.nome}</b> para o dia <b>{new Date(schedules[scheduleIndex].dataAgendada + "T" + schedules[scheduleIndex].horaAgendada).toLocaleString()}</b>?
+                        Tem certeza que deseja desmarcar o agendamento do paciente <b>{schedules[scheduleIndex].paciente.nome}</b> para o dia <b>{new Date(schedules[scheduleIndex].dataAgendada + "T" + schedules[scheduleIndex].horaAgendada).toLocaleString()}</b>?
                     </p>
 
                     <Warning value={warning} />

@@ -15,7 +15,7 @@ type PatientCollapseCardProps = {
 const PatientCollapseCard = ({ cpf, name, contact, address, onClickOpenPatient }: PatientCollapseCardProps) => {
     return (
         <UncontrolledAccordion open="">
-            <CollapseCardEl className="collapse-card-patient collapse-card-color-gray">
+            <CollapseCardEl className={`collapse-card-patient ${onClickOpenPatient === undefined ? "collapse-card-color-gray" : ""}`}>
                 <AccordionHeader targetId={cpf}>
                     {`${name} - ${formatCpf(cpf)}`}
                 </AccordionHeader>

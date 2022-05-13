@@ -1,4 +1,4 @@
-import { getValuePaymentMethodType } from "../../services/enums/paymentMethodType";
+import PaymentMethodTypeEnum, { getValuePaymentMethodType } from "../../services/enums/paymentMethodType";
 import { formatCurrency } from "../../util/formatCurrency";
 import { normalizeDate } from "../../util/formatString";
 
@@ -10,7 +10,7 @@ type PaymentCollapseCardProps = {
     id: number;
     price: number;
     discount: number;
-    paymentMethodType: number;
+    paymentMethodType: PaymentMethodTypeEnum;
     date: string;
 }
 

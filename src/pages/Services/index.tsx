@@ -23,12 +23,12 @@ const Services = () => {
     const [services, setServices] = useState<Servico[]>([]);
 
     useEffect(() => {
-        getServices(null);
+        getServices(undefined);
         getSpecialties();
         // eslint-disable-next-line
     }, []);
 
-    const getServices = (specialtyId: number | null) => {
+    const getServices = (specialtyId: number | undefined) => {
         setWarning(["", ""]);
 
         setIsLoading("get");

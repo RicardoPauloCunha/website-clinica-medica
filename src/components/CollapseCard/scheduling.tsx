@@ -1,4 +1,4 @@
-import { defineColorScheduleStatus, getValueScheduleStatus } from "../../services/enums/scheduleStatus";
+import ScheduleStatusEnum, { defineColorScheduleStatus, getValueScheduleStatus } from "../../services/enums/scheduleStatus";
 import { formatCellphone, formatCpf, normalizeDate } from "../../util/formatString";
 
 import { AccordionBody, AccordionHeader, UncontrolledAccordion } from "reactstrap";
@@ -14,7 +14,7 @@ type SchedulingCollapseCardProps = {
     time: string;
     date: string;
     creationDate: string;
-    status: number;
+    status: ScheduleStatusEnum;
     serviceName: string;
     doctorName: string;
     specialtyName: string;

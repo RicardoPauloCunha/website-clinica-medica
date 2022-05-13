@@ -96,11 +96,11 @@ const RegisterMaterial = () => {
                     name: editedMaterial.nomeMaterial,
                     description: editedMaterial.descricao,
                     unitMeasurement: editedMaterial.unidadeDeMedida,
-                    categoryId: editedMaterial.categoriaMaterial?.idCategoria.toString(),
-                    manufacturerCnpj: editedMaterial.fabricante?.cnpj
+                    categoryId: editedMaterial.categoriaMaterial.idCategoria.toString(),
+                    manufacturerCnpj: editedMaterial.fabricante.cnpj
                 });
 
-                handlerChangeManufacturer(editedMaterial?.fabricante?.cnpj as string);
+                handlerChangeManufacturer(editedMaterial.fabricante.cnpj);
             }, 100);
         }
         // eslint-disable-next-line
@@ -131,7 +131,7 @@ const RegisterMaterial = () => {
     }
 
     const toggleModal = (modalName?: ModalString) => {
-        if (modalName !== undefined) {
+        if (typeof(modalName) === "string") {
             setModal(modalName);
             setWarning(["", ""]);
         }
@@ -412,7 +412,7 @@ const RegisterMaterial = () => {
                     label='Categoria'
                     placeholder='Selecione a categoria'
                     options={categories.map(x => ({
-                        value: x.idCategoria?.toString(),
+                        value: x.idCategoria.toString(),
                         label: x.nomeCategoria
                     }))}
                     disabled={isEdition}

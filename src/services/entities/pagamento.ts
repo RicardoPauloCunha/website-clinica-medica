@@ -1,3 +1,5 @@
+import PaymentMethodTypeEnum from "../enums/paymentMethodType";
+import PaymentStatusEnum from "../enums/paymentStatus";
 import Agendamento from "./agendamento";
 import NotaFiscal from "./notaFiscal";
 
@@ -7,8 +9,8 @@ interface Pagamento {
     notaFiscal: NotaFiscal;
     data: string;
     valor: number;
-    status: number;
-    formaDePagamento: number;
+    status: PaymentStatusEnum;
+    formaDePagamento: PaymentMethodTypeEnum;
     desconto: number;
 }
 

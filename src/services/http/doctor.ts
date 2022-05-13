@@ -1,30 +1,20 @@
 import { get, getParams, post, put } from "../api";
 import Medico from "../entities/medico";
-
-import { PostEmployeeRequest, _listEmployee } from "./employee";
-import { _listSpecialty } from "./specialty";
+import { PostEmployeeRequest } from "./employee";
 
 const ROOT = "medicos/";
 
-export const _listDoctor: Medico[] = [
-    {
-        crm: "000000/SP",
-        especialidade: _listSpecialty[0],
-        ..._listEmployee[3]
-    }
-];
-
-export const getDoctorByEmployeeIdHttp = async (employeeId: number): Promise<Medico> => {
-    let { data } = await get<Medico>(ROOT + employeeId);
+export const getDoctorByIdHttp = async (doctorId: number): Promise<Medico> => {
+    let { data } = await get<Medico>(ROOT + doctorId);
     return data;
 }
 
-interface ListDoctorParams {
-    idEspecialidade: number | null;
+interface ListDoctorByParams {
+    idEspecialidade: number | undefined;
 }
 
-export const listDoctorByParamsHttp = async (paramsData: ListDoctorParams): Promise<Medico[]> => {
-    let { data } = await getParams<ListDoctorParams, Medico[]>(ROOT + "listar-por-id-especialidade", paramsData);
+export const listDoctorByParamsHttp = async (paramsData: ListDoctorByParams): Promise<Medico[]> => {
+    let { data } = await getParams<ListDoctorByParams, Medico[]>(ROOT + "listar-por-id-especialidade", paramsData);
     return data;
 }
 

@@ -1,3 +1,4 @@
+import ScheduleStatusEnum from "../enums/scheduleStatus";
 import Funcionario from "./funcionario";
 import Medico from "./medico";
 import Paciente from "./paciente";
@@ -12,7 +13,7 @@ interface Agendamento {
     dataAgendada: string;
     horaAgendada: string;
     servico: Servico;
-    status: number;
+    status: ScheduleStatusEnum;
 }
 
 export default Agendamento;

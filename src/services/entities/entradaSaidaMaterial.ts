@@ -1,3 +1,4 @@
+import RecordTypeEnum from "../enums/recordType";
 import Funcionario from "./funcionario";
 import Material from "./material";
 
@@ -8,7 +9,7 @@ interface EntradaSaidaMaterial {
     descricao: string;
     material: Material;
     funcionario: Funcionario;
-    tipoEntradaSaida: number;
+    tipoEntradaSaida: RecordTypeEnum;
 }
 
 export default EntradaSaidaMaterial;

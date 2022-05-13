@@ -23,12 +23,12 @@ export const getLoggedUser = () => {
     let dataHash = localStorage.getItem(LOGGED_USER_KEY);
 
     if (dataHash === null)
-        return null;
+        return undefined;
 
     try {
         return decryptData(dataHash) as TokenData;
     } catch (error) {
-        return null;
+        return undefined;
     }
 }
 

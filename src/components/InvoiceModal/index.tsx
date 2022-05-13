@@ -22,7 +22,7 @@ const InvoiceModal = ({showModal, invoice, patient, toggleModal}: InvoiceModalPr
 
     useEffect(() => {
         if (invoice) {
-            let address = splitAddress(invoice.clinica?.endereco);
+            let address = splitAddress(invoice.clinica.endereco);
             setClinicAddress(address);
         }
     }, [invoice]);
@@ -52,81 +52,81 @@ const InvoiceModal = ({showModal, invoice, patient, toggleModal}: InvoiceModalPr
                     bordered
                     responsive
                 >
-                    <tbody>
+                    {invoice && patient && clinicAddress && patientAddress && <tbody>
                         <tr>
                             <th colSpan={4}>Nota fiscal de serviço prestado</th>
                         </tr>
                         <tr>
                             <th>Número</th>
-                            <td>{invoice?.idNotaFiscal}</td>
+                            <td>{invoice.idNotaFiscal}</td>
                             <th>Data</th>
-                            <td>{new Date(normalizeDate(invoice?.dataEmissao)).toLocaleDateString()}</td>
+                            <td>{new Date(normalizeDate(invoice.dataEmissao)).toLocaleDateString()}</td>
                         </tr>
                         <tr>
                             <th colSpan={4}>Prestador</th>
                         </tr>
                         <tr>
                             <th>Nome</th>
-                            <td colSpan={3}>{invoice?.clinica?.nome}</td>
+                            <td colSpan={3}>{invoice.clinica.nome}</td>
                         </tr>
                         <tr>
                             <th>CNPJ</th>
-                            <td>{formatCnpj(invoice?.clinica?.cnpj)}</td>
+                            <td>{formatCnpj(invoice.clinica.cnpj)}</td>
                             <th>Inscrição Municipal</th>
-                            <td>{invoice?.clinica?.inscricaoMunicipal}</td>
+                            <td>{invoice.clinica.inscricaoMunicipal}</td>
                         </tr>
                         <tr>
                             <th>Endereço</th>
-                            <td colSpan={3}>{clinicAddress?.street}, {clinicAddress?.number} - {clinicAddress?.district} - {clinicAddress?.cep}</td>
+                            <td colSpan={3}>{clinicAddress.street}, {clinicAddress.number} - {clinicAddress.district} - {clinicAddress.cep}</td>
                         </tr>
                         <tr>
                             <th>Município</th>
-                            <td>{clinicAddress?.city}</td>
+                            <td>{clinicAddress.city}</td>
                             <th>UF</th>
-                            <td>{clinicAddress?.state}</td>
+                            <td>{clinicAddress.state}</td>
                         </tr>
                         <tr>
                             <th colSpan={4}>Tomador</th>
                         </tr>
                         <tr>
                             <th>Nome</th>
-                            <td colSpan={3}>{patient?.nome}</td>
+                            <td colSpan={3}>{patient.nome}</td>
                         </tr>
                         <tr>
                             <th>CPF</th>
-                            <td>{formatCpf(patient?.cpf)}</td>
+                            <td>{formatCpf(patient.cpf)}</td>
                             <th>Inscrição Municipal</th>
                             <td>-</td>
                         </tr>
                         <tr>
                             <th>Endereço</th>
-                            <td colSpan={3}>{patientAddress?.street}, {patientAddress?.number} - {patientAddress?.district} - {patientAddress?.cep}</td>
+                            <td colSpan={3}>{patientAddress.street}, {patientAddress.number} - {patientAddress.district} - {patientAddress.cep}</td>
                         </tr>
                         <tr>
                             <th>Município</th>
-                            <td>{patientAddress?.city}</td>
+                            <td>{patientAddress.city}</td>
                             <th>UF</th>
-                            <td>{patientAddress?.state}</td>
+                            <td>{patientAddress.state}</td>
                         </tr>
                         <tr>
                             <th colSpan={4}>Atividade</th>
                         </tr>
                         <tr>
-                            <td colSpan={4}>{invoice?.clinica?.atividade}</td>
+                            <td colSpan={4}>{invoice.clinica.atividade}</td>
                         </tr>
                         <tr>
                             <th colSpan={4}>Descrição</th>
                         </tr>
                         <tr>
-                            <td colSpan={4}>{invoice?.descricao}</td>
+                            <td colSpan={4}>{invoice.descricao}</td>
                         </tr>
                         <tr>
                             <th>Impostos</th>
-                            <td>{formatCurrency(invoice?.impostos)}</td>
+                            <td>{formatCurrency(invoice.impostos)}</td>
                             <th>Total</th>
-                            <td>{formatCurrency(invoice?.valorNota)}</td>
+                            <td>{formatCurrency(invoice.valorNota)}</td>
                         </tr>
-                    </tbody>
+                    </tbody>}
                 </Table>
             </ModalBody>
         </DataModal>

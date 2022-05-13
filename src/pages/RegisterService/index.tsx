@@ -71,7 +71,7 @@ const RegisterService = () => {
                     name: editedService.nomeServico,
                     price: editedService.valor.toFixed(2),
                     description: editedService.descricaoServico,
-                    specialtyId: editedService.especialidade?.idEspecialidade.toString()
+                    specialtyId: editedService.especialidade.idEspecialidade.toString()
                 });
             }, 100);
         }
@@ -96,7 +96,7 @@ const RegisterService = () => {
     }
 
     const toggleModal = (modalName?: ModalString) => {
-        if (modalName !== undefined) {
+        if (typeof(modalName) === "string") {
             setModal(modalName);
             setWarning(["", ""]);
         }
@@ -268,6 +268,7 @@ const RegisterService = () => {
                         value: x.idEspecialidade.toString(),
                         label: x.nomeEspecialidade
                     }))}
+                    disabled={isEdition}
                 />
 
                 {modal === "" && <Warning value={warning} />}

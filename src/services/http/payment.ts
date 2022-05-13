@@ -2,34 +2,8 @@ import { get, post, put } from "../api";
 import Pagamento from "../entities/pagamento";
 import PaymentMethodTypeEnum from "../enums/paymentMethodType";
 import PaymentStatusEnum from "../enums/paymentStatus";
-import { _listInvoice } from "./invoice";
-
-import { _listScheduling } from "./scheduling";
 
 const ROOT = "pagamentos/";
-
-export const _listPayment: Pagamento[] = [
-    {
-        idPagamento: 1,
-        data: "2022-05-03",
-        valor: 110,
-        desconto: 0,
-        formaDePagamento: PaymentMethodTypeEnum.Cash,
-        status: PaymentStatusEnum.Reimbursed,
-        agendamento: _listScheduling[0],
-        notaFiscal: _listInvoice[0]
-    },
-    {
-        idPagamento: 2,
-        data: "2022-05-03",
-        valor: 120,
-        desconto: 0,
-        formaDePagamento: PaymentMethodTypeEnum.Card,
-        status: PaymentStatusEnum.PaidOut,
-        agendamento: _listScheduling[1],
-        notaFiscal: _listInvoice[0]
-    }
-];
 
 export const getPaymentByIdHttp = async (paymentId: number): Promise<Pagamento> => {
     let { data } = await get<Pagamento>(ROOT + paymentId);
@@ -41,15 +15,11 @@ export const getPaymentBySchedulingIdHttp = async (schedulingId: number): Promis
     return data;
 }
 
-export const getPaymentByInvoiceIdHttp = async (invoiceId: number): Promise<Pagamento> => {
-    return _listPayment[0];
-}
-
 interface PostPaymentRequest {
     idAgendamento: number;
     valor: number;
-    status: number;
-    formaDePagamento: number;
+    status: PaymentStatusEnum;
+    formaDePagamento: PaymentMethodTypeEnum;
     desconto: number;
 }
 
@@ -58,6 +28,21 @@ export const postPaymentHttp = async (requestData: PostPaymentRequest): Promise<
     return data;
 }
 
-export const putPaymentHttp = async (requestData: Pagamento): Promise<void> => {
-    await put<Pagamento, void>(ROOT, requestData);
+interface PutPaymentRequest {
+    idPagamento: number;
+    agendamento: {
+        idAgendamento: number;
+    }
+    notaFiscal: {
+        idNotaFiscal: number;
+    }
+    data: string;
+    valor: number;
+    status: PaymentStatusEnum;
+    formaDePagamento: PaymentMethodTypeEnum;
+    desconto: number;
+}
+
+export const putPaymentHttp = async (requestData: PutPaymentRequest): Promise<void> => {
+    await put<PutPaymentRequest, void>(ROOT, requestData);
 }

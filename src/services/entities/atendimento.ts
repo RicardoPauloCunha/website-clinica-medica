@@ -2,10 +2,10 @@ import Agendamento from "./agendamento";
 
 interface Atendimento {
     idAtendimento: number;
+    agendamento: Agendamento;
     data: string;
     observacoes: string;
     diagnostico: string;
-    agendamento: Agendamento;
 }
 
 export default Atendimento;

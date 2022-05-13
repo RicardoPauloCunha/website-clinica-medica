@@ -82,7 +82,7 @@ const RegisterScheduling = () => {
         });
     }
 
-    const getDoctors = (specialtyId: number | null) => {
+    const getDoctors = (specialtyId: number | undefined) => {
         listDoctorByParamsHttp({
             idEspecialidade: specialtyId
         }).then(response => {
@@ -91,7 +91,7 @@ const RegisterScheduling = () => {
     }
 
     const toggleModal = (modalName?: ModalString) => {
-        if (modalName !== undefined) {
+        if (typeof(modalName) === "string") {
             setModal(modalName);
             setWarning(["", ""]);
         }
@@ -121,6 +121,9 @@ const RegisterScheduling = () => {
 
     const submitSchedulingForm: SubmitHandler<SchedulingFormData> = async (data, { reset }) => {
         try {
+            if (loggedUser === undefined)
+                return;
+
             setIsLoading("scheduling");
             setWarning(["", ""]);
             schedulingFormRef.current?.setErrors({});
@@ -155,7 +158,7 @@ const RegisterScheduling = () => {
             data.serviceId = Number(data.serviceId);
 
             postSchedulingHttp({
-                recepcionistaId: loggedUser?.employeeId as number,
+                recepcionistaId: loggedUser.employeeId,
                 pacienteCpf: data.patientCpf,
                 medicoId: data.doctorId,
                 dataAgendada: data.date,
@@ -184,7 +187,7 @@ const RegisterScheduling = () => {
         try {
             setIsLoading("patient");
             setWarning(["", ""]);
-            schedulingFormRef.current?.setErrors({});
+            patientFormRef.current?.setErrors({});
 
             const shema = Yup.object().shape({
                 cpf: Yup.string().trim()
@@ -250,7 +253,7 @@ const RegisterScheduling = () => {
         }
         catch (err) {
             if (err instanceof Yup.ValidationError)
-                schedulingFormRef.current?.setErrors(getValidationErrors(err));
+                patientFormRef.current?.setErrors(getValidationErrors(err));
             setWarning(["warning", "Campos do paciente inválidos."]);
             setIsLoading("");
         }
@@ -261,7 +264,7 @@ const RegisterScheduling = () => {
         let index = services.findIndex(x => x.idServico === serviceId);
         setServiceIndex(index);
 
-        getDoctors(services[index].especialidade?.idEspecialidade as number);
+        getDoctors(services[index].especialidade.idEspecialidade);
     }
 
     const handlerChangeDoctor = (optionValue: string) => {

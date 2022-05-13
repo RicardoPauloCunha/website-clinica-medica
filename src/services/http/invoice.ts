@@ -1,43 +1,19 @@
-import { get } from "../api";
+import { get, getParams } from "../api";
 import NotaFiscal from "../entities/notaFiscal";
-
-import { _listClinic } from "./clinic";
+import Paciente from "../entities/paciente";
 
 const ROOT = "notasfiscais/";
 
-export const _listInvoice: NotaFiscal[] = [
-    {
-        idNotaFiscal: 1,
-        clinica: _listClinic[0],
-        valorNota: 110,
-        dataEmissao: "2022-05-03",
-        impostos: 0,
-        descricao: "Serviços de saúde, assistência médica e congêneres"
-    },
-    {
-        idNotaFiscal: 2,
-        clinica: _listClinic[0],
-        valorNota: 120,
-        dataEmissao: "2022-05-03",
-        impostos: 0,
-        descricao: "Serviços de saúde, assistência médica e congêneres"
-    },
-    {
-        idNotaFiscal: 2,
-        clinica: _listClinic[0],
-        valorNota: 100,
-        dataEmissao: "2022-05-03",
-        impostos: 0,
-        descricao: "Reembolso"
-    }
-];
-
-interface listInvoiceByParamsRequest {
-    periodo?: number;
+interface ListInvoiceByParams {
+    dias: number | undefined;
 }
 
-export const listInvoiceByParamsHttp = async (paramsData: listInvoiceByParamsRequest): Promise<NotaFiscal[]> => {
-    // TODO: integração API
-    let { data } = await get<NotaFiscal[]>(ROOT);
+export const listInvoiceByParamsHttp = async (paramsData: ListInvoiceByParams): Promise<NotaFiscal[]> => {
+    let { data } = await getParams<ListInvoiceByParams, NotaFiscal[]>(ROOT + "listar-por-periodo", paramsData);
+    return data;
+}
+
+export const getPatientByInvoiceIdHttp = async (invoiceId: number): Promise<Paciente> => {
+    let { data } = await get<Paciente>(ROOT + "buscar-paciente-por-nota-fiscal/" + invoiceId);
     return data;
 }

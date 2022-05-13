@@ -19,7 +19,7 @@ const MaterialCollapseCard = ({ id, name, description, unitMeasurement, quantity
         <UncontrolledAccordion open="">
             <CollapseCardEl className="collapse-card-material collapse-card-color-gray">
                 <AccordionHeader targetId={id.toString()}>
-                    {`${name} - ${formatQuantity(quantity)}`}
+                    {`${name} - Quantidade: ${formatQuantity(quantity)}`}
                 </AccordionHeader>
 
                 <AccordionBody accordionId={id.toString()}>

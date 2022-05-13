@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import Funcionario from "../../services/entities/funcionario";
 import { listEmployeeType } from "../../services/enums/employeeType";
-import { listEmployeeByTypeHttp } from "../../services/http/employee";
+import { listEmployeeByParamsHttp } from "../../services/http/employee";
 import { WarningTuple } from "../../util/getHttpErrors";
 
 import { Form } from "../../styles/components";
@@ -27,7 +27,7 @@ const Employees = () => {
         setWarning(["", ""]);
 
         setIsLoading("get");
-        listEmployeeByTypeHttp({
+        listEmployeeByParamsHttp({
             tipoFuncionario: employeeType
         }).then(response => {
             setEmployees([...response]);

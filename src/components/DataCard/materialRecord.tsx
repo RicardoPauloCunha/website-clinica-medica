@@ -5,7 +5,7 @@ import { DataCardEl } from "./styles";
 import DataText from "../DataText";
 
 type MaterialRecordCardProps = {
-    recordType: number;
+    recordType: RecordTypeEnum;
     quantity: number;
     date: string;
     description: string;

@@ -3,17 +3,17 @@ import { TokenData } from '../localStorages/auth';
 
 type AuthContextData = {
     userIsChecked: boolean;
-    loggedUser: TokenData | null;
-    defineLoggedUser: (value: TokenData | null) => void;
+    loggedUser: TokenData | undefined;
+    defineLoggedUser: (value: TokenData | undefined) => void;
 }
 
 const AuthContext = createContext({} as AuthContextData);
 
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
-    const [loggedUser, setLoggedUser] = useState<TokenData | null>(null);
+    const [loggedUser, setLoggedUser] = useState<TokenData | undefined>(undefined);
     const [userIsChecked, setUserIsChecked] = useState(false);
 
-    const defineLoggedUser = (value: TokenData | null) => {
+    const defineLoggedUser = (value: TokenData | undefined) => {
         setLoggedUser(value);
         setUserIsChecked(true);
     }

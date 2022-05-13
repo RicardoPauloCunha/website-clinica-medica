@@ -10,7 +10,7 @@ import EmployeeTypeEnum, { listToRegisterEmployeeType } from "../../services/enu
 import EmployeeStatusEnum from "../../services/enums/employeeStatus";
 import { listSpecialtyHttp } from "../../services/http/specialty";
 import { getEmployeeByIdHttp, postEmployeeHttp, putEmployeeHttp } from "../../services/http/employee";
-import { getDoctorByEmployeeIdHttp, postDoctorHttp, putDoctorHttp } from "../../services/http/doctor";
+import { getDoctorByIdHttp, postDoctorHttp, putDoctorHttp } from "../../services/http/doctor";
 import { WarningTuple } from "../../util/getHttpErrors";
 import getValidationErrors from "../../util/getValidationErrors";
 
@@ -110,7 +110,7 @@ const RegisterEmployee = () => {
                     confirmPassword: editedDoctor.senha,
                     sector: editedDoctor.setor,
                     crm: editedDoctor.crm,
-                    specialtyId: editedDoctor.especialidade?.idEspecialidade.toString()
+                    specialtyId: editedDoctor.especialidade.idEspecialidade.toString()
                 });
             }, 100);
         }
@@ -141,7 +141,7 @@ const RegisterEmployee = () => {
             return;;
 
         setIsLoading("get");
-        getDoctorByEmployeeIdHttp(id).then(response => {
+        getDoctorByIdHttp(id).then(response => {
             setEditedDoctor(response)
             setIsEnabled(response.statusFuncionario === EmployeeStatusEnum.Enabled);
             setIsLoading("");
@@ -149,7 +149,7 @@ const RegisterEmployee = () => {
     }
 
     const toggleModal = (modalName?: ModalString) => {
-        if (modalName !== undefined) {
+        if (typeof(modalName) === "string") {
             setModal(modalName);
             setWarning(["", ""]);
         }
@@ -166,11 +166,11 @@ const RegisterEmployee = () => {
                 : EmployeeStatusEnum.Enabled;
 
             putEmployeeHttp(editedEmployee).then(() => {
-                setWarning(["success", "Funcionário editado com sucesso."]);
+                setWarning(["success", `Status do funcionário editado com sucesso.`]);
                 setIsEnabled(editedEmployee.statusFuncionario === EmployeeStatusEnum.Enabled);
                 toggleModal();
             }).catch(() => {
-                setWarning(["danger", "Não foi possível editar o funcionário."]);
+                setWarning(["danger", "Não foi possível editar o status do funcionário."]);
             }).finally(() => { setIsLoading(""); });
         }
         else if (editedDoctor) {
@@ -179,11 +179,11 @@ const RegisterEmployee = () => {
                 : EmployeeStatusEnum.Enabled;
 
             putDoctorHttp(editedDoctor).then(() => {
-                setWarning(["success", "Médico editado com sucesso."]);
+                setWarning(["success", "Status do médico editado com sucesso."]);
                 setIsEnabled(editedDoctor.statusFuncionario === EmployeeStatusEnum.Enabled);
                 toggleModal();
             }).catch(() => {
-                setWarning(["danger", "Não foi possível editar o médico."]);
+                setWarning(["danger", "Não foi possível editar o status do médico."]);
             }).finally(() => { setIsLoading(""); });
         }
     }
@@ -239,6 +239,7 @@ const RegisterEmployee = () => {
                     statusFuncionario: editedEmployee.statusFuncionario
                 }).then(() => {
                     setWarning(["success", "Funcionário editado com sucesso."]);
+                    editedEmployee.nomeFuncionario = data.name;
                 }).catch(() => {
                     setWarning(["danger", "Não foi possível editar o funcionário."]);
                 }).finally(() => { setIsLoading(""); });
@@ -307,6 +308,7 @@ const RegisterEmployee = () => {
                     statusFuncionario: editedDoctor.statusFuncionario
                 }).then(() => {
                     setWarning(["success", "Médico editado com sucesso."]);
+                    editedDoctor.nomeFuncionario = data.name;
                 }).catch(() => {
                     setWarning(["danger", "Não foi possível editar o médico."]);
                 }).finally(() => { setIsLoading(""); });
@@ -375,7 +377,7 @@ const RegisterEmployee = () => {
                             label='Especialidade'
                             placeholder='Selecione a especialidade'
                             options={specialties.map(x => ({
-                                value: x.idEspecialidade?.toString(),
+                                value: x.idEspecialidade.toString(),
                                 label: x.nomeEspecialidade
                             }))}
                         />
@@ -388,6 +390,7 @@ const RegisterEmployee = () => {
                             value: `${index + 1}`,
                             label: x
                         }))}
+                        disabled={isEdition}
                     />
                 }
 

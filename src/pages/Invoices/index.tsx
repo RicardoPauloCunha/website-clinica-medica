@@ -4,8 +4,7 @@ import { WarningTuple } from "../../util/getHttpErrors";
 
 import NotaFiscal from "../../services/entities/notaFiscal";
 import Paciente from "../../services/entities/paciente";
-import { listInvoiceByParamsHttp } from "../../services/http/invoice";
-import { getPaymentByInvoiceIdHttp } from "../../services/http/payment";
+import { getPatientByInvoiceIdHttp, listInvoiceByParamsHttp } from "../../services/http/invoice";
 import { formatCurrency } from "../../util/formatCurrency";
 import { normalizeDate } from "../../util/formatString";
 
@@ -24,8 +23,8 @@ const Invoices = () => {
     const [warning, setWarning] = useState<WarningTuple>(["", ""]);
     const [modal, setModal] = useState<ModalString>("");
     const [periods] = useState<[string, string][]>([
-        ["-30", "Último mês"],
-        ["-7", "Última semana"],
+        ["30", "Último mês"],
+        ["7", "Última semana"],
         ["0", "Hoje"]
     ]);
 
@@ -34,16 +33,16 @@ const Invoices = () => {
     const [patient, setPatient] = useState<Paciente | undefined>(undefined);
 
     useEffect(() => {
-        getInvoices(0);
+        getInvoices(undefined);
         // eslint-disable-next-line
     }, []);
 
-    const getInvoices = (period: number) => {
+    const getInvoices = (period: number | undefined) => {
         setWarning(["", ""]);
 
         setIsLoading("get");
         listInvoiceByParamsHttp({
-            periodo: period
+            dias: period
         }).then(response => {
             setInvoices([...response]);
 
@@ -55,7 +54,7 @@ const Invoices = () => {
     }
 
     const toggleModal = (modalName?: ModalString) => {
-        setModal(modalName !== undefined ? modalName : "");
+        setModal(typeof(modalName) === "string" ? modalName : "");
     }
 
     const handlerChangePeriod = (optionValue: string) => {
@@ -64,12 +63,8 @@ const Invoices = () => {
     }
 
     const onClickOpenInvoice = (index: number) => {
-        if (invoices[index] === undefined)
-            return;
-
-        // TODO: Integração API
-        getPaymentByInvoiceIdHttp(invoices[index].idNotaFiscal).then(response => {
-            setPatient(response.agendamento?.paciente);
+        getPatientByInvoiceIdHttp(invoices[index].idNotaFiscal).then(response => {
+            setPatient(response);
             setInvoiceIndex(index);
             toggleModal("invoice");
         });

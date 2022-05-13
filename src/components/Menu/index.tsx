@@ -6,7 +6,7 @@ import { useAuth } from '../../contexts/auth';
 import { getLoggedUser, handlerLogout } from '../../localStorages/auth';
 import EmployeeTypeEnum from '../../services/enums/employeeType';
 
-import { Button, Collapse, NavLink, Nav, Navbar, NavbarBrand, NavbarText, NavbarToggler, NavItem } from 'reactstrap';
+import { Button, Collapse, NavLink, Nav, Navbar, NavbarBrand, NavbarToggler, NavItem } from 'reactstrap';
 import { NavbarProfile } from './styles';
 
 const Menu = () => {
@@ -25,7 +25,7 @@ const Menu = () => {
     }
 
     const logout = () => {
-        defineLoggedUser(null);
+        defineLoggedUser(undefined);
         handlerLogout();
         navigate("/");
     }

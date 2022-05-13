@@ -1,4 +1,4 @@
-import { defineColorScheduleStatus, getValueScheduleStatus } from "../../services/enums/scheduleStatus";
+import ScheduleStatusEnum, { defineColorScheduleStatus, getValueScheduleStatus } from "../../services/enums/scheduleStatus";
 
 import { Button } from "reactstrap";
 import { DataCardEl } from "./styles";
@@ -10,7 +10,7 @@ type SchedulingCardProps = {
     patientName: string;
     time: string;
     date: string;
-    status: number;
+    status: ScheduleStatusEnum;
     serviceName: string;
     doctorName?: string;
     onClickOpenSchedule: (scheduleId: number) => void;

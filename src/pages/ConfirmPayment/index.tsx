@@ -58,14 +58,14 @@ const ConfirmPayment = () => {
 
         setIsLoading("get");
         getSchedulingByIdHttp(id).then(response => {
-            if (response?.status !== ScheduleStatusEnum.Scheduled)
+            if (response.status !== ScheduleStatusEnum.Scheduled)
                 toggleModal();
 
             setScheduling(response);
             setIsLoading("");
 
             setTimeout(() => {
-                paymentFormRef.current?.setFieldValue("price", response?.servico?.valor.toFixed(2));
+                paymentFormRef.current?.setFieldValue("price", response.servico.valor.toFixed(2));
             }, 100);
         });
     }
@@ -111,7 +111,7 @@ const ConfirmPayment = () => {
             });
 
             postPaymentHttp({
-                valor: data.price,
+                valor: data.price - data.discount,
                 desconto: data.discount,
                 formaDePagamento: Number(data.paymentMethodType),
                 status: PaymentStatusEnum.PaidOut,
