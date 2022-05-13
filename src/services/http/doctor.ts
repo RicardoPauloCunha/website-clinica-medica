@@ -1,4 +1,5 @@
 import { get, getParams, post, put } from "../api";
+
 import Medico from "../entities/medico";
 import { PostEmployeeRequest } from "./employee";
 

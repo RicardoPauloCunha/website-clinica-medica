@@ -10,8 +10,10 @@ import { listPaymentMethodType } from "../../services/enums/paymentMethodType";
 import ScheduleStatusEnum from "../../services/enums/scheduleStatus";
 import { getPaymentByIdHttp, putPaymentHttp } from "../../services/http/payment";
 import { postRefundHttp } from "../../services/http/refund";
+import { putSchedulingHttp } from "../../services/http/scheduling";
 import { WarningTuple } from "../../util/getHttpErrors";
 import getValidationErrors from "../../util/getValidationErrors";
+import DocumentTitle from "../../util/documentTitle";
 
 import { Form } from "../../styles/components";
 import CurrencyInput from "../../components/Input/currency";
@@ -66,9 +68,13 @@ const RefundPayment = () => {
             setPayment(response);
             setIsLoading("");
 
+            let refundPrice = response.valor - response.desconto;
+
             setTimeout(() => {
-                refundFormRef.current?.setFieldValue("price", response.valor.toFixed(2));
+                refundFormRef.current?.setFieldValue("price", refundPrice.toFixed(2));
             }, 100);
+        }).catch(() => {
+            setWarning(["danger", "Pagamento não encontrado."]);
         });
     }
 
@@ -82,8 +88,23 @@ const RefundPayment = () => {
 
         payment.status = PaymentStatusEnum.Reimbursed;
 
-        await putPaymentHttp(payment).catch(() => {
+        await putPaymentHttp(payment).then(() => {
+            if (payment.agendamento.status === ScheduleStatusEnum.Progress)
+                sendSchedulingStatus();
+        }).catch(() => {
             setWarning(["danger", "Não foi possível atualizar o pagamento."]);
+        });
+    }
+
+    const sendSchedulingStatus = () => {
+        let scheduling = payment?.agendamento;
+        if (scheduling === undefined)
+            return;
+
+        scheduling.status = ScheduleStatusEnum.Canceled;
+
+        putSchedulingHttp(scheduling).catch(() => {
+            setWarning(["danger", "Não foi possível atualizar o status do agendamento."]);
             setIsLoading("");
         });
     }
@@ -133,6 +154,8 @@ const RefundPayment = () => {
         }
     }
 
+    DocumentTitle("Ressarcimento | CM");
+
     return (
         <>
             <h1>Ressarcir pagamento</h1>
@@ -169,6 +192,7 @@ const RefundPayment = () => {
                 <CurrencyInput
                     name='price'
                     label='Preço'
+                    disabled={true}
                 />
 
                 <SelectInput

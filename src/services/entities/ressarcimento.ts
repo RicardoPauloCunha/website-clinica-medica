@@ -1,6 +1,7 @@
-import PaymentMethodTypeEnum from "../enums/paymentMethodType";
 import NotaFiscal from "./notaFiscal";
 import Pagamento from "./pagamento";
+
+import PaymentMethodTypeEnum from "../enums/paymentMethodType";
 
 interface Ressarcimento {
     idRessarcimento: number;

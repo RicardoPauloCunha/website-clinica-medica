@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import EntradaSaidaMaterial from "../../services/entities/entradaSaidaMaterial";
 import { listRecordByMaterialIdHttp } from "../../services/http/record";
 import { WarningTuple } from "../../util/getHttpErrors";
+import DocumentTitle from "../../util/documentTitle";
 
 import SpinnerBlock from "../../components/SpinnerBlock";
 import Warning from "../../components/Warning";
@@ -42,6 +43,8 @@ const MaterialRecords = () => {
             setIsLoading("");
         });
     }
+
+    DocumentTitle("Registros material | CM");
 
     return (
         <>

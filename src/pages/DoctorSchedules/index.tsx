@@ -11,6 +11,7 @@ import { postAttendanceHttp } from "../../services/http/attendance";
 import { WarningTuple } from "../../util/getHttpErrors";
 import getValidationErrors from "../../util/getValidationErrors";
 import { normalize, normalizeDate } from "../../util/formatString";
+import DocumentTitle from "../../util/documentTitle";
 
 import { Button, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import { DataModal, Form, TextGroupGrid } from "../../styles/components";
@@ -157,6 +158,8 @@ const DoctorSchedules = () => {
     const onClickPatientAttendances = () => {
         navigate("/pacientes/" + normalize(schedules[scheduleIndex].paciente.cpf) + "/atendimentos");
     }
+
+    DocumentTitle("Agendamentos médicos | CM");
 
     return (
         <>

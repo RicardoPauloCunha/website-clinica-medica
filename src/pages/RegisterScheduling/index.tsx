@@ -16,6 +16,7 @@ import { WarningTuple } from "../../util/getHttpErrors";
 import { normalize, normalizeDate } from "../../util/formatString";
 import getValidationErrors from "../../util/getValidationErrors";
 import { concatenateAddress, splitAddress } from "../../util/formatAddress";
+import DocumentTitle from "../../util/documentTitle";
 
 import { Button, Col, ModalBody, ModalFooter, ModalHeader, Row } from "reactstrap";
 import { DataModal, Form } from "../../styles/components";
@@ -59,6 +60,7 @@ const RegisterScheduling = () => {
     const { loggedUser } = useAuth();
 
     const _genderTypes = listGenderType();
+    const minDate = new Date().toISOString().substring(0, 10);
 
     const [isLoading, setIsLoading] = useState<"scheduling" | "patient" | "getPatient" | "">("");
     const [warning, setWarning] = useState<WarningTuple>(["", ""]);
@@ -299,6 +301,8 @@ const RegisterScheduling = () => {
         toggleModal("patient");
     }
 
+    DocumentTitle("Cadastrar agendamento | CM");
+
     return (
         <>
             <h1>Cadastro de agendamento</h1>
@@ -315,16 +319,18 @@ const RegisterScheduling = () => {
                             label='Data'
                             placeholder='Selecione a data'
                             type="date"
+                            min={minDate}
                         />
                     </Col>
 
                     <Col md={6}>
-                        <MaskInput
+                        <FieldInput
                             name='time'
                             label='Horário'
-                            placeholder='00:00'
-                            mask="99:99"
-                            maskChar=""
+                            placeholder='Selecione o horário'
+                            type="time"
+                            min="08:00"
+                            max="16:00"
                         />
                     </Col>
                 </Row>

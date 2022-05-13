@@ -9,6 +9,7 @@ import Funcionario from '../../services/entities/funcionario';
 import { getEmployeeByIdHttp, postLoginEmployeeHttp } from '../../services/http/employee';
 import { WarningTuple } from '../../util/getHttpErrors';
 import getValidationErrors from '../../util/getValidationErrors';
+import DocumentTitle from '../../util/documentTitle';
 
 import { Form } from '../../styles/components';
 import FieldInput from '../../components/Input';
@@ -53,7 +54,9 @@ const Login = () => {
         }
     }
 
-    const submitLoginForm: SubmitHandler<LoginFormData> = async (data, { reset }) => {
+    DocumentTitle("Login | CM");
+
+    const submitLoginForm: SubmitHandler<LoginFormData> = async (data) => {
         try {
             setIsLoading("form");
             setWarning(["", ""]);

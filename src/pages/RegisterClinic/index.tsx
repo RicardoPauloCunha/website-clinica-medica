@@ -2,12 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { FormHandles, SubmitHandler } from "@unform/core";
 import * as Yup from 'yup';
 
-import Clinica from "../../services/entities/Clinica";
+import Clinica from "../../services/entities/clinica";
 import { getCurrentClinicHttp, postClinicHttp, putClinicHttp } from "../../services/http/clinic";
 import { WarningTuple } from "../../util/getHttpErrors";
 import getValidationErrors from "../../util/getValidationErrors";
 import { concatenateAddress, splitAddress } from "../../util/formatAddress";
 import { normalize } from "../../util/formatString";
+import DocumentTitle from "../../util/documentTitle";
 
 import { Form } from "../../styles/components";
 import Warning from "../../components/Warning";
@@ -131,6 +132,8 @@ const RegisterClinic = () => {
             setIsLoading("");
         }
     }
+
+    DocumentTitle(`${isEdition ? "Editar" : "Cadastrar"} clínica | CM`);
 
     return (
         <>

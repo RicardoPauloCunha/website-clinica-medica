@@ -1,6 +1,9 @@
-import ActivityBlock from '../../components/ActivityBlock';
+import { FaBoxes, FaCalendarDay, FaClipboard, FaFileInvoice, FaHospital, FaUsers } from 'react-icons/fa';
+
 import { useAuth } from '../../contexts/auth';
 import EmployeeTypeEnum from '../../services/enums/employeeType';
+
+import ActivityBlock from '../../components/ActivityBlock';
 import { HomeEl } from './styles';
 
 const Home = () => {
@@ -19,6 +22,7 @@ const Home = () => {
                             "Faça o cadastro dos dados da clínica médica.",
                             "Visualize e atualize as informações da clínica médica."
                         ]}
+                        icon={FaHospital}
                     />
 
                     <ActivityBlock
@@ -28,6 +32,7 @@ const Home = () => {
                             "Adicione novos serviços para os agendamentos.",
                             "Gerencie todos os serviços disponibilizados pela clínica médica."
                         ]}
+                        icon={FaClipboard}
                     />
 
                     <ActivityBlock
@@ -37,6 +42,7 @@ const Home = () => {
                             "Cadastre novos usuários para seus funcionários terem acesso ao sistema.",
                             "Gerencie todos os funcionários que utilizam o sistema da clínica médica."
                         ]}
+                        icon={FaUsers}
                     />
                 </>}
 
@@ -48,6 +54,7 @@ const Home = () => {
                             "Marque a consulta e/ou exame dos pacientes da clínica médica.",
                             "Visualize e gerencie todos os agendamentos cadastrados."
                         ]}
+                        icon={FaCalendarDay}
                     />
 
                     <ActivityBlock
@@ -56,6 +63,7 @@ const Home = () => {
                         messages={[
                             "Visualize as notas fiscais dos pagamentos e ressarcimentos realizados."
                         ]}
+                        icon={FaFileInvoice}
                     />
                 </>}
 
@@ -64,11 +72,12 @@ const Home = () => {
                         title="Materiais"
                         link="/materiais/listar"
                         messages={[
-                            "Cadastre os materiais disponíveis da clínica médica.",
+                            "Cadastre os materiais disponíveis na clínica médica.",
                             "Gerencie as informações dos materiais utilizados.",
-                            "Registre a entrada/saída de materiais do estoque.",
-                            "Visualize o histórico de entrada/saída dos materiais.",
+                            "Registre a entrada/saída de materiais no estoque.",
+                            "Visualize o histórico de entrada/saída de materiais.",
                         ]}
+                        icon={FaBoxes}
                     />
                 </>}
 
@@ -81,6 +90,7 @@ const Home = () => {
                             "Registre as informações do atendimento ao paciente.",
                             "Entenda o caso do paciente através do histórico de atendimentos.",
                         ]}
+                        icon={FaCalendarDay}
                     />
                 </>}
             </main>

@@ -1,6 +1,7 @@
-import RecordTypeEnum from "../enums/recordType";
 import Funcionario from "./funcionario";
 import Material from "./material";
+
+import RecordTypeEnum from "../enums/recordType";
 
 interface EntradaSaidaMaterial {
     idEntradaSaidaMaterial: number;

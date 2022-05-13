@@ -12,6 +12,7 @@ import { listCategoryHttp } from "../../services/http/category";
 import { postRecordHttp } from "../../services/http/record";
 import getValidationErrors from "../../util/getValidationErrors";
 import { WarningTuple } from "../../util/getHttpErrors";
+import DocumentTitle from "../../util/documentTitle";
 
 import { Button, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import { DataModal, Form } from "../../styles/components";
@@ -75,7 +76,7 @@ const Materials = () => {
     }
 
     const toggleModal = (modalName?: ModalString) => {
-        if (typeof(modalName) === "string") {
+        if (typeof (modalName) === "string") {
             setModal(modalName);
             setWarning(["", ""]);
         }
@@ -108,6 +109,14 @@ const Materials = () => {
 
             data.recordType = Number(data.recordType);
             data.quantity = Number(data.quantity);
+
+            if (data.recordType === RecordTypeEnum.Output
+                && data.quantity > materials[materialIndex].quantidade) {
+                setIsLoading("");
+                setWarning(["warning", "Campos do registro inválidos."]);
+                recordFormRef.current?.setFieldError("quantity", "A quantidade do registro de saida não poder ser maior que a quantidade atual do material.");
+                return;
+            }
 
             if (data.recordType === RecordTypeEnum.Input)
                 materials[materialIndex].quantidade += data.quantity;
@@ -172,6 +181,8 @@ const Materials = () => {
     const onClickViewRecords = () => {
         navigate("/materiais/" + materials[materialIndex].idMaterial + "/registros");
     }
+
+    DocumentTitle("Materiais | CM");
 
     return (
         <>

@@ -12,6 +12,7 @@ import SelectInput from "../../components/Input/select";
 import SpinnerBlock from "../../components/SpinnerBlock";
 import Warning from "../../components/Warning";
 import ServiceCard from "../../components/DataCard/service";
+import DocumentTitle from "../../util/documentTitle";
 
 const Services = () => {
     const filterFormRef = useRef<FormHandles>(null);
@@ -54,6 +55,8 @@ const Services = () => {
         let specialtyId = Number(optionValue);
         getServices(specialtyId);
     }
+
+    DocumentTitle("Serviços | CM");
 
     return (
         <>

@@ -12,6 +12,7 @@ import { getSchedulingByIdHttp, putSchedulingHttp } from "../../services/http/sc
 import { postPaymentHttp } from "../../services/http/payment";
 import { WarningTuple } from "../../util/getHttpErrors";
 import getValidationErrors from "../../util/getValidationErrors";
+import DocumentTitle from "../../util/documentTitle";
 
 import { Form } from "../../styles/components";
 import CurrencyInput from "../../components/Input/currency";
@@ -67,6 +68,8 @@ const ConfirmPayment = () => {
             setTimeout(() => {
                 paymentFormRef.current?.setFieldValue("price", response.servico.valor.toFixed(2));
             }, 100);
+        }).catch(() => {
+            setWarning(["danger", "Agendamento não encontrado."]);
         });
     }
 
@@ -74,7 +77,7 @@ const ConfirmPayment = () => {
         navigate("/agendamentos/listar");
     }
 
-    const sendChangeStatus = () => {
+    const sendSchedulingStatus = () => {
         if (scheduling === undefined)
             return;
 
@@ -110,15 +113,22 @@ const ConfirmPayment = () => {
                 abortEarly: false
             });
 
+            if (data.discount >= data.price) {
+                setIsLoading("");
+                setWarning(["warning", "Campos do pagamento inválidos."]);
+                paymentFormRef.current?.setFieldError("discount", "O desconto precisa ser menor que o preço do pagamento.");
+                return;
+            }
+
             postPaymentHttp({
-                valor: data.price - data.discount,
+                valor: data.price,
                 desconto: data.discount,
                 formaDePagamento: Number(data.paymentMethodType),
                 status: PaymentStatusEnum.PaidOut,
                 idAgendamento: scheduling.idAgendamento
             }).then(response => {
                 setInvoice(response.notaFiscal);
-                sendChangeStatus();
+                sendSchedulingStatus();
             }).catch(() => {
                 setWarning(["danger", "Não foi possível confirmar o pagamento."]);
             }).finally(() => { setIsLoading(""); });
@@ -130,6 +140,8 @@ const ConfirmPayment = () => {
             setIsLoading("");
         }
     }
+
+    DocumentTitle("Confirmar pagamento | CM");
 
     return (
         <>
@@ -157,6 +169,7 @@ const ConfirmPayment = () => {
                 <CurrencyInput
                     name='price'
                     label='Preço'
+                    disabled={true}
                 />
 
                 <CurrencyInput

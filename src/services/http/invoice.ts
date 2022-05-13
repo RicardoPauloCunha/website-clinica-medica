@@ -1,4 +1,5 @@
 import { get, getParams } from "../api";
+
 import NotaFiscal from "../entities/notaFiscal";
 import Paciente from "../entities/paciente";
 

@@ -1,4 +1,5 @@
 import { get, post, put } from "../api";
+
 import CategoriaMaterial from "../entities/categoriaMaterial";
 
 const ROOT = "categoriasmateriais/";

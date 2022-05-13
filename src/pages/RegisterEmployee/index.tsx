@@ -13,6 +13,7 @@ import { getEmployeeByIdHttp, postEmployeeHttp, putEmployeeHttp } from "../../se
 import { getDoctorByIdHttp, postDoctorHttp, putDoctorHttp } from "../../services/http/doctor";
 import { WarningTuple } from "../../util/getHttpErrors";
 import getValidationErrors from "../../util/getValidationErrors";
+import DocumentTitle from "../../util/documentTitle";
 
 import { Button, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import { DataModal, Form } from "../../styles/components";
@@ -132,6 +133,8 @@ const RegisterEmployee = () => {
             setEditedEmployee(response);
             setIsEnabled(response.statusFuncionario === EmployeeStatusEnum.Enabled);
             setIsLoading("");
+        }).catch(() => {
+            setWarning(["danger", "Funcionário não encontrado."]);
         });
     }
 
@@ -145,6 +148,8 @@ const RegisterEmployee = () => {
             setEditedDoctor(response)
             setIsEnabled(response.statusFuncionario === EmployeeStatusEnum.Enabled);
             setIsLoading("");
+        }).catch(() => {
+            setWarning(["danger", "Médico não encontrado."]);
         });
     }
 
@@ -322,6 +327,8 @@ const RegisterEmployee = () => {
         }
     }
 
+    DocumentTitle(`${isEdition ? "Editar" : "Cadastrar"} ${isDoctor ? "médico" : "funcionário"} | CM`);
+
     return (
         <>
             <h1>{isEdition ? `Edição de ${isDoctor ? "médico" : "funcionário"}` : `Cadastro de ${isDoctor ? "médico" : "funcionário"}`}</h1>
@@ -404,7 +411,7 @@ const RegisterEmployee = () => {
                 />
             </Form>
 
-            {isEdition && <>
+            {isEdition && (editedDoctor || editedEmployee) && <>
                 <h2>{isEnabled ? "Desabilitar" : "Habilitar"} {isDoctor ? "médico" : "funcionário"}</h2>
                 <p>Você pode {isEnabled ? "desabilitar" : "habilitar"} a conta do {isDoctor ? "médico" : "funcionário"} dentro do sistema.</p>
 

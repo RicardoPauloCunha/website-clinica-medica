@@ -4,6 +4,7 @@ import Funcionario from "../../services/entities/funcionario";
 import { listEmployeeType } from "../../services/enums/employeeType";
 import { listEmployeeByParamsHttp } from "../../services/http/employee";
 import { WarningTuple } from "../../util/getHttpErrors";
+import DocumentTitle from "../../util/documentTitle";
 
 import { Form } from "../../styles/components";
 import SelectInput from "../../components/Input/select";
@@ -43,6 +44,8 @@ const Employees = () => {
         let employeeType = Number(optionValue);
         getEmployees(employeeType);
     }
+
+    DocumentTitle("Funcionários | CM");
 
     return (
         <>

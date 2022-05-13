@@ -1,4 +1,5 @@
 import { get, getParams, post, put } from '../api';
+
 import Funcionario from '../entities/funcionario';
 import EmployeeTypeEnum from '../enums/employeeType';
 

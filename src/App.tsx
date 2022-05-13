@@ -1,6 +1,8 @@
 import PagesRoutes from './routes';
-import GlobalStyles from './styles/global';
+
 import { AuthContextProvider } from './contexts/auth';
+
+import GlobalStyles from './styles/global';
 import Menu from './components/Menu';
 
 const App = () => {

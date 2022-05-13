@@ -1,5 +1,5 @@
-import { FaClinicMedical } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { IconBaseProps } from "react-icons";
 
 import { Button } from "reactstrap";
 import { ActivityBlockEl } from "./styles";
@@ -8,9 +8,10 @@ type ActivityBlockProps = {
     title: string;
     link: string;
     messages: string[];
+    icon: React.ComponentType<IconBaseProps>;
 }
 
-const ActivityBlock = ({title, link, messages}: ActivityBlockProps) => {
+const ActivityBlock = ({title, link, messages, icon: Icon}: ActivityBlockProps) => {
     const navigate = useNavigate();
 
     const onClickAccess = () => {
@@ -21,7 +22,7 @@ const ActivityBlock = ({title, link, messages}: ActivityBlockProps) => {
         <ActivityBlockEl>
             <div>
                 <span>
-                    <FaClinicMedical />
+                    <Icon />
                 </span>
             </div>
 

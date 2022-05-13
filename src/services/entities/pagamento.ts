@@ -1,7 +1,8 @@
-import PaymentMethodTypeEnum from "../enums/paymentMethodType";
-import PaymentStatusEnum from "../enums/paymentStatus";
 import Agendamento from "./agendamento";
 import NotaFiscal from "./notaFiscal";
+
+import PaymentMethodTypeEnum from "../enums/paymentMethodType";
+import PaymentStatusEnum from "../enums/paymentStatus";
 
 interface Pagamento {
     idPagamento: number;

@@ -14,6 +14,7 @@ import { getPaymentBySchedulingIdHttp } from "../../services/http/payment";
 import { formatCurrency } from "../../util/formatCurrency";
 import { WarningTuple } from "../../util/getHttpErrors";
 import { formatCellphone, formatCpf, normalize, normalizeDate } from "../../util/formatString";
+import DocumentTitle from "../../util/documentTitle";
 
 import { Button, Col, ModalBody, ModalFooter, ModalHeader, Row } from "reactstrap";
 import { DataModal, Form, TextGroupGrid } from "../../styles/components";
@@ -173,6 +174,8 @@ const Schedules = () => {
 
         navigate("/agendamentos/" + payment.agendamento.idAgendamento + "/pagamento/" + payment.idPagamento + "/ressarcir");
     }
+
+    DocumentTitle("Agendamentos | CM");
 
     return (
         <>

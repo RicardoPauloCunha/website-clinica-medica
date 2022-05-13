@@ -7,6 +7,7 @@ import Paciente from "../../services/entities/paciente";
 import { getPatientByInvoiceIdHttp, listInvoiceByParamsHttp } from "../../services/http/invoice";
 import { formatCurrency } from "../../util/formatCurrency";
 import { normalizeDate } from "../../util/formatString";
+import DocumentTitle from "../../util/documentTitle";
 
 import { Table } from "reactstrap";
 import { Form } from "../../styles/components";
@@ -69,6 +70,8 @@ const Invoices = () => {
             toggleModal("invoice");
         });
     }
+
+    DocumentTitle("Notas fiscais | CM");
 
     return (
         <>

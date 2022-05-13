@@ -14,6 +14,7 @@ import { WarningTuple } from "../../util/getHttpErrors";
 import getValidationErrors from "../../util/getValidationErrors";
 import { normalize } from "../../util/formatString";
 import { concatenateAddress, splitAddress } from "../../util/formatAddress";
+import DocumentTitle from "../../util/documentTitle";
 
 import { Button, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import { DataModal, Form } from "../../styles/components";
@@ -115,6 +116,8 @@ const RegisterMaterial = () => {
         getMaterialByIdHttp(id).then(response => {
             setEditedMaterial(response);
             setIsLoading("");
+        }).catch(() => {
+            setWarning(["danger", "Material não encontrado."]);
         });
     }
 
@@ -131,7 +134,7 @@ const RegisterMaterial = () => {
     }
 
     const toggleModal = (modalName?: ModalString) => {
-        if (typeof(modalName) === "string") {
+        if (typeof (modalName) === "string") {
             setModal(modalName);
             setWarning(["", ""]);
         }
@@ -378,6 +381,8 @@ const RegisterMaterial = () => {
         }
     }
 
+    DocumentTitle(`${isEdition ? "Editar" : "Cadastrar"} material | CM`);
+
     return (
         <>
             <h1>{isEdition ? "Edição de material" : "Cadastro de material"}</h1>
@@ -448,7 +453,7 @@ const RegisterMaterial = () => {
             </Form>
 
             {isEdition
-                ? <>
+                ? <>{editedMaterial && <>
                     <h2>Editar categoria</h2>
                     <p>Você pode editar os dados da categoria selecionada.</p>
 
@@ -458,7 +463,7 @@ const RegisterMaterial = () => {
                     >
                         Editar categoria
                     </Button>
-                </>
+                </>}</>
                 : <>
                     <h2>Adicionar categoria</h2>
                     <p>Você pode adicionar uma nova categoria de material caso não tenha encontrado a opção desejada.</p>
@@ -511,7 +516,7 @@ const RegisterMaterial = () => {
             </DataModal>
 
             {isEdition
-                ? <>
+                ? <>{editedMaterial && <>
                     <h2>Editar fabricante</h2>
                     <p>Você pode editar os dados do fabricante selecionado.</p>
 
@@ -521,7 +526,7 @@ const RegisterMaterial = () => {
                     >
                         Editar fabricante
                     </Button>
-                </>
+                </>}</>
                 : <>
                     <h2>Adicionar fabricante</h2>
                     <p>Você pode adicionar uma novo fabricante caso não tenha encontrado a opção desejada.</p>

@@ -2,7 +2,8 @@ enum ScheduleStatusEnum {
     Scheduled = 1,
     Unchecked = 2,
     Progress = 3,
-    Concluded = 4
+    Concluded = 4,
+    Canceled = 5,
 }
 
 export const getValueScheduleStatus = (status: ScheduleStatusEnum) => {
@@ -15,6 +16,8 @@ export const getValueScheduleStatus = (status: ScheduleStatusEnum) => {
             return "Andamento";
         case ScheduleStatusEnum.Concluded:
             return "Concluído";
+        case ScheduleStatusEnum.Canceled:
+            return "Cancelado";
         default:
             return "";
     }
@@ -34,6 +37,7 @@ export const defineColorScheduleStatus = (status: number) => {
         case ScheduleStatusEnum.Scheduled:
             return "info";
         case ScheduleStatusEnum.Unchecked:
+        case ScheduleStatusEnum.Canceled:
             return "danger";
         case ScheduleStatusEnum.Progress:
             return "warning";

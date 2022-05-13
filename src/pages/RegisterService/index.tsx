@@ -9,6 +9,7 @@ import { getServiceByIdHttp, postServiceHttp, putServiceHttp } from "../../servi
 import { listSpecialtyHttp, postSpecialtyHttp, putSpecialtyHttp } from "../../services/http/specialty";
 import { WarningTuple } from "../../util/getHttpErrors";
 import getValidationErrors from "../../util/getValidationErrors";
+import DocumentTitle from "../../util/documentTitle";
 
 import { Button, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import { DataModal, Form } from "../../styles/components";
@@ -85,7 +86,9 @@ const RegisterService = () => {
         setIsLoading("get");
         getServiceByIdHttp(id).then(response => {
             setEditedService(response);
-            setIsLoading("");
+            setIsLoading("")
+        }).catch(() => {
+            setWarning(["danger", "Serviço não encontrado."]);
         });
     }
 
@@ -232,6 +235,8 @@ const RegisterService = () => {
         }
     }
 
+    DocumentTitle(`${isEdition ? "Editar" : "Cadastrar"} serviço | CM`);
+
     return (
         <>
             <h1>{isEdition ? "Edição de serviço" : "Cadastro de serviço"}</h1>
@@ -289,6 +294,7 @@ const RegisterService = () => {
                     <Button
                         color="warning"
                         onClick={() => onClickOpenSpecialty()}
+                        disabled={editedService === undefined}
                     >
                         Editar especialidade
                     </Button>

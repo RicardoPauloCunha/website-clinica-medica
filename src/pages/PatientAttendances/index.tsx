@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import Atendimento from "../../services/entities/atendimento";
 import { listAttendanceByCpfHttp } from "../../services/http/attendance";
 import { WarningTuple } from "../../util/getHttpErrors";
+import DocumentTitle from "../../util/documentTitle";
 
 import SpinnerBlock from "../../components/SpinnerBlock";
 import Warning from "../../components/Warning";
@@ -42,6 +43,8 @@ const PatientAttendances = () => {
             return;
         }
     }
+
+    DocumentTitle("Atendimentos do paciente | CM");
 
     return (
         <>
