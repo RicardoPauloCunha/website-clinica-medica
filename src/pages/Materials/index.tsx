@@ -110,18 +110,20 @@ const Materials = () => {
             data.recordType = Number(data.recordType);
             data.quantity = Number(data.quantity);
 
-            if (data.recordType === RecordTypeEnum.Output
-                && data.quantity > materials[materialIndex].quantidade) {
+            let quantity = materials[materialIndex].quantidade;
+            if (data.recordType === RecordTypeEnum.Input)
+                quantity += data.quantity;
+            else
+                quantity -= data.quantity;
+
+            if (quantity < 0 || data.quantity <= 0) {
                 setIsLoading("");
                 setWarning(["warning", "Campos do registro inválidos."]);
-                recordFormRef.current?.setFieldError("quantity", "A quantidade do registro de saida não poder ser maior que a quantidade atual do material.");
+                recordFormRef.current?.setFieldError("quantity", "A quantidade do registro é inválida.");
                 return;
             }
 
-            if (data.recordType === RecordTypeEnum.Input)
-                materials[materialIndex].quantidade += data.quantity;
-            else
-                materials[materialIndex].quantidade -= data.quantity;
+            materials[materialIndex].quantidade = quantity;
 
             await postRecordHttp({
                 quantidade: data.quantity,
