@@ -5,7 +5,7 @@ import * as Yup from "yup";
 
 import { useAuth } from "../../contexts/auth";
 import Agendamento from "../../services/entities/agendamento";
-import ScheduleStatusEnum, { defineColorScheduleStatus, getValueScheduleStatus } from "../../services/enums/scheduleStatus";
+import ScheduleStatusEnum, { defineColorScheduleStatus, getValueScheduleStatus, listScheduleStatus } from "../../services/enums/scheduleStatus";
 import { listDoctorSchedulingByParamsHttp, putSchedulingHttp } from "../../services/http/scheduling";
 import { postAttendanceHttp } from "../../services/http/attendance";
 import { WarningTuple } from "../../util/getHttpErrors";
@@ -33,9 +33,12 @@ type ModalString = "schedule" | "attendace" | "";
 
 const DoctorSchedules = () => {
     const navigate = useNavigate();
+    const filterFormRef = useRef<FormHandles>(null);
     const attendanceFormRef = useRef<FormHandles>(null);
 
     const { loggedUser } = useAuth();
+
+    const _scheduleStatus = listScheduleStatus();
 
     const [isLoading, setIsLoading] = useState<"get" | "attendance" | "">("");
     const [warning, setWarning] = useState<WarningTuple>(["", ""]);
@@ -54,18 +57,19 @@ const DoctorSchedules = () => {
     const [scheduleIndex, setScheduleIndex] = useState(-1);
 
     useEffect(() => {
-        getSchedules(undefined);
+        getSchedules(undefined, undefined);
         // eslint-disable-next-line
     }, [loggedUser]);
 
-    const getSchedules = (period: number | undefined) => {
+    const getSchedules = (period: number | undefined, status: number | undefined) => {
         setWarning(["", ""]);
 
         if (loggedUser) {
             setIsLoading("get");
             listDoctorSchedulingByParamsHttp({
                 idMedico: loggedUser.employeeId,
-                periodo: period
+                periodo: period,
+                status
             }).then(response => {
                 setSchedules([...response]);
 
@@ -138,9 +142,24 @@ const DoctorSchedules = () => {
         }
     }
 
+    const handlerChangeScheduleStatus = (optionValue: string) => {
+        let scheduleStatus = Number(optionValue);
+        let period: number | undefined = Number(filterFormRef.current?.getFieldValue("period"));
+        
+        if (isNaN(period) || period === 0)
+            period = undefined;
+
+        getSchedules(period, scheduleStatus);
+    }
+
     const handlerChangePeriod = (optionValue: string) => {
         let period = Number(optionValue);
-        getSchedules(period);
+        let scheduleStatus: number | undefined = Number(filterFormRef.current?.getFieldValue("scheduleStatus"));
+        
+        if (isNaN(scheduleStatus) || scheduleStatus === 0)
+            scheduleStatus = undefined;
+
+        getSchedules(period, scheduleStatus);
     }
 
     const onClickOpenSchedule = (scheduleId: number) => {
@@ -166,10 +185,21 @@ const DoctorSchedules = () => {
             <h1>Lista de agendamentos do médico</h1>
 
             <Form
-                ref={null}
+                ref={filterFormRef}
                 onSubmit={() => { }}
                 className="form-search"
             >
+                <SelectInput
+                    name='scheduleStatus'
+                    label='Status do agendamento'
+                    placeholder='Filtrar pelo status do agendamento'
+                    options={_scheduleStatus.map((x, index) => ({
+                        value: `${index + 1}`,
+                        label: x
+                    }))}
+                    handlerChange={handlerChangeScheduleStatus}
+                />
+
                 <SelectInput
                     name='period'
                     label='Filtro de período'

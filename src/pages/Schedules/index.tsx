@@ -111,7 +111,6 @@ const Schedules = () => {
 
     const handlerChangeScheduleStatus = (optionValue: string) => {
         let scheduleStatus = Number(optionValue);
-
         let cpf: string | undefined = normalize(filterFormRef.current?.getFieldValue("patientCpf"));
 
         if (cpf.length !== 11)

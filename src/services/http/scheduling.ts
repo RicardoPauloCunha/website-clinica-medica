@@ -23,6 +23,7 @@ export const listReceptionistSchedulingByParamsHttp = async (paramsData: ListRec
 interface ListDoctorSchedulingByParams {
     idMedico: number;
     periodo: number | undefined;
+    status: number | undefined;
 }
 
 export const listDoctorSchedulingByParamsHttp = async (paramsData: ListDoctorSchedulingByParams): Promise<Agendamento[]> => {
