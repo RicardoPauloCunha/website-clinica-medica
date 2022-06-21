@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { FormHandles, SubmitHandler } from "@unform/core";
 import * as Yup from 'yup';
 
-import Clinica from "../../services/entities/clinicaa";
+import Clinica from "../../services/entities/clinica";
 import { getCurrentClinicHttp, postClinicHttp, putClinicHttp } from "../../services/http/clinic";
 import { WarningTuple } from "../../util/getHttpErrors";
 import getValidationErrors from "../../util/getValidationErrors";
