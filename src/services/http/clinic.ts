@@ -1,6 +1,6 @@
 import { get, post, put } from "../api";
 
-import Clinica from "../entities/clinica";
+import Clinica from "../entities/clinicaa";
 
 const ROOT = "clinica/";
 

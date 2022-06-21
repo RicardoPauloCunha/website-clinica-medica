@@ -1,4 +1,4 @@
-import Clinica from "./clinica";
+import Clinica from "./clinicaa";
 
 interface NotaFiscal {
     idNotaFiscal: number;

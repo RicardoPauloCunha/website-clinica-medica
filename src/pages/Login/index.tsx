@@ -110,10 +110,7 @@ const Login = () => {
                 ref={loginFormRef}
                 onSubmit={submitLoginForm}
                 className="form-data"
-                initialData={{
-                    email: "admin@cm.com",
-                    password: "147852369"
-                }}
+                
             >
                 <FieldInput
                     name='email'
